@@ -1,6 +1,10 @@
-'use client';
+type HeaderProps = {
+    onScrollToKnowUs: () => void;
+    onScrollToCertificacoes: () => void;
+    onScrollToSolucoes: () => void;
+};
 
-export default function Header() {
+export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onScrollToSolucoes }: HeaderProps) {
 
     return (
         <>
@@ -9,11 +13,10 @@ export default function Header() {
                     <img src="/imgs/Logo.png" alt="Logo" className="h-15" />
                 </div>
                 
-                {/* navbar centralizada com absolute */}
                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl flex space-x-8">
-                    <a href="/marketplace" className="text-white hover:text-gray-300">Marketplace</a>
-                    <a href="#" className="text-white hover:text-gray-300">Certificações</a>
-                    <a href="#" className="text-white hover:text-gray-300">Soluções</a>
+                    <a className="text-white hover:text-gray-300 cursor-pointer" onClick={onScrollToKnowUs}>Marketplace</a>
+                    <a className="text-white hover:text-gray-300 cursor-pointer" onClick={onScrollToCertificacoes}>Certificações</a>
+                    <a className="text-white hover:text-gray-300 cursor-pointer" onClick={onScrollToSolucoes}>Soluções</a>
                 </div>
 
                 <div className="ml-auto flex items-center">
