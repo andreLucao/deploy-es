@@ -29,7 +29,7 @@ export default function LandingPage() {
       <section><Hero /></section>
       <section ref={knowUsRef}><KnowUs /></section>
       <section ref={certificacoesRef}><Certificacoes /></section>
-      {/* <section ref={solucoesRef}><Solucoes /></section> */}
+      <section ref={solucoesRef}><Solucoes /></section>
     </main>
   );
 }
