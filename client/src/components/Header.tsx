@@ -8,7 +8,7 @@ export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onSc
 
     return (
         <>
-            <div className="w-full h-20 flex items-center px-24 py-5 bg-[#efefef] bg-opacity-50 relative shadow-lg z-10 sticky top-0 z-100">
+            <div className="w-full h-20 flex items-center px-24 py-5 bg-[#efefef] bg-opacity-50 relative shadow-lg z-10 sticky top-0 z-100 rounded-b-3xl">
                 <div>
                     <img src="/imgs/Logo.png" alt="Logo" className="h-15" />
                 </div>
