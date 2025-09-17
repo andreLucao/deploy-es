@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 .text-glow {
-    text-shadow: 0 0 10px #89ff0a, 0 0 30px #89ff0a;
+    text-shadow: 0 0 20px #00D90B, 0 0 30px #00D90B;
 }
 
 @theme inline {

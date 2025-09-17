@@ -20,7 +20,7 @@ export default function LandingPage() {
     }
   };
   return (
-    <main>
+    <main className="bg-[#efefef]">
       <Header
         onScrollToKnowUs={() => scrollToSection(knowUsRef, 80)}
         onScrollToCertificacoes={() => scrollToSection(certificacoesRef, 60)}

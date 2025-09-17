@@ -3,7 +3,7 @@
 export default function KnowUs() {
     return (
         <section id="marketplace"
-        className="h-[700px] flex items-center justify-center relative"
+        className="h-[700px] flex items-center justify-center relative mb-0"
         style={{
           backgroundImage: "url('/imgs/MKTBG.png')",
           backgroundSize: "cover", 
@@ -11,11 +11,20 @@ export default function KnowUs() {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="absolute inset-0 bg-white/30 backdrop-blur-md"></div>
+        <div className="absolute inset-0 bg-[#efefef]/30 backdrop-blur-md"></div>
+        
+        {/* Gradiente do topo: #efefef para transparente */}
+        <div className="absolute top-0 left-0 w-full h-32 pointer-events-none"
+              style={{
+                background: "linear-gradient(to bottom, #efefef, transparent)"
+              }}></div>
+        
+        {/* Gradiente do fim: transparente para #efefef */}
         <div className="absolute bottom-0 left-0 w-full h-32 pointer-events-none"
               style={{
-                background: "linear-gradient(to bottom, transparent, white)"
+                background: "linear-gradient(to bottom, transparent, #efefef)"
               }}></div>
+        
         <div className="relative z-10 flex flex-col items-center justify-center w-full">
           <h1 className="text-center text-black text-5xl font-medium mb-16">
             Conheça o Marketplace

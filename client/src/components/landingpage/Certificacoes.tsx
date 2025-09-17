@@ -4,7 +4,7 @@ export default function Certificacoes() {
 
     return (
         <section id="certificacoes">
-            <div className="h-[350px] flex mt-30 flex-col items-center">
+            <div className=" bg-[#efefef] flex flex-col items-center py-30">
                 <h1 className="text-center text-black text-5xl font-medium ">
                     Certificações
                 </h1>
