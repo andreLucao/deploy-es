@@ -6,6 +6,7 @@ import Certificacoes from "@/components/landingpage/Certificacoes";
 import Hero from "@/components/landingpage/Hero";
 import KnowUs from "@/components/landingpage/KnowUs";
 import Solucoes from "@/components/landingpage/Solucoes";
+import Footer from "@/components/Footer";
 
 export default function LandingPage() {
   const knowUsRef = useRef<HTMLElement>(null);
@@ -30,6 +31,7 @@ export default function LandingPage() {
       <section ref={knowUsRef}><KnowUs /></section>
       <section ref={certificacoesRef}><Certificacoes /></section>
       <section ref={solucoesRef}><Solucoes /></section>
+      <section><footer><Footer /></footer></section>
     </main>
   );
 }
