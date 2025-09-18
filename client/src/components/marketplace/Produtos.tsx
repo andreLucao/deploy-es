@@ -12,7 +12,7 @@ type ProdutosProps = {
 
 export default function Produtos({ produtos }: ProdutosProps) {
   return (
-    <div className="grid-container grid grid-cols-5 gap-[40px] mx-auto">
+    <div className="grid-container grid grid-cols-5 gap-[40px] mx-auto p-5">
       {produtos.map((produto) => (
         <div key={produto.id} className="flex flex-col h-[240px] w-[240px] bg-gray-300 rounded-lg items-center">
           <h3 className="font-bold">{produto.titulo}</h3>

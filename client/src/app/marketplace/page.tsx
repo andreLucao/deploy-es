@@ -5,6 +5,7 @@ import Header from "@/components/marketplace/Header";
 import Destaque from "@/components/marketplace/Destaque";
 import Footer from "@/components/Footer";
 import Produtos from "@/components/marketplace/Produtos";
+import Filtro from "@/components/marketplace/Filtro";
 
 type Produto = {
   id: number;
@@ -31,6 +32,7 @@ export default function Marketplace() {
         <div className="flex p-30 h-170 ">
           <Destaque />
         </div>
+        <Filtro />
         <div className="flex ">
           <Produtos produtos={produtosMock} />
         </div>
