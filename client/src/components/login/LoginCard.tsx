@@ -27,10 +27,10 @@ export default function RegisterCard() {
     return (           
         <div className="bg-white bg-opacity-20 flex backdrop-blur-lg rounded-4xl shadow-lg p-23 gap-30 max-w-7xl mx-auto relative">
             <div className="absolute top-7 right-8 cursor-pointer">
-                <CircleChevronLeft className="w-8 h-8 text-[#002E34] hover:text-[#004443] transition" onClick={() => window.location.href = '/'}/>
+                <CircleChevronLeft className="w-8 h-8 text-[#002E34] hover:text-[#004443] transition hover:scale-105" onClick={() => window.location.href = '/'}/>
             </div>
             <div className="flex flex-col items-center p-3 w-full">
-                <h2 className="text-5xl font-medium mb-4">Entrar na sua conta</h2>
+                <h2 className="text-[2.9rem] font-medium mb-4">Entrar na sua conta</h2>
                 <p className="font-medium text-center text-lg">Insira seu e-mail para receber o link de acesso.</p>
                 <div className="w-full max-w-md">
                     <form className="flex flex-col items-center w-full" onSubmit={handleSubmit}>
@@ -58,7 +58,7 @@ export default function RegisterCard() {
             </div>
 
             <div className="w-full h-full flex items-center justify-center">
-                <img src="/imgs/card4.png" className="rounded-4xl h-132 max-w-full" alt="Ilustração" />
+                <img src="/imgs/card2.png" className="rounded-4xl h-132 max-w-full" alt="Ilustração" />
             </div>
         </div>
     );

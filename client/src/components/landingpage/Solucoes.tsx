@@ -19,7 +19,7 @@ export default function Solucoes() {
 
     return (
         <section id="solucoes">
-            <div className=" flex justify-center flex-col items-center bg-[#efefef] ">
+            <div className="flex justify-center flex-col items-center bg-[#efefef] ">
                 <h1 className="mb-15 text-center text-black text-5xl font-medium ">
                     Soluções
                 </h1>
