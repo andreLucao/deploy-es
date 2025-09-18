@@ -20,13 +20,9 @@ export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onSc
                 </div>
 
                 <div className="ml-auto flex items-center">
-                    <button className="bg-transparent font-medium text-black px-4 py-2 rounded-[10px] mr-4 hover:text-zinc-800 transition cursor-pointer"
+                    <button className="bg-[#00e07f] font-medium text-black px-4 py-2 rounded-[10px] hover:bg-green-500 transition cursor-pointer" 
                             onClick={() => window.location.href = '/login'}>
                         Entrar
-                    </button>
-                    <button className="bg-[#00e07f] font-medium text-black px-4 py-2 rounded-[10px] hover:bg-green-500 transition cursor-pointer" 
-                            onClick={() => window.location.href = '/register'}>
-                        Cadastrar
                     </button>
                 </div>
             </div>
