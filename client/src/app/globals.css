@@ -10,11 +10,17 @@
 .custom-gradient {
   background: linear-gradient(
     180deg,
-    rgba(0, 46, 52, 100%) 0%,
-    rgba(0, 143, 112, 100%) 17%,
-    rgba(0, 224, 127, 100%) 37%,
-    rgba(0, 224, 127, 0%) 100%
+    rgba(0, 46, 52, 100%) 0px,
+    rgba(0, 143, 112, 100%) 200px,
+    rgba(0, 224, 127, 100%) 400px,
+    rgba(0, 224, 127, 100%) 500px,
+    rgb(239, 239, 239, 100%) 900px
   );
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
 }
 
 @theme inline {

@@ -6,16 +6,36 @@ import Destaque from "@/components/marketplace/Destaque";
 import Footer from "@/components/Footer";
 import Produtos from "@/components/marketplace/Produtos";
 
+type Produto = {
+  id: number;
+  titulo: string;
+  descricao: string;
+  preco: number;
+};
+
+const produtosMock: Produto[] = [];
+for (let i = 1; i <= 25; i++) {
+  produtosMock.push({
+    id: i,
+    titulo: `Produto ${i}`,
+    descricao: `Descrição ${i}`,
+    preco: i * 100,
+  });
+}
+
 export default function Marketplace() {
   return (
-    <div className="h-[950px] custom-gradient">
-        <Header />
-        <div className="flex p-50 h-170">
-            <Destaque />
+    <div className="flex flex-col min-h-screen custom-gradient">
+      <Header />
+      <div className="flex flex-col">
+        <div className="flex p-30 h-170 ">
+          <Destaque />
         </div>
-        <div className="flex bg-white p-10">
-            <Produtos />
+        <div className="flex ">
+          <Produtos produtos={produtosMock} />
         </div>
+      </div>
+      <Footer />
     </div>
   );
 }

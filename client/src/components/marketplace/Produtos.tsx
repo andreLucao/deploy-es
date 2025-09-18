@@ -1,7 +1,25 @@
-export default function Produtos() {
-    return (
-        <div className="w-full flex items-center justify-center">
-            <div className="flex"></div>
+type Produto = {
+  id: number;
+  titulo: string;
+  descricao: string;
+  preco: number;
+};
+
+type ProdutosProps = {
+  produtos: Produto[];
+};
+
+
+export default function Produtos({ produtos }: ProdutosProps) {
+  return (
+    <div className="grid-container grid grid-cols-5 gap-[40px] mx-auto">
+      {produtos.map((produto) => (
+        <div key={produto.id} className="flex flex-col h-[240px] w-[240px] bg-gray-300 rounded-lg items-center">
+          <h3 className="font-bold">{produto.titulo}</h3>
+          <p className="text-sm">{produto.descricao}</p>
+          <span className="mt-auto font-semibold text-green-700">R$ {produto.preco}</span>
         </div>
-    );
+      ))}
+    </div>
+  );
 }

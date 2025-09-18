@@ -17,5 +17,4 @@ export default function Destaque() {
             </div>
         </div>
     );
-
 }
