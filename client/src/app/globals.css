@@ -7,6 +7,16 @@
     text-shadow: 0 0 20px #00D90B, 0 0 30px #00D90B;
 }
 
+.custom-gradient {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 46, 52, 100%) 0%,
+    rgba(0, 143, 112, 100%) 17%,
+    rgba(0, 224, 127, 100%) 37%,
+    rgba(0, 224, 127, 0%) 100%
+  );
+}
+
 @theme inline {
   --animate-scroll: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
   --color-sidebar-ring: var(--sidebar-ring);
