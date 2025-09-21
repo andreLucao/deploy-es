@@ -6,9 +6,9 @@ import { List } from 'lucide-react';
 export default function Filtro() {
     return (
         <div className="flex h-15 justify-center items-center gap-216">
-            <div className="flex items-center bg-gray-300 h-full gap-3 p-4">
+            <div className="flex items-center h-full gap-3 p-4">
                 <p>Ordenar por:</p>
-                <button className="flex bg-white p-2 cursor-pointer">
+                <button className="flex p-2 cursor-pointer">
                     <p>Relevância</p>
                     <ChevronDownIcon />
                 </button>
