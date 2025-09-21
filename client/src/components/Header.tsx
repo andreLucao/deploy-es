@@ -9,10 +9,7 @@ export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onSc
     return (
         <>
             <div className="w-full h-20 flex items-center px-24 py-5 bg-[#efefef] bg-opacity-50 relative shadow-lg z-10 sticky top-0 z-100 rounded-b-3xl">
-                <div>
-                    <img src="/imgs/Logo.png" alt="Logo" className="h-15" />
-                </div>
-                
+                <img src="/imgs/Logo.png" alt="Logo" className="h-15" />
                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl flex space-x-8">
                     <a className="text-black hover:text-zinc-800 cursor-pointer" onClick={onScrollToKnowUs}>Marketplace</a>
                     <a className="text-black hover:text-zinc-800 cursor-pointer" onClick={onScrollToCertificacoes}>Certificações</a>
