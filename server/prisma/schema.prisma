@@ -51,6 +51,7 @@ model Emission {
 
   year         Int
   quantity     Int
+  calculatedCo2e    Float           @map("calculated_co2e")
   registeredAt DateTime? @map("registered_at")
   createdAt    DateTime  @default(now()) @map("created_at")
 
