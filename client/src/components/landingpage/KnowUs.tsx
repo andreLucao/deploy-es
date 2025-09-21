@@ -29,8 +29,8 @@ export default function KnowUs() {
           <h1 className="text-center text-black text-5xl font-medium mb-16">
             Conheça o Marketplace
           </h1>
-          <p className="text-center text-black font-light text-xl max-w-2xl mx-auto">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          <p className="text-center text-black font-light text-xl max-w-5xl mx-auto">
+          Bem-vindo ao nosso marketplace, seu ponto de encontro para um futuro mais verde. Conectamos de forma simples e transparente quem deseja compensar suas emissões de carbono com quem tem projetos sustentáveis. Em nossa plataforma, você pode comprar e vender créditos de carbono, que representam uma tonelada de CO2 que deixou de ser emitida, e assim financiar iniciativas de impacto positivo como a conservação de florestas e a produção de energia renovável. Ao participar, você não apenas adquire um crédito, mas se torna parte de um movimento global que impulsiona a sustentabilidade e faz a diferença na construção de um futuro mais limpo e justo para todos. Pronto para fazer parte da mudança? Clique no botão e acesse o marketplace.
           </p>
 
           <button className="bg-[#002e34] text-[25px] text-white font-medium px-6 py-3 rounded-[10px] mt-16 hover:bg-emerald-950 transition duration-200 hover:scale-105 cursor-pointer"
