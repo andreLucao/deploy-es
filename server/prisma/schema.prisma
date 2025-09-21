@@ -1,0 +1,62 @@
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  emissions Emission[]
+
+  @@map("companies")
+}
+
+model EmissionProduct {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  unit      String
+  scope     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  emissionFactors EmissionFactor[]
+  emissions       Emission[]
+
+  @@map("emission_products")
+}
+
+model EmissionFactor {
+  id                String   @id @default(uuid())
+  emissionProductId String   @map("emission_product_id")
+  region            String?
+  year              Int?
+  factorValue       Float    @map("factor_value")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  emissionProduct EmissionProduct @relation(fields: [emissionProductId], references: [id])
+
+  @@map("emission_factors")
+}
+
+model Emission {
+  id String @id @default(uuid())
+
+  companyId         String @map("company_id")
+  emissionProductId String @map("emission_product_id")
+
+  year         Int
+  quantity     Int
+  registeredAt DateTime? @map("registered_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  company         Company         @relation(fields: [companyId], references: [id])
+  emissionProduct EmissionProduct @relation(fields: [emissionProductId], references: [id])
+
+  @@unique([companyId, emissionProductId, year])
+  @@map("emissions")
+}
