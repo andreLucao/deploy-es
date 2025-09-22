@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express';
+const authRoutes = require("authRoutes");
 
 const app: Application = express();
 const port = process.env.PORT || 3000;
@@ -15,6 +16,9 @@ app.get('/', (req: Request, res: Response) => {
 app.get('/api/test', (req: Request, res: Response) => {
   res.json({ message: 'API is working!' });
 });
+
+// Mount auth routes BEFORE starting the server
+app.use('/api/auth', authRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
