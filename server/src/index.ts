@@ -1,25 +1,9 @@
-import express, { Application, Request, Response } from 'express';
-const authRoutes = require("authRoutes");
+import app, { PORT } from "./app";
+import authRoutes from "./routes/authRoutes";
 
-const app: Application = express();
-const port = process.env.PORT || 3000;
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Routes
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World with TypeScript!');
-});
-
-app.get('/api/test', (req: Request, res: Response) => {
-  res.json({ message: 'API is working!' });
-});
-
-// Mount auth routes BEFORE starting the server
+// Mount auth routes
 app.use('/api/auth', authRoutes);
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(PORT, () => {
+   console.log(`Server is running at http://localhost:${PORT}`);
 });
