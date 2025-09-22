@@ -33,14 +33,13 @@ export default function RegisterCard() {
         setLoginState('loading');
         
         try {
-            // Chamar a API de magic link aqui
-            // const response = await fetch('/api/auth/magic-link', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({ email }),
-            // });
+            const response = await fetch('http://localhost:3001/api/auth/magic-link', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({ email }),
+            });
 
             // Caso der certo, setar o estado de sucesso; Setei como true para testar
             if (true) {

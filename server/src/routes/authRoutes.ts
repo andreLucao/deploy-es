@@ -43,12 +43,13 @@ interface UserDocument {
 
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === "true",
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  // For port 465 use secure true, for 587/STARTTLS use false
+  secure: (process.env.SMTP_PORT === "465"),
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
@@ -91,19 +92,23 @@ router.post("/magic-link", async (req: Request<{}, {}, MagicLinkRequestBody>, re
 
     // Send email
     await transporter.sendMail({
-      from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`,
+      from: `"eco change" <${process.env.EMAIL_FROM}>`,
       to: email,
-      subject: "Seu link de acesso - CatalisePsi",
+      subject: "Seu link de acesso - eco change",
       html: `
-        <div style="background-color: #fff; max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
-          <div style="background: linear-gradient(to bottom, #fff7ed, #ffffff); border: 1px solid #fed7aa; border-radius: 8px; padding: 24px; text-align: center;">
-            <h1 style="color: #1e1e1e; font-size: 24px; margin-bottom: 16px;">Bem-vindo(a) ao CatalisePsi!</h1>
-            <p style="color: #4b5563; font-size: 16px; margin-bottom: 24px;">Clique no botão abaixo para acessar sua conta:</p>
-            <a href="${magicLink}" style="display: inline-block; background-color: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Acessar minha conta</a>
-            <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">Este link expira em 15 minutos por questões de segurança.</p>
+        <div style="background-color:#ffffff; max-width:600px; margin:0 auto; padding:24px; font-family:ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+          <div style="border:1px solid #00e07f; border-radius:12px; padding:28px; background:linear-gradient(45deg, #002e34 0%, #00e07f 100%); text-align:center;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
+              <div style="width:10px; height:10px; background:#00e07f; border-radius:50%;"></div>
+              <div style="font-weight:700; color:#ffffff; letter-spacing:0.2px;">eco change</div>
+            </div>
+            <h1 style="color:#ffffff; font-size:24px; line-height:32px; margin:0 0 12px 0;">Bem-vindo(a) ao eco change</h1>
+            <p style="color:#ffffff; font-size:16px; margin:0 0 24px 0;">Clique no botão abaixo para acessar sua conta.</p>
+            <a href="${magicLink}" style="display:inline-block; background:#002e34; color:#ffffff; padding:12px 22px; text-decoration:none; border-radius:8px; font-weight:700;">Acessar minha conta</a>
+            <p style="color:#ffffff; font-size:14px; margin:22px 0 0 0;">Este link expira em 15 minutos por questões de segurança.</p>
           </div>
-          <div style="text-align: center; margin-top: 16px;">
-            <p style="color: #9ca3af; font-size: 12px;">Se você não solicitou este email, por favor ignore.</p>
+          <div style="text-align:center; margin-top:16px;">
+            <p style="color:#6b7280; font-size:12px; margin:0;">Se você não solicitou este email, por favor ignore.</p>
           </div>
         </div>
       `,

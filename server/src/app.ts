@@ -1,4 +1,6 @@
+import "dotenv/config";
 import express, { Application } from "express";
+import cors from "cors";
 import basicRoutes from "./routes/basic.routes";
 import authRoutes from "./routes/authRoutes";
 import calculatorRoutes from "./routes/calculator.routes";
@@ -7,9 +9,10 @@ import emissionFactorsRoutes from "./routes/emission_factors.routes";
 import companiesRoutes from "./routes/companies.routes";
 
 const app: Application = express();
-export const PORT = process.env.PORT || 3000;
+export const PORT = process.env.PORT || 3001;
 
 // Middleware
+app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
