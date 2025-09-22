@@ -6,6 +6,7 @@ interface EmissionData {
    emissionProductId: string;
    year: number;
    quantity: number;
+   description?: string;
 }
 
 export class CalculatorService {
@@ -42,6 +43,7 @@ export class CalculatorService {
          update: {
             quantity: data.quantity,
             calculatedCo2e: calculatedCo2e,
+            description: data.description,
          },
          create: {
             companyId: data.companyId,
@@ -49,19 +51,16 @@ export class CalculatorService {
             year: data.year,
             quantity: data.quantity,
             calculatedCo2e: calculatedCo2e,
+            description: data.description,
          },
       });
    }
 
-   /**
-    * Calcula o total de emissões para uma empresa em um dado ano.
-    * A lógica é ativada quando o usuário clica em "Salvar Formulário".
-    */
+   //Calcula o total de emissões para uma empresa em um dado ano.
    async calculateTotalEmissions(
       companyId: string,
       year: number
    ): Promise<number> {
-      //Validar se a empresa existe
       const company = await prisma.company.findUnique({
          where: { id: companyId },
       });
@@ -80,7 +79,6 @@ export class CalculatorService {
          },
       });
 
-      // Somar os valores de CO2e
       const total = allEmissionsForYear.reduce(
          (sum, emission) => sum + emission.calculatedCo2e,
          0
