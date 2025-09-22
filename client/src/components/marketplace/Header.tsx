@@ -24,12 +24,17 @@ export default function Header() {
 
                 <div className="ml-auto flex items-center">
                     <div className="flex items-center justify-center bg-gray-300 h-13 w-35 rounded-xl">
-                        <p className="text-black">Balance</p>
+                        <p className="text-black">
+                            {/* Valor de Créditos Carteira */}
+                            CC : 1000
+                        </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <ShoppingCart className="text-white ml-4" />
                         <Menu className="text-white ml-4" />
-                        <div className="w-13 h-13 bg-gray-300 rounded-full ml-4"></div>
+                        <div className="w-13 h-13 bg-gray-300 rounded-full ml-4">
+                            <img src="/imgs/avatar.png" alt="User" className="h-full rounded-full"/>
+                        </div>
                     </div>
                 </div>
             </div>
