@@ -17,19 +17,19 @@ export default function Solucoes() {
             src: "imgs/card4.png",
             description: 'Visualize seu progresso em tempo real. Monitore seu desempenho e acompanhe o impacto de suas ações através de um dashboard interativo e intuitivo.'
         },
-    ]
-
+    ];
 
     return (
         <section id="solucoes">
-            <div className="flex justify-center flex-col items-center bg-[#efefef] ">
-                <h1 className="mb-15 text-center text-black text-5xl font-medium ">
+            <div className="flex justify-center flex-col items-center bg-[#efefef] px-4 sm:px-8 py-16 sm:py-20 lg:py-0">
+                <h1 className="mb-8 sm:mb-12 lg:mb-15 text-center text-black text-3xl sm:text-4xl lg:text-5xl font-medium">
                     Soluções
                 </h1>
 
-                <FocusCards cards={cards} />
+                <div className="w-full max-w-7xl">
+                    <FocusCards cards={cards} />
+                </div>
             </div>
         </section>
-
     );
 }

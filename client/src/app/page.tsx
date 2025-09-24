@@ -19,13 +19,14 @@ export default function LandingPage() {
       window.scrollTo({ top, behavior: "smooth" });
     }
   };
+
   return (
     <main className="bg-[#efefef]">
       <Header
-        onScrollToKnowUs={() => scrollToSection(knowUsRef, 80)}
+        onScrollToKnowUs={() => scrollToSection(knowUsRef, 60)}
         onScrollToCertificacoes={() => scrollToSection(certificacoesRef, 60)}
-        onScrollToSolucoes={() => scrollToSection(solucoesRef, 80)}
-        />
+        onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
+      />
 
       <section><Hero /></section>
       <section ref={knowUsRef}><KnowUs /></section>
