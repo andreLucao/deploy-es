@@ -92,17 +92,17 @@ router.post("/magic-link", async (req: Request<{}, {}, MagicLinkRequestBody>, re
 
     // Send email
     await transporter.sendMail({
-      from: `"eco change" <${process.env.EMAIL_FROM}>`,
+      from: `"EcoChange" <${process.env.EMAIL_FROM}>`,
       to: email,
-      subject: "Seu link de acesso - eco change",
+      subject: "Seu link de acesso - EcoChange",
       html: `
         <div style="background-color:#ffffff; max-width:600px; margin:0 auto; padding:24px; font-family:ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
           <div style="border:1px solid #00e07f; border-radius:12px; padding:28px; background:linear-gradient(45deg, #002e34 0%, #00e07f 100%); text-align:center;">
             <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:12px;">
               <div style="width:10px; height:10px; background:#00e07f; border-radius:50%;"></div>
-              <div style="font-weight:700; color:#ffffff; letter-spacing:0.2px;">eco change</div>
+              <div style="font-weight:700; color:#ffffff; letter-spacing:0.2px;">EcoChange</div>
             </div>
-            <h1 style="color:#ffffff; font-size:24px; line-height:32px; margin:0 0 12px 0;">Bem-vindo(a) ao eco change</h1>
+            <h1 style="color:#ffffff; font-size:24px; line-height:32px; margin:0 0 12px 0;">Bem-vindo(a) ao EcoChange</h1>
             <p style="color:#ffffff; font-size:16px; margin:0 0 24px 0;">Clique no botão abaixo para acessar sua conta.</p>
             <a href="${magicLink}" style="display:inline-block; background:#002e34; color:#ffffff; padding:12px 22px; text-decoration:none; border-radius:8px; font-weight:700;">Acessar minha conta</a>
             <p style="color:#ffffff; font-size:14px; margin:22px 0 0 0;">Este link expira em 15 minutos por questões de segurança.</p>
