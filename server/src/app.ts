@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express, { Application } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import basicRoutes from "./routes/basic.routes";
 import authRoutes from "./routes/authRoutes";
 import calculatorRoutes from "./routes/calculator.routes";
@@ -12,9 +13,10 @@ const app: Application = express();
 export const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000" }));
+app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000", credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Routes
 app.use("/", basicRoutes);
