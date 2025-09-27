@@ -49,22 +49,22 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
     scope3: { emissions: [] }
   });
 
-  // Carregar dados do sessionStorage na inicialização
+  // Carregar dados do localStorage na inicialização
   useEffect(() => {
-    const savedData = sessionStorage.getItem('calculator-data');
+    const savedData = localStorage.getItem('calculator-data');
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
         setData(parsedData);
       } catch (error) {
-        console.error('Erro ao carregar dados do sessionStorage:', error);
+        console.error('Erro ao carregar dados do localStorage:', error);
       }
     }
   }, []);
 
-  // Salvar dados no sessionStorage sempre que houver mudanças
+  // Salvar dados no localStorage sempre que houver mudanças
   useEffect(() => {
-    sessionStorage.setItem('calculator-data', JSON.stringify(data));
+    localStorage.setItem('calculator-data', JSON.stringify(data));
   }, [data]);
 
   const updateEmission = (scope: keyof CalculatorData, emissionId: string, emissionData: any) => {
@@ -119,7 +119,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
       scope2: { emissions: [] },
       scope3: { emissions: [] }
     });
-    sessionStorage.removeItem('calculator-data');
+    localStorage.removeItem('calculator-data');
   };
 
   return (
