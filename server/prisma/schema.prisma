@@ -83,7 +83,7 @@ model AdProduct {
   companyId String @map("company_id")
 
   company Company   @relation(fields: [companyId], references: [id])
-  Comment Comment[]
+  comments Comment[]
 
   @@map("ad_product")
 }
