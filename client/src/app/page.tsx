@@ -25,7 +25,7 @@ export default function LandingPage() {
         onScrollToKnowUs={() => scrollToSection(knowUsRef, 80)}
         onScrollToCertificacoes={() => scrollToSection(certificacoesRef, 60)}
         onScrollToSolucoes={() => scrollToSection(solucoesRef, 80)}
-      />
+        />
 
       <section><Hero /></section>
       <section ref={knowUsRef}><KnowUs /></section>
