@@ -1,18 +1,20 @@
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
 }
 
 model Company {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  emissions Emission[]
+  id    String @id @default(uuid())
+  email String @unique
+
+  emissions  Emission[]
+  adProducts AdProduct[]
+  comments   Comment[]
 
   @@map("companies")
 }
@@ -49,16 +51,53 @@ model Emission {
   companyId         String @map("company_id")
   emissionProductId String @map("emission_product_id")
 
-  year         Int
-  quantity     Int
-  calculatedCo2e    Float           @map("calculated_co2e")
-  registeredAt DateTime? @map("registered_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  description  String?
+  year           Int
+  quantity       Int
+  calculatedCo2e Float     @map("calculated_co2e")
+  registeredAt   DateTime? @map("registered_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  description    String?
 
   company         Company         @relation(fields: [companyId], references: [id])
   emissionProduct EmissionProduct @relation(fields: [emissionProductId], references: [id])
 
   @@unique([companyId, emissionProductId, year])
   @@map("emissions")
+}
+
+model AdProduct {
+  id                 String   @id @default(uuid())
+  title              String   @unique
+  credit_type        String   @map("credit_type")
+  certification_type String   @map("certification_type")
+  price              Float    @map("price")
+  createdAt          DateTime @default(now()) @map("created_at")
+  description        String   @map("description")
+  image_url          String?  @map("image_url")
+  supply             Int      @map("supply")
+  batch_discount     Float    @map("batch_discount")
+  size_batch         Int      @map("size_batch")
+  verified_stamp     Boolean  @map("verified_stamp")
+  active             Boolean  @map("active")
+
+  companyId String @map("company_id")
+
+  company Company   @relation(fields: [companyId], references: [id])
+  Comment Comment[]
+
+  @@map("ad_product")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  adProductId String @map("ad_product_id")
+  companyId   String @map("company_id")
+
+  adProduct AdProduct @relation(fields: [adProductId], references: [id])
+  company   Company   @relation(fields: [companyId], references: [id])
+
+  @@map("comments")
 }
