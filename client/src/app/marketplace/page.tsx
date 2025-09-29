@@ -7,8 +7,6 @@ import Filtro from "@/components/marketplace/Filtro";
 import Produtos from "@/components/marketplace/Produtos";
 import Footer from "@/components/Footer";
 
-import CartSummary from "@/components/common/cart-summary";
-
 type Produto = {
    id: number;
    titulo: string;
@@ -36,10 +34,6 @@ export default function Marketplace() {
       <div className="flex flex-col min-h-screen custom-gradient">
          <Header />
          <div className="flex flex-col">
-            <div className="self-end mb-4">
-               <CartSummary /> // adicionado agora
-            </div>
-
             <div className="flex p-30 h-170">
                <Destaque />
             </div>

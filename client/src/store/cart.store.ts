@@ -13,6 +13,8 @@ interface CartState {
    items: CartItem[];
 
    addItem: (item: CartItem) => void;
+   increaseQuantity: (creditId: string) => void;
+   decreaseQuantity: (creditId: string) => void;
    removeItem: (creditId: string) => void;
    clearCart: () => void;
    getTotalPrice: () => number;
@@ -42,6 +44,29 @@ export const useCartStore = create<CartState>((set, get) => ({
             return { items: [...state.items, newItem] };
          }
       });
+   },
+
+   increaseQuantity: (creditId: string) => {
+      set((state) => ({
+         items: state.items.map((item) =>
+            item.creditId === creditId
+               ? { ...item, quantity: item.quantity + 1 }
+               : item
+         ),
+      }));
+   },
+
+   //Diminui a quantidade de um item existente (e remove se chegar a zero)
+   decreaseQuantity: (creditId: string) => {
+      set((state) => ({
+         items: state.items
+            .map((item) =>
+               item.creditId === creditId
+                  ? { ...item, quantity: item.quantity - 1 }
+                  : item
+            )
+            .filter((item) => item.quantity > 0),
+      }));
    },
 
    removeItem: (creditId) => {
