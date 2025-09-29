@@ -1,16 +1,20 @@
-// client/src/components/common/CartDrawer.tsx
 "use client";
 
-import React, { useState } from "react";
-import { useCartStore } from "@/store/cart.store"; // Seu store
+import React, { useState, useEffect } from "react";
+import { useCartStore } from "@/store/cart.store";
 import { X, Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
-import { useRouter } from "next/navigation"; // Hook do Next.js para navegação
+import { useRouter } from "next/navigation";
 
 export default function CartDrawer() {
    // Estado local para gerenciar se o painel está aberto ou fechado
    const [isOpen, setIsOpen] = useState(false);
+   const [isLoaded, setIsLoaded] = useState(false);
 
-   // Conexão com o store do Zustand
+   // Efeito para garantir que o componente está montado no lado do cliente
+   useEffect(() => {
+      setIsLoaded(true);
+   }, []); // O array vazio garante que isso rode apenas uma vez, após a primeira renderização do cliente.
+
    const {
       items,
       getTotalPrice,
@@ -21,9 +25,12 @@ export default function CartDrawer() {
 
    const router = useRouter();
 
+   if (!isLoaded) {
+      return null;
+   }
+
    const handleCheckout = () => {
       if (items.length > 0) {
-         // Regra 1: Navegar para a página de Checkout
          router.push("/checkout");
       } else {
          alert("Seu carrinho está vazio!");
@@ -32,7 +39,7 @@ export default function CartDrawer() {
 
    return (
       <>
-         {/* Botão de Carrinho (para abrir o Drawer) - Você pode colocá-lo no Header */}
+         {/* Botão de Carrinho */}
          <button
             onClick={() => setIsOpen(true)}
             className="p-1 text-white rounded-full hover:opacity-80 transition"

@@ -4,7 +4,7 @@ import { ShoppingCart } from "lucide-react";
 import { Menu } from "lucide-react";
 import { useRouter } from "next/dist/client/components/navigation";
 
-import CartDrawer from "../common/CartDrawer"; //adicionado agora
+import CartDrawer from "../common/CartDrawer";
 
 export default function Header() {
    const router = useRouter();

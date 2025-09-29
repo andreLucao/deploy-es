@@ -1,4 +1,3 @@
-// client/src/components/marketplace/product-card.tsx
 "use client";
 
 import React from "react";
@@ -10,7 +9,6 @@ interface ProductCardProps {
    titulo: string;
    descricao: string;
    preco: number;
-   // Adicionamos a prop 'modoVisualizacao' para herdar o estilo do pai
    modoVisualizacao: "grid" | "list";
 }
 
@@ -30,7 +28,7 @@ export default function ProductCard({
          // IDs mockados (necessário usar o id do produto real aqui)
          creditId: `CREDIT-${id}`,
          sellerId: `SELLER-MOCK-ID`,
-         quantity: 1, // Adiciona 1 unidade por clique
+         quantity: 1,
          pricePerUnit: preco,
       };
 
@@ -39,7 +37,6 @@ export default function ProductCard({
    };
 
    return (
-      // Reutilize a estrutura visual que estava no Produtos.tsx
       <div
          className="bg-white rounded-lg cursor-pointer transition-all duration-400 hover:shadow-lg"
          style={{

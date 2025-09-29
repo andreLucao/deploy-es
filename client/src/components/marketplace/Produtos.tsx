@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import ProductCard from "./product-card"; //adicionado agora
+import ProductCard from "./product-card";
 
 type Produto = {
    id: number;
