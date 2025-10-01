@@ -8,7 +8,9 @@ import calculatorRoutes from "./routes/calculator.routes";
 import emissionProductsRoutes from "./routes/emission_products.routes";
 import emissionFactorsRoutes from "./routes/emission_factors.routes";
 import companiesRoutes from "./routes/companies.routes";
+import adProductRoutes from './routes/adProduct.routes';
 import paymentRoutes from "./routes/paymentRoutes";
+
 
 const app: Application = express();
 export const PORT = process.env.PORT || 3001;
@@ -26,6 +28,7 @@ app.use("/api/calculator", calculatorRoutes);
 app.use("/api/emission-products", emissionProductsRoutes);
 app.use("/api/emission-factors", emissionFactorsRoutes);
 app.use("/api/companies", companiesRoutes);
+app.use('/api/adProducts', adProductRoutes);
 app.use("/api/payment", paymentRoutes);
 
 export default app;
