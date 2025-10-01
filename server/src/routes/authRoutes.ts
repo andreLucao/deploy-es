@@ -2,11 +2,7 @@ import { Router, Request, Response } from 'express';
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-// Import your User model, transporter, generateToken, and verifyToken middleware here
-// import User from '../models/User';
-// import transporter from '../config/email';
-// import { generateToken } from '../utils/tokens';
-// import { verifyToken } from '../middleware/auth';
+import prisma from '../config/database';
 
 const router = Router();
 
@@ -14,7 +10,6 @@ interface AuthRequest extends Request {
   user?: {
     email: string;
     id: string;
-    nome: string;
   };
 }
 
@@ -27,18 +22,9 @@ interface VerifyQuery {
   email?: string;
 }
 
-interface UserDocument {
-  _id: string;
+interface CompanyDocument {
+  id: string;
   email: string;
-  nome: string;
-  setupComplete: boolean;
-  preferredPrompt?: string;
-  subscription?: any;
-  credits: {
-    available: number;
-    totalPurchased: number;
-    lastPurchaseDate: Date;
-  };
 }
 
 
@@ -60,16 +46,21 @@ const generateToken = (email: string) => {
   return { token, expires, email };
 };
 
-const verifyToken = (req: AuthRequest, res: Response, next: any) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "No token provided" });
+const verifyToken = (req: AuthRequest, res: Response, next: any): void => {
+  // Try to get token from cookie first, then from Authorization header
+  const token = req.cookies.authToken || req.headers.authorization?.split(" ")[1];
+  
+  if (!token) {
+    res.status(401).json({ error: "No token provided" });
+    return;
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
-    return next();
+    next();
   } catch (error) {
-    return res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Invalid token" });
   }
 };
 
@@ -78,11 +69,16 @@ router.post("/magic-link", async (req: Request<{}, {}, MagicLinkRequestBody>, re
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: "Email is required" });
 
-    // Busca ou cria usuario
-    //let user: UserDocument | null = await User.findOne({ email });
-    //if (!user) {
-    //  criação de usuario aqui
-    //}
+    // Busca ou cria company
+    let company: CompanyDocument | null = await prisma.company.findUnique({ 
+      where: { email } 
+    });
+    
+    if (!company) {
+      company = await prisma.company.create({
+        data: { email }
+      });
+    }
 
     // Generate magic link token
     const { token, expires } = generateToken(email);
@@ -124,18 +120,20 @@ router.post("/magic-link", async (req: Request<{}, {}, MagicLinkRequestBody>, re
 router.get("/verify", async (req: Request<{}, {}, {}, VerifyQuery>, res: Response) => {
   try {
     const { token, email } = req.query;
-    if (!token) return res.status(400).json({ error: "Token is required" });
+    if (!token || !email) return res.status(400).json({ error: "Token and email are required" });
 
-    // Encontra user no db
-    //const user: UserDocument | null = await User.findOne({ email });
-    //if (!user) return res.status(404).json({ error: "User not found" });
+    // Find company in database
+    const company: CompanyDocument | null = await prisma.company.findUnique({ 
+      where: { email: email as string } 
+    });
+    
+    if (!company) return res.status(404).json({ error: "Company not found" });
 
-    //cria jwt com dados do user
+    // Create JWT with company data
     const jwtToken = jwt.sign(
       {
-        //email: user.email,
-        //id: user._id,
-        //nome: user.nome,
+        email: company.email,
+        id: company.id,
       },
       process.env.JWT_SECRET as string,
       {
@@ -143,12 +141,23 @@ router.get("/verify", async (req: Request<{}, {}, {}, VerifyQuery>, res: Respons
       }
     );
 
+    // Set HTTP-only cookie with JWT token
+    res.cookie('authToken', jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/'
+    });
+    
+    console.log(`🍪 JWT cookie set for company ID: ${company.id}`);
+    console.log(`🍪 Cookie value: ${jwtToken.substring(0, 20)}...`);
+
     return res.json({
       token: jwtToken,
       user: {
-        //email: user.email,
-        //nome: user.nome,
-        //setupComplete: user.setupComplete,
+        id: company.id,
+        email: company.email,
       },
     });
   } catch (error) {
@@ -159,17 +168,22 @@ router.get("/verify", async (req: Request<{}, {}, {}, VerifyQuery>, res: Respons
 
 router.get("/me", verifyToken, async (req: AuthRequest, res: Response) => {
   try {
-    //const user: UserDocument | null = await User.findOne({ email: req.user?.email });
-    //if (!user) return res.status(404).json({ error: "User not found" });
+    const company: CompanyDocument | null = await prisma.company.findUnique({ 
+      where: { email: req.user?.email } 
+    });
     
-    res.json({
+    if (!company) {
+      return res.status(404).json({ error: "Company not found" });
+    }
+    
+    return res.json({
       user: {
-        //_id: user._id,
-        //email: user.email,
+        id: company.id,
+        email: company.email,
       },
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch user data" });
+    return res.status(500).json({ error: "Failed to fetch company data" });
   }
 });
 
