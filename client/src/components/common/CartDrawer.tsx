@@ -42,7 +42,7 @@ export default function CartDrawer() {
          {/* Botão de Carrinho */}
          <button
             onClick={() => setIsOpen(true)}
-            className="p-1 text-white rounded-full hover:opacity-80 transition"
+            className="p-1 text-white rounded-full hover:opacity-80 transition cursor-pointer"
             style={{ position: "relative" }}
          >
             <ShoppingCart size={24} />
@@ -52,14 +52,6 @@ export default function CartDrawer() {
                </span>
             )}
          </button>
-
-         {/* Overlay Escuro */}
-         {/* {isOpen && (
-            <div
-               className="fixed inset-0 bg-black bg-opacity-50 z-40"
-               onClick={() => setIsOpen(false)}
-            />
-         )} */}
 
          {/* Painel Lateral (Drawer) */}
          <div
@@ -72,7 +64,7 @@ export default function CartDrawer() {
                <h2 className="text-xl font-bold">Seu Carrinho</h2>
                <button
                   onClick={() => setIsOpen(false)}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-gray-600 hover:text-gray-900 cursor-pointer"
                >
                   <X size={24} />
                </button>
@@ -104,7 +96,7 @@ export default function CartDrawer() {
                         <div className="flex items-center space-x-2">
                            <button
                               onClick={() => decreaseQuantity(item.creditId)}
-                              className="p-1 border rounded-full hover:bg-gray-200"
+                              className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
                            >
                               <Minus size={16} />
                            </button>
@@ -113,13 +105,13 @@ export default function CartDrawer() {
                            </span>
                            <button
                               onClick={() => increaseQuantity(item.creditId)}
-                              className="p-1 border rounded-full hover:bg-gray-200"
+                              className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
                            >
                               <Plus size={16} />
                            </button>
                            <button
                               onClick={() => removeItem(item.creditId)}
-                              className="text-red-500 hover:text-red-700 ml-2"
+                              className="text-red-500 hover:text-red-700 ml-2 cursor-pointer"
                            >
                               <Trash2 size={20} />
                            </button>
@@ -140,7 +132,7 @@ export default function CartDrawer() {
                <button
                   onClick={handleCheckout}
                   disabled={items.length === 0}
-                  className="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition disabled:bg-gray-400"
+                  className="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 cursor-pointer"
                >
                   Finalizar Compra
                </button>

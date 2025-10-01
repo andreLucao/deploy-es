@@ -37,7 +37,7 @@ export default function Header() {
             </div>
 
             <div className="ml-auto flex items-center">
-               <div className="flex items-center justify-center bg-gray-300 h-13 w-35 rounded-xl">
+               <div className="flex items-center justify-center bg-gray-300 h-13 w-35 rounded-xl mr-4">
                   <p className="text-black">
                      {/* Valor de Créditos Carteira */}
                      CC : 1000

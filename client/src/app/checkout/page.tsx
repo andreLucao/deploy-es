@@ -27,7 +27,7 @@ export default function CheckoutPage() {
          {/* Botão de Voltar */}
          <button
             onClick={handleGoBack}
-            className="flex items-center text-blue-600 hover:text-blue-800 transition mb-4"
+            className="flex items-center text-blue-600 hover:text-blue-800 transition mb-4 cursor-pointer"
          >
             <ArrowLeft size={20} className="mr-2" />
             Voltar ao Marketplace
@@ -67,7 +67,7 @@ export default function CheckoutPage() {
                               {/* Botões de quantidade */}
                               <button
                                  onClick={() => decreaseQuantity(item.creditId)}
-                                 className="p-1 border rounded-full hover:bg-gray-200"
+                                 className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
                               >
                                  {" "}
                                  <Minus size={14} />{" "}
@@ -77,7 +77,7 @@ export default function CheckoutPage() {
                               </span>
                               <button
                                  onClick={() => increaseQuantity(item.creditId)}
-                                 className="p-1 border rounded-full hover:bg-gray-200"
+                                 className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
                               >
                                  {" "}
                                  <Plus size={14} />{" "}
@@ -94,7 +94,7 @@ export default function CheckoutPage() {
                               </span>
                               <button
                                  onClick={() => removeItem(item.creditId)}
-                                 className="ml-2 text-red-500 hover:text-red-700 transition"
+                                 className="ml-2 text-red-500 hover:text-red-700 transition cursor-pointer"
                               >
                                  <Trash2 size={16} />
                               </button>
@@ -114,7 +114,7 @@ export default function CheckoutPage() {
                   {/* Botão de Finalizar */}
                   <button
                      onClick={handleProcessCheckout}
-                     className="w-full mt-6 py-3 bg-green-600 text-white text-lg font-bold rounded-lg hover:bg-green-700 transition shadow-lg" // Reduzido de text-xl para text-lg
+                     className="w-full mt-6 py-3 bg-green-600 text-white text-lg font-bold rounded-lg hover:bg-green-700 transition shadow-lg cursor-pointer"
                   >
                      Confirmar e Pagar
                   </button>
