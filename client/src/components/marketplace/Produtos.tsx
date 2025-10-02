@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+import Link from "next/link"; //Necessário para os redirecionamentos
+
 type Produto = {
   id: number;
   titulo: string;
@@ -45,8 +47,9 @@ export default function Produtos({ produtos, produtosPorPagina = 10, modoVisuali
         }}
       >
         {produtosPagina.map((produto) => (
-          <div 
-            key={produto.id} 
+          <Link
+            key={produto.id}
+            href={`/marketplace/${produto.id}`}
             className="bg-gray-300 rounded-lg cursor-pointer overflow-hidden"
             style={{
               display: 'flex',
@@ -86,7 +89,7 @@ export default function Produtos({ produtos, produtosPorPagina = 10, modoVisuali
             >
               R$ {produto.preco}
             </span>
-          </div>
+          </Link>
         ))}
       </div>
       
