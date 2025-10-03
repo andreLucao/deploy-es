@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState, useRef, useEffect } from 'react';
-import { Home, ShoppingCart, User, Star, Heart, Settings, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Repeat, ClipboardList, Leaf, MapPin, Info, FileText, ChevronDown } from 'lucide-react';
 import Header from "@/components/marketplace/Header";
 import Footer from "@/components/Footer";
 
@@ -24,12 +24,12 @@ export default function ProductPage({ params }: ProductPageProps) {
     const { id } = use(params);
 
     const cards = [
-        { id: 1, icon: <Home size={24} />, text: <>Toneladas de CO<sub>2eq</sub> Compensados</>, subText: 'Quantidade' },
-        { id: 2, icon: <ShoppingCart size={24} />, text: 'Tipo de projeto', subText: 'Reflorestamento' },
-        { id: 3, icon: <User size={24} />, text: 'Bioma', subText: 'Mata Atlântica' },
-        { id: 4, icon: <Star size={24} />, text: 'Local', subText: 'São Paulo' },
-        { id: 5, icon: <Heart size={24} />, text: 'Status', subText: 'Ativo' },
-        { id: 6, icon: <Settings size={24} />, text: 'Padrão', subText: 'X'},
+        { id: 1, icon: <Repeat size={24} />, text: <>Toneladas de CO<sub>2eq</sub> Compensados</>, subText: 'Quantidade' },
+        { id: 2, icon: <ClipboardList size={24} />, text: 'Tipo de projeto', subText: 'Reflorestamento' },
+        { id: 3, icon: <Leaf size={24} />, text: 'Bioma', subText: 'Mata Atlântica' },
+        { id: 4, icon: <MapPin size={24} />, text: 'Local', subText: 'São Paulo' },
+        { id: 5, icon: <Info size={24} />, text: 'Status', subText: 'Ativo' },
+        { id: 6, icon: <FileText size={24} />, text: 'Padrão', subText: 'X'},
     ];
 
     const images = [
@@ -87,8 +87,9 @@ export default function ProductPage({ params }: ProductPageProps) {
                         {/* Botão */}
                         <button
                         style={{ backgroundColor: "rgb(0, 224, 127)" }}
-                        className="text-white px-6 py-3 rounded-lg hover:brightness-90"
+                        className="flex items-center gap-2 text-white px-6 py-3 rounded-lg hover:brightness-90"
                         >
+                        <ShoppingCart size={20} />
                         Comprar
                         </button>
                     </div>
@@ -136,9 +137,6 @@ export default function ProductPage({ params }: ProductPageProps) {
                             <img
                             src={img.src}
                             alt={img.alt}
-                            onError={(e) => {
-                                e.currentTarget.src = "/images/placeholder.jpg"; // imagem fallback
-                            }}
                             className="w-full h-full object-cover rounded-xl shadow-xl
                             transform transition-transform duration-300 ease-in-out
                             hover:scale-105"
