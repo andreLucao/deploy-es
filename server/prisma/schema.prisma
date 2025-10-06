@@ -12,6 +12,7 @@ model Company {
   id    String @id @default(uuid())
   email String @unique
 
+  balance    Int 
   emissions  Emission[]
   adProducts AdProduct[]
   comments   Comment[]
