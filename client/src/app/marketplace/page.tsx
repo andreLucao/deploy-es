@@ -1,43 +1,62 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/marketplace/Header";
 import Destaque from "@/components/marketplace/Destaque";
 import Filtro from "@/components/marketplace/Filtro";
 import Produtos from "@/components/marketplace/Produtos";
 import Footer from "@/components/Footer";
 
+
+
 type Produto = {
   id: number;
   titulo: string;
   descricao: string;
   preco: number;
+  tipoMercado?: string;
+  tipoCertificado?: string;
 };
-
-const produtosMock: Produto[] = [];
-for (let i = 1; i <= 16; i++) {
-  produtosMock.push({
-    id: i,
-    titulo: `Produto ${i}`,
-    descricao: `Descrição ${i}`,
-    preco: i * 100,
-  });
-}
 
 export default function Marketplace() {
   const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'list'>('grid');
   const [produtosPorPagina, setProdutosPorPagina] = useState(8);
   const [ordenacao, setOrdenacao] = useState<'relevancia' | 'precoAsc' | 'precoDesc'>('relevancia');
   const [filtro, setFiltro] = useState<string | null>(null);
-  
+  const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [loading, setLoading] = useState(false);
 
- let produtosOrdenados = [...produtosMock];
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
 
-  if (ordenacao === 'precoAsc') {
-    produtosOrdenados.sort((a, b) => a.preco - b.preco);
-  } else if (ordenacao === 'precoDesc') {
-    produtosOrdenados.sort((a, b) => b.preco - a.preco);
-  }
+  useEffect(() => {
+    async function fetchProdutos() {
+      setLoading(true);
+
+      const params = new URLSearchParams({
+        pagina: paginaAtual.toString(),
+        limite: produtosPorPagina.toString(),
+        ordenacao,
+      });
+
+      if (filtro) params.append("filtro", filtro);
+
+      // chama API do server
+      const res = await fetch(`${process.env.NEXT_PUBLIC_PORT_URL}/api/products?${params.toString()}`);
+      const json = await res.json();
+    
+      if (res.ok) {
+        setProdutos(json.produtos);
+        setTotalPaginas(json.totalPaginas);
+      } else {
+        console.error(json.error);
+      }
+
+      setLoading(false);
+    }
+
+    fetchProdutos();
+  }, [paginaAtual, produtosPorPagina, ordenacao, filtro]);
 
   return (
     <div className="flex flex-col min-h-screen custom-gradient">
@@ -46,22 +65,37 @@ export default function Marketplace() {
         <div className="flex p-30 h-170">
           <Destaque />
         </div>
+
         <Filtro 
           modoVisualizacao={modoVisualizacao}   
           setModoVisualizacao={setModoVisualizacao}
           produtosPorPagina={produtosPorPagina}
-          setProdutosPorPagina={setProdutosPorPagina}
+          setProdutosPorPagina={(qtd) => {
+            setProdutosPorPagina(qtd);
+            setPaginaAtual(1); 
+          }}
           ordenacao={ordenacao}
           setOrdenacao={setOrdenacao}
-          setFiltro={setFiltro}
+          setFiltro={(f) => {
+            setFiltro(f);
+            setPaginaAtual(1); 
+          }}
         />
+
         <div className="flex">
-          <Produtos 
-            
-            produtos={produtosOrdenados}
-            produtosPorPagina={produtosPorPagina} 
-            modoVisualizacao={modoVisualizacao}
-          />
+          {loading ? (
+            <p className="p-4">Carregando produtos...</p>
+          ) : produtos.length === 0 ? (
+            <p className="p-4">Nenhum produto encontrado.</p>
+  ) : (
+            <Produtos 
+              produtos={produtos}
+              modoVisualizacao={modoVisualizacao}
+              paginaAtual={paginaAtual}
+              totalPaginas={totalPaginas}
+              setPaginaAtual={setPaginaAtual}
+            />
+          )}
         </div>
       </div>
       <Footer />
