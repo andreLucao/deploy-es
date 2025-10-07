@@ -12,6 +12,7 @@ model Company {
   id    String @id @default(uuid())
   email String @unique
 
+  balance    Int @default(0)
   emissions  Emission[]
   adProducts AdProduct[]
   comments   Comment[]
@@ -73,14 +74,24 @@ model AdProduct {
   price              Float    @map("price")
   createdAt          DateTime @default(now()) @map("created_at")
   description        String   @map("description")
-  image_url          String?  @map("image_url")
   supply             Int      @map("supply")
   batch_discount     Float    @map("batch_discount")
   size_batch         Int      @map("size_batch")
-  verified_stamp     Boolean  @map("verified_stamp")
-  active             Boolean  @map("active")
+  image_ad           String?  @map("image_ad")
+  carousel_images    Json?    @map("carousel_images")
+  verified_stamp     Boolean? @map("verified_stamp")
+  active             Boolean? @map("active")
+  problem            String?  @map("problem")
+  solution           String?  @map("solution")
+  impact             String?  @map("impact")
+  co2_reduction      Float?   @map("co2_reduction")
+  local              String?  @map("local")
+  status             String   @map("status") @default("pending")
+  standard           String?  @map("standard")
+  biome              String?  @map("biome")
+  project_type       String?  @map("project_type")
 
-  companyId String @map("company_id")
+  companyId          String   @map("company_id")
 
   company Company   @relation(fields: [companyId], references: [id])
   comments Comment[]
