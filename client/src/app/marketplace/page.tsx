@@ -49,7 +49,7 @@ export default function Marketplace() {
             modoVisualizacao={modoVisualizacao}
           />
         </div>
-        <CreateAdButton />
+        <CreateAdButton/>
       </div>
 
       <Footer />
