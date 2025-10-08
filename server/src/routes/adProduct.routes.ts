@@ -2,6 +2,34 @@
 import { Router, Request, Response } from 'express';
 import { AdProductService } from '../services/adProduct.service';
 
+// Import the authentication middleware
+const jwt = require('jsonwebtoken');
+
+interface AuthRequest extends Request {
+  user?: {
+    email: string;
+    id: string;
+  };
+}
+
+const verifyToken = (req: AuthRequest, res: Response, next: any): void => {
+  // Try to get token from cookie first, then from Authorization header
+  const token = req.cookies.authToken || req.headers.authorization?.split(" ")[1];
+  
+  if (!token) {
+    res.status(401).json({ error: "No token provided" });
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
+
 const router = Router();
 const adProductService = new AdProductService();
 
@@ -34,10 +62,25 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // POST /adProducts - Criar um novo anúncio
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', verifyToken, async (req: AuthRequest, res: Response) => {
   try {
     const data = req.body;
-    const newAdProduct = await adProductService.create(data);
+    
+    // Get companyId from authenticated user instead of trusting client
+    const companyId = req.user?.id;
+    
+    if (!companyId) {
+      return res.status(401).json({ error: 'Company ID not found in token' });
+    }
+    
+    // Remove companyId from client data and use the authenticated one
+    const { companyId: _, ...adData } = data;
+    const dataWithAuthCompanyId = {
+      ...adData,
+      companyId: companyId
+    };
+    
+    const newAdProduct = await adProductService.create(dataWithAuthCompanyId);
     return res.status(201).json(newAdProduct);
   } catch (error) {
     console.error('Erro ao criar anúncio:', error);

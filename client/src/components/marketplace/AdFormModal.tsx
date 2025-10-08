@@ -36,7 +36,6 @@ export default function AdFormModal({
     standard: "",
     biome: "",
     project_type: "",
-    companyId: "052bb7f7-6fb3-4028-83b8-fe61a0814537", // Temporário - será preenchido automaticamente
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +94,19 @@ export default function AdFormModal({
     setError(null);
 
     try {
+      // First check if user is authenticated
+      const authCheck = await fetch("http://localhost:3001/api/auth/me", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!authCheck.ok) {
+        throw new Error("Você precisa estar logado para criar anúncios. Faça login primeiro.");
+      }
+
       const response = await fetch("http://localhost:3001/api/adProducts", {
         method: "POST",
         credentials: "include",
@@ -138,7 +150,6 @@ export default function AdFormModal({
         standard: "",
         biome: "",
         project_type: "",
-        companyId: "052bb7f7-6fb3-4028-83b8-fe61a0814537",
       });
       
       // Limpar estados da imagem
