@@ -76,7 +76,7 @@ model AdProduct {
   title              String   @unique
   credit_type        String   @map("credit_type")
   certification_type String   @map("certification_type")
-  price              Float    @map("price")
+  price              Int      @map("price") // Armazenado em centavos, R$ 99,90 = 9990
   createdAt          DateTime @default(now()) @map("created_at")
   description        String   @map("description")
   supply             Int      @map("supply")
@@ -124,6 +124,7 @@ model Comment {
 model Cart {
   id        String   @id @default(uuid())
   companyId String   @unique @map("company_id")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -150,7 +151,7 @@ model CartItem {
 model Order {
   id                    String         @id @default(uuid())
   companyId             String         @map("company_id")
-  totalAmount           Float          @map("total_amount")
+  totalAmount           Int            @map("total_amount") // Armazenado em centavos, R$ 99,90 = 9990
   status                OrderStatus
   createdAt             DateTime       @default(now()) @map("created_at")
   updatedAt             DateTime       @updatedAt @map("updated_at")
@@ -167,8 +168,8 @@ model OrderItem {
   orderId     String @map("order_id")
   adProductId String @map("ad_product_id")
   quantity    Int
-  unitPrice   Float  @map("unit_price") // Preço unitário no momento da compra
-  totalPrice  Float  @map("total_price") // quantity * unitPrice
+  unitPrice   Int  @map("unit_price") // Preço unitário no momento da compra
+  totalPrice  Int  @map("total_price") // quantity * unitPrice
 
   order       Order     @relation(fields: [orderId], references: [id])
   adProduct   AdProduct @relation(fields: [adProductId], references: [id])
@@ -182,8 +183,8 @@ model Payment {
 
   stripePaymentIntentId   String        @unique @map("stripe_payment_intent_id")
   status                  PaymentStatus @default(PENDING)
-  amount                  Int           // Armazenado em centavos, ex: R$ 100,00 = 10000
-  currency                String        // ex: "brl"
+  amount                  Int           // Armazenado em centavos, R$ 99,90 = 9990
+  currency                String        // ex: "brl", "usd"
   
   paymentMethod           String?       @map("payment_method") // ex: "card", "pix"
   receiptUrl              String?       @map("receipt_url")
