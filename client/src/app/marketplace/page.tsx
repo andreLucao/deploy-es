@@ -52,6 +52,7 @@ export default function Marketplace() {
         <CreateAdButton/>
       </div>
 
+
       <Footer />
     </div>
   );
