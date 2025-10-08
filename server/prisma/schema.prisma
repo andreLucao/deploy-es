@@ -90,6 +90,7 @@ model AdProduct {
   standard           String?  @map("standard")
   biome              String?  @map("biome")
   project_type       String?  @map("project_type")
+  sold               Int?     @map("sold")
 
   companyId          String   @map("company_id")
 
