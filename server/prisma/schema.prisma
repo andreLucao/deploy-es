@@ -12,7 +12,7 @@ model Company {
   id    String @id @default(uuid())
   email String @unique
 
-  balance    Int 
+  balance    Int @default(0)
   emissions  Emission[]
   adProducts AdProduct[]
   comments   Comment[]
@@ -86,7 +86,7 @@ model AdProduct {
   impact             String?  @map("impact")
   co2_reduction      Float?   @map("co2_reduction")
   local              String?  @map("local")
-  status             String   @map("status")
+  status             String   @map("status") @default("pending")
   standard           String?  @map("standard")
   biome              String?  @map("biome")
   project_type       String?  @map("project_type")
