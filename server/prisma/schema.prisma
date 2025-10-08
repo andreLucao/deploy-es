@@ -12,6 +12,8 @@ model Company {
   id    String @id @default(uuid())
   email String @unique
 
+  stripeCustomerId String? @unique @map("stripe_customer_id")
+
   balance    Int @default(0)
   emissions  Emission[]
   adProducts AdProduct[]
@@ -148,8 +150,6 @@ model CartItem {
 model Order {
   id                    String         @id @default(uuid())
   companyId             String         @map("company_id")
-  stripeCustomerId      String?        @map("stripe_customer_id")
-  stripePaymentIntentId String?        @map("stripe_payment_intent_id")
   totalAmount           Float          @map("total_amount")
   status                OrderStatus
   createdAt             DateTime       @default(now()) @map("created_at")
@@ -177,18 +177,21 @@ model OrderItem {
 }
 
 model Payment {
-  id                 String        @id @default(uuid())
-  orderId            String        @unique @map("order_id")
-  stripePaymentId    String        @map("stripe_payment_id")
-  amount             Float
-  currency           String        @default("brl")
-  status             PaymentStatus
-  paymentMethod      String?       @map("payment_method") // card, bank_transfer, etc.
-  stripeClientSecret String?       @map("stripe_client_secret") // Para confirmação no frontend
-  createdAt          DateTime      @default(now()) @map("created_at")
-  updatedAt          DateTime      @updatedAt @map("updated_at")
+  id                      String        @id @default(uuid())
+  orderId                 String        @unique @map("order_id")
 
-  order              Order         @relation(fields: [orderId], references: [id])
+  stripePaymentIntentId   String        @unique @map("stripe_payment_intent_id")
+  status                  PaymentStatus @default(PENDING)
+  amount                  Int           // Armazenado em centavos, ex: R$ 100,00 = 10000
+  currency                String        // ex: "brl"
+  
+  paymentMethod           String?       @map("payment_method") // ex: "card", "pix"
+  receiptUrl              String?       @map("receipt_url")
+  lastPaymentError        String?       @map("last_payment_error") // Pra debugar falhas
+
+  order                   Order         @relation(fields: [orderId], references: [id])
+  createdAt               DateTime      @default(now()) @map("created_at")
+  updatedAt               DateTime      @updatedAt @map("updated_at")
 
   @@map("payments")
 }
