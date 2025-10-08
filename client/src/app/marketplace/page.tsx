@@ -6,6 +6,7 @@ import Destaque from "@/components/marketplace/Destaque";
 import Filtro from "@/components/marketplace/Filtro";
 import Produtos from "@/components/marketplace/Produtos";
 import Footer from "@/components/Footer";
+import CreateAdButton from "@/components/marketplace/CreateAdButton";
 
 type Produto = {
    id: number;
@@ -30,28 +31,30 @@ export default function Marketplace() {
    );
    const [produtosPorPagina, setProdutosPorPagina] = useState(8);
 
-   return (
-      <div className="flex flex-col min-h-screen custom-gradient">
-         <Header />
-         <div className="flex flex-col">
-            <div className="flex p-30 h-170">
-               <Destaque />
-            </div>
-            <Filtro
-               modoVisualizacao={modoVisualizacao}
-               setModoVisualizacao={setModoVisualizacao}
-               produtosPorPagina={produtosPorPagina}
-               setProdutosPorPagina={setProdutosPorPagina}
-            />
-            <div className="flex">
-               <Produtos
-                  produtos={produtosMock}
-                  produtosPorPagina={produtosPorPagina}
-                  modoVisualizacao={modoVisualizacao}
-               />
-            </div>
-         </div>
-         <Footer />
+  return (
+    <div className="flex flex-col min-h-screen custom-gradient">
+      <Header />
+      <div className="flex flex-col">
+        <div className="flex p-30 h-170">
+          <Destaque />
+        </div>
+        <Filtro 
+          modoVisualizacao={modoVisualizacao}   
+          setModoVisualizacao={setModoVisualizacao}
+          produtosPorPagina={produtosPorPagina}
+          setProdutosPorPagina={setProdutosPorPagina}
+        />
+        <div className="flex">
+          <Produtos 
+            produtos={produtosMock} 
+            produtosPorPagina={produtosPorPagina} 
+            modoVisualizacao={modoVisualizacao}
+          />
+        </div>
+        <CreateAdButton />
       </div>
-   );
+
+      <Footer />
+    </div>
+  );
 }
