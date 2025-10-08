@@ -12,10 +12,16 @@ model Company {
   id    String @id @default(uuid())
   email String @unique
 
+  stripeCustomerId String? @unique @map("stripe_customer_id")
+
   balance    Int @default(0)
   emissions  Emission[]
   adProducts AdProduct[]
   comments   Comment[]
+
+  cart       Cart?
+  orders     Order[]
+  payments   Payment[]
 
   @@map("companies")
 }
@@ -71,7 +77,7 @@ model AdProduct {
   title              String   @unique
   credit_type        String   @map("credit_type")
   certification_type String   @map("certification_type")
-  price              Float    @map("price")
+  price              Int      @map("price") // Armazenado em centavos, R$ 99,90 = 9990
   createdAt          DateTime @default(now()) @map("created_at")
   description        String   @map("description")
   supply             Int      @map("supply")
@@ -97,6 +103,10 @@ model AdProduct {
   company Company   @relation(fields: [companyId], references: [id])
   comments Comment[]
 
+  cartItems          CartItem[]
+  orderItems         OrderItem[]
+  payments           Payment[]
+
   @@map("ad_product")
 }
 
@@ -112,4 +122,96 @@ model Comment {
   company   Company   @relation(fields: [companyId], references: [id])
 
   @@map("comments")
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  companyId String   @unique @map("company_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company   Company    @relation(fields: [companyId], references: [id])
+  items     CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id          String   @id @default(uuid())
+  cartId      String   @map("cart_id")
+  adProductId String   @map("ad_product_id")
+  quantity    Int
+  addedAt     DateTime @default(now()) @map("added_at")
+
+  cart        Cart      @relation(fields: [cartId], references: [id])
+  adProduct   AdProduct @relation(fields: [adProductId], references: [id])
+
+  @@unique([cartId, adProductId]) // Evita duplicatas no carrinho
+  @@map("cart_items")
+}
+
+model Order {
+  id                    String         @id @default(uuid())
+  companyId             String         @map("company_id")
+  totalAmount           Int            @map("total_amount") // Armazenado em centavos, R$ 99,90 = 9990
+  status                OrderStatus
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
+
+  company               Company        @relation(fields: [companyId], references: [id])
+  items                 OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String @id @default(uuid())
+  orderId     String @map("order_id")
+  adProductId String @map("ad_product_id")
+  quantity    Int
+  unitPrice   Int  @map("unit_price") // Preço unitário no momento da compra
+  totalPrice  Int  @map("total_price") // quantity * unitPrice
+
+  order       Order     @relation(fields: [orderId], references: [id])
+  adProduct   AdProduct @relation(fields: [adProductId], references: [id])
+
+  @@map("order_items")
+}
+
+model Payment {
+  id                      String        @id @default(uuid())  
+  adId                    String        @map("ad_id")
+  companyId               String        @map("company_id")
+
+  amount                  Int           // Armazenado em centavos, R$ 99,90 = 9990
+  currency                String        @default("brl") // ex: "brl", "usd"
+  creditsBought           Int           @map("credits_bought")
+  
+  paymentMethod           String?       @map("payment_method") // ex: "card", "pix"
+  stripePaymentIntentId   String?       @unique @map("stripe_payment_intent_id")
+  
+  createdAt               DateTime      @default(now()) @map("created_at")
+ 
+  adProduct               AdProduct     @relation(fields: [adId], references: [id])
+  company                 Company       @relation(fields: [companyId], references: [id])
+
+  @@map("payments")
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION // Requer ação adicional (3D Secure, etc.)
+  SUCCEEDED
+  FAILED
+  CANCELLED
 }
