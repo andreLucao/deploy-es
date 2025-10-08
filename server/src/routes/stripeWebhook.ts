@@ -39,6 +39,42 @@ async function updateUserBalance(buyerUuid: string, amount_purchased: number) {
     });
 }
 
+async function updatePayment(adId: string, companyId: string, amount: number, creditsBought: number, stripePaymentIntentId: string, createdAt: Date) {
+    
+    const adProduct = await prisma.adProduct.findUnique({
+        where: { id: adId }
+    });
+
+    if (!adProduct) {
+        throw new Error('Ad product not found');
+    }
+
+    if (adProduct.supply < creditsBought) {
+        throw new Error('Ad product supply is less than credits bought');
+    }
+
+    const company = await prisma.company.findUnique({
+        where: { id: companyId }
+    });
+
+    if (!company) {
+        throw new Error('Company not found');
+    }
+
+    await prisma.payment.create({
+        data: {
+            adId,
+            companyId,
+            amount,
+            currency: 'brl',
+            creditsBought,
+            paymentMethod: 'card',
+            stripePaymentIntentId,
+            createdAt,
+        }
+    });
+}
+
 router.post('/', async (req: Request, res: Response) => {
     const sig = req.headers['stripe-signature'] as string;
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -61,20 +97,22 @@ router.post('/', async (req: Request, res: Response) => {
             case 'checkout.session.completed':
                 const session = event.data.object as Stripe.Checkout.Session;
                 
-                const { buyerUuid, adUuid, amount_purchased } = session.metadata || {};
+                const { buyerUuid, adUuid, amount, amount_purchased } = session.metadata || {};
 
-                if (!buyerUuid || !adUuid || !amount_purchased) {
+                if (!buyerUuid || !adUuid || !amount_purchased ) {
                     console.error('Missing metadata:', session.metadata);
                     return res.status(400).send('Error with metadata');
                 }
 
-                console.log('Processing payment:', { buyerUuid, adUuid, amount_purchased });
+                console.log('Processing payment:', { buyerUuid, adUuid, amount, amount_purchased });
 
                 await updateAdProductSupply(adUuid, parseInt(amount_purchased));
                 await updateUserBalance(buyerUuid, parseInt(amount_purchased));
+                await updatePayment(adUuid, buyerUuid, parseInt(amount), parseInt(amount_purchased), session.payment_intent as string, new Date());
 
                 console.log('Payment processed successfully');
                 return res.status(200).json({ received: true });
+
 
             default:
                 console.log(`Unhandled event type: ${event.type}`);
