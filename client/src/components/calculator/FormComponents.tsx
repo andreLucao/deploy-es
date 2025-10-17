@@ -118,25 +118,27 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
     const [products, setProducts] = useState<{value: string, label: string, unit: string}[]>([]);
 
     useEffect(() => {
-      const fetchProducts = async () => {
-        const { data, error } = await supabase
-          .from("emission_products")
-          .select("name, unit");
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from("emission_products")
+        .select("name, unit");
 
-        if (!error && data) {
-          const formatted = data.map(item => ({
+      if (!error && data) {
+        const formatted = data
+          .map((item) => ({
             value: item.name.toLowerCase().replace(/\s+/g, "_"),
             label: item.name,
             unit: item.unit,
-          }));
-          setProducts(formatted);
+          }))
+          //Ordena os produtos em ordem alfabética
+          .sort((a, b) => a.label.localeCompare(b.label));
 
-          console.log("Products fetched:", formatted);
-        }
-      };
+        setProducts(formatted);
+      }
+    };
 
-      fetchProducts();
-    }, []);
+    fetchProducts();
+  }, []);
 
     switch (emissionType) {
       case 'combustao_estacionaria':
