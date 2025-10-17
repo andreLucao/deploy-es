@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { createClient } from "@supabase/supabase-js";
+import { useEffect, useState } from 'react';
 import { Trash2, Plus } from 'lucide-react';
+
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface SelectBoxProps {
   options: { value: string; label: string; unit?: string }[];
@@ -9,6 +15,20 @@ interface SelectBoxProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+}
+
+//Função async para buscar produtos de emissão
+async function fetchEmissionProducts() {
+  const { data, error } = await supabase
+    .from("emission_products")
+    .select("name, unit");
+
+    if (error) {
+      console.error("Erro ao buscar produtos: ", error);
+      return [];
+    }
+
+    return data ?? [];
 }
 
 export const SelectBox = ({ options, value, onChange, placeholder, className = "" }: SelectBoxProps) => {
@@ -83,7 +103,7 @@ interface EmissionFormProps {
 
 export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, initialData }: EmissionFormProps) => {
   const [formData, setFormData] = useState(initialData || {});
-
+  
   const updateField = (field: string, value: any) => {
     const newData = { ...formData, [field]: value };
     setFormData(newData);
@@ -94,7 +114,30 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
     if (!emissionType) {
       return <div>Erro: Tipo de emissão não encontrado</div>;
     }
-    
+
+    const [products, setProducts] = useState<{value: string, label: string, unit: string}[]>([]);
+
+    useEffect(() => {
+      const fetchProducts = async () => {
+        const { data, error } = await supabase
+          .from("emission_products")
+          .select("name, unit");
+
+        if (!error && data) {
+          const formatted = data.map(item => ({
+            value: item.name.toLowerCase().replace(/\s+/g, "_"),
+            label: item.name,
+            unit: item.unit,
+          }));
+          setProducts(formatted);
+
+          console.log("Products fetched:", formatted);
+        }
+      };
+
+      fetchProducts();
+    }, []);
+
     switch (emissionType) {
       case 'combustao_estacionaria':
         return (
@@ -111,7 +154,7 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
                 Selecione o Combustível <span className="text-red-500">*</span>
               </label>
               <SelectBox
-                options={stationaryCombustionFuels}
+                options={products} //Dados vindo da tabela do supabase
                 value={formData.fuel || ''}
                 onChange={(value) => updateField('fuel', value)}
                 placeholder="Selecione o combustível"

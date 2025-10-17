@@ -6,6 +6,7 @@ import Destaque from "@/components/marketplace/Destaque";
 import Filtro from "@/components/marketplace/Filtro";
 import Produtos from "@/components/marketplace/Produtos";
 import Footer from "@/components/Footer";
+import CreateAdButton from "@/components/marketplace/CreateAdButton";
 
 type Produto = {
   id: number;
@@ -48,7 +49,10 @@ export default function Marketplace() {
             modoVisualizacao={modoVisualizacao}
           />
         </div>
+        <CreateAdButton/>
       </div>
+
+
       <Footer />
     </div>
   );
