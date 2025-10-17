@@ -28,6 +28,7 @@ export default function Marketplace() {
 
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
+  const [busca, setBusca] = useState<string>("");
 
   useEffect(() => {
     async function fetchProdutos() {
@@ -40,6 +41,7 @@ export default function Marketplace() {
       });
 
       if (filtro) params.append("filtro", filtro);
+      if (busca) params.append("busca", busca);
 
       // chama API do server
       const res = await fetch(`${process.env.NEXT_PUBLIC_PORT_URL}/api/products?${params.toString()}`);
@@ -56,7 +58,7 @@ export default function Marketplace() {
     }
 
     fetchProdutos();
-  }, [paginaAtual, produtosPorPagina, ordenacao, filtro]);
+  }, [paginaAtual, produtosPorPagina, ordenacao, filtro, busca]);
 
   return (
     <div className="flex flex-col min-h-screen custom-gradient">
@@ -80,6 +82,12 @@ export default function Marketplace() {
             setFiltro(f);
             setPaginaAtual(1); 
           }}
+           busca={busca}
+           setBusca={(valor) => {
+           setBusca(valor);
+           setPaginaAtual(1);
+  }}
+
         />
 
         <div className="flex">

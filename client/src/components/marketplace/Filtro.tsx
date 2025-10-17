@@ -1,5 +1,5 @@
 import { Funnel } from 'lucide-react'
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon, Search } from 'lucide-react';
 import { Grid } from 'lucide-react';
 import { List } from 'lucide-react';
 import { useState, useRef, useEffect } from "react";
@@ -13,9 +13,11 @@ type FiltroProps = {
   ordenacao: 'relevancia' | 'precoAsc' | 'precoDesc';
   setOrdenacao: (ordem: 'relevancia' | 'precoAsc' | 'precoDesc') => void;
   setFiltro: (filtro: string | null) => void;
+   busca: string;
+  setBusca: (valor: string) => void;
 };
 
-export default function Filtro({ modoVisualizacao, setModoVisualizacao, produtosPorPagina, setProdutosPorPagina, ordenacao, setOrdenacao, setFiltro }: FiltroProps) {
+export default function Filtro({ modoVisualizacao, setModoVisualizacao, produtosPorPagina, setProdutosPorPagina, ordenacao, setOrdenacao, setFiltro, busca, setBusca }: FiltroProps) {
     const opcoesProdutos = [8, 12, 16, 20, 24];
     const [open, setOpen] = useState(false);
     const [tipoMercado, setTipoMercado] = useState<string[]>([]);
@@ -25,6 +27,7 @@ export default function Filtro({ modoVisualizacao, setModoVisualizacao, produtos
     const [valorMax, setValorMax] = useState(1000);
 
   const filtroRef = useRef<HTMLDivElement>(null);
+  const [valorBusca, setValorBusca] = useState(busca);
 
 useEffect(() => {
   function handleClickOutside(event: MouseEvent) {
@@ -57,6 +60,10 @@ useEffect(() => {
         <div className="flex h-full justify-center items-center gap-230">
   <div className="flex items-center h-full gap-3 p-4">
     <p className="text-sm whitespace-nowrap">Ordenar por:</p>
+
+    
+
+    {/* Ordenação */}
     <div className="relative">
       <select
         value={ordenacao}
@@ -78,6 +85,37 @@ useEffect(() => {
       </div>
     </div>
 
+
+     
+  {/* busca */}
+  <div className="relative">
+  <input
+    type="text"
+    value={valorBusca}
+    onChange={(e) => setValorBusca(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        setBusca(valorBusca.trim());
+      }
+    }}
+    placeholder="Buscar produtos..."
+    className="bg-white text-black placeholder-black border border-gray-300 rounded-lg pl-3 pr-10 py-2 text-sm 
+               focus:outline-none focus:ring-2 focus:ring-[#008f70] 
+               focus:border-transparent transition-all duration-200 shadow-sm hover:shadow-md w-[180px]"
+  />
+
+ <div className="absolute right-8 top-1/2 -translate-y-1/2 h-4 border-r border-gray-300" />
+
+  <button
+    onClick={() => setBusca(valorBusca.trim())}
+    type="button"
+    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#008f70] transition-colors"
+  >
+    <Search size={18} strokeWidth={1.8} />
+  </button>
+</div>
+
+        {/* Filtros */}
         <div className="relative" ref={filtroRef}>
     <button onClick={() => setOpen(!open)}
   className={`cursor-pointer p-2 rounded-lg transition-all 
