@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useRef } from "react";
 import Header from "@/components/Header";
@@ -9,30 +9,48 @@ import Solucoes from "@/components/landingpage/Solucoes";
 import Footer from "@/components/Footer";
 
 export default function LandingPage() {
-  const knowUsRef = useRef<HTMLElement>(null);
-  const certificacoesRef = useRef<HTMLElement>(null);
-  const solucoesRef = useRef<HTMLElement>(null);
+   const knowUsRef = useRef<HTMLElement>(null);
+   const certificacoesRef = useRef<HTMLElement>(null);
+   const solucoesRef = useRef<HTMLElement>(null);
 
-  const scrollToSection = (ref: React.RefObject<HTMLElement | null>, offset = 0) => {
-    if (ref.current) {
-      const top = ref.current.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
-  };
+   const scrollToSection = (
+      ref: React.RefObject<HTMLElement | null>,
+      offset = 0
+   ) => {
+      if (ref.current) {
+         const top =
+            ref.current.getBoundingClientRect().top + window.scrollY - offset;
+         window.scrollTo({ top, behavior: "smooth" });
+      }
+   };
 
-  return (
-    <main className="bg-[#efefef]">
-      <Header
-        onScrollToKnowUs={() => scrollToSection(knowUsRef, 60)}
-        onScrollToCertificacoes={() => scrollToSection(certificacoesRef, 60)}
-        onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
-      />
+   return (
+      <main className="bg-[#efefef]">
+         <Header
+            onScrollToKnowUs={() => scrollToSection(knowUsRef, 60)}
+            onScrollToCertificacoes={() =>
+               scrollToSection(certificacoesRef, 60)
+            }
+            onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
+         />
 
-      <section><Hero /></section>
-      <section ref={knowUsRef}><KnowUs /></section>
-      <section ref={certificacoesRef}><Certificacoes /></section>
-      <section ref={solucoesRef}><Solucoes /></section>
-      <section><footer><Footer /></footer></section>
-    </main>
-  );
+         <section>
+            <Hero />
+         </section>
+         <section ref={knowUsRef}>
+            <KnowUs />
+         </section>
+         <section ref={certificacoesRef}>
+            <Certificacoes />
+         </section>
+         <section ref={solucoesRef}>
+            <Solucoes />
+         </section>
+         <section>
+            <footer>
+               <Footer />
+            </footer>
+         </section>
+      </main>
+   );
 }
