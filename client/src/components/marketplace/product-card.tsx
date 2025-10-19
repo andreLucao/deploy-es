@@ -38,7 +38,7 @@ export default function ProductCard({
 
    return (
       <div
-         className="bg-white rounded-lg cursor-pointer transition-all duration-400 hover:shadow-lg"
+         className="bg-white rounded-lg cursor-pointer transition-all duration-400 hover:shadow-md"
          style={{
             display: "flex",
             flexDirection: modoVisualizacao === "grid" ? "column" : "row",
@@ -68,18 +68,19 @@ export default function ProductCard({
          </div>
 
          <div
-            className="flex flex-col items-end"
+            className="flex flex-col items-center justify-center gap-2"
             style={{
                transition: "all 0.7s ease-out",
+               minWidth: modoVisualizacao === "grid" ? "auto" : "120px",
             }}
          >
-            <span className="font-semibold text-green-700 mb-2">
+            <span className="font-semibold text-green-700 text-lg">
                R$ {preco.toFixed(2)}
             </span>
 
             <button
                onClick={handleAddToCart}
-               className="flex items-center justify-center gap-1 bg-[#0056b3] text-white px-3 py-1 rounded-md hover:bg-[#003871] transition-colors"
+               className="flex items-center justify-center gap-1 bg-[#0056b3] text-white px-3 py-1 rounded-md hover:bg-[#003871] transition-colors w-full"
             >
                <ShoppingCart size={16} />
                {modoVisualizacao === "grid" ? "Comprar" : ""}
