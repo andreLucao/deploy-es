@@ -108,6 +108,7 @@ export default function Marketplace() {
             />
           )}
         </div>
+        <CreateAdButton />
       </div>
       <Footer />
     </div>
