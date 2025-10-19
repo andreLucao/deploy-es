@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from "react";
 import Header from "@/components/marketplace/Header";
@@ -6,6 +6,7 @@ import Destaque from "@/components/marketplace/Destaque";
 import Filtro from "@/components/marketplace/Filtro";
 import Produtos from "@/components/marketplace/Produtos";
 import Footer from "@/components/Footer";
+import CreateAdButton from "@/components/marketplace/CreateAdButton";
 
 
 
@@ -19,8 +20,10 @@ type Produto = {
 };
 
 export default function Marketplace() {
-  const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'list'>('grid');
-  const [produtosPorPagina, setProdutosPorPagina] = useState(8);
+   const [modoVisualizacao, setModoVisualizacao] = useState<"grid" | "list">(
+      "grid"
+   );
+   const [produtosPorPagina, setProdutosPorPagina] = useState(8);
   const [ordenacao, setOrdenacao] = useState<'relevancia' | 'precoAsc' | 'precoDesc'>('relevancia');
   const [filtro, setFiltro] = useState<string | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);

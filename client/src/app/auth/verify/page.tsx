@@ -37,6 +37,7 @@ export default function VerifyPage() {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`,
           {
             method: 'GET',
+            credentials: 'include', // CRITICAL: This allows HTTP-only cookies to be set
             headers: {
               'Content-Type': 'application/json',
             },
