@@ -53,7 +53,7 @@ export default function Produtos({
                <Link
                   key={produto.id}
                   href={`/marketplace/${produto.id}`}
-                  className="bg-gray-300 rounded-lg cursor-pointer overflow-hidden"
+                  className="rounded-lg cursor-pointer overflow-hidden"
                   style={{
                      display: "flex",
                      flexDirection:
@@ -68,79 +68,15 @@ export default function Produtos({
                            : "space-between",
                      padding: modoVisualizacao === "grid" ? "16px" : "16px",
                      transition: "all 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
-                     transform: "scale(1)",
-                  }}
-                  onMouseEnter={(e) => {
-                     e.currentTarget.style.transform = "scale(1.02)";
-                     e.currentTarget.style.boxShadow =
-                        "0 8px 25px rgba(0,0,0,0.15)";
-                  }}
-                  onMouseLeave={(e) => {
-                     e.currentTarget.style.transform = "scale(1)";
-                     e.currentTarget.style.boxShadow = "none";
                   }}
                >
-                  <div
-                     className="w-[1550px] p-3 transition-all duration-700 ease-out"
-                     style={{
-                        display: "grid",
-                        gridTemplateColumns:
-                           modoVisualizacao === "grid"
-                              ? "repeat(4, 1fr)"
-                              : "1fr",
-                        gap: modoVisualizacao === "grid" ? "40px" : "16px",
-                        justifyItems:
-                           modoVisualizacao === "grid" ? "center" : "stretch",
-                        maxWidth:
-                           modoVisualizacao === "list" ? "1520px" : "none",
-                        margin: "0 auto",
-                     }}
-                  >
-                     {produtosPagina.map((produto) => (
-                        <Link
-                           key={produto.id}
-                           href={`/marketplace/${produto.id}`}
-                           className="bg-gray-300 rounded-lg cursor-pointer overflow-hidden"
-                           style={{
-                              display: "flex",
-                              flexDirection:
-                                 modoVisualizacao === "grid" ? "column" : "row",
-                              height:
-                                 modoVisualizacao === "grid"
-                                    ? "340px"
-                                    : "120px",
-                              width:
-                                 modoVisualizacao === "grid" ? "340px" : "100%",
-                              alignItems:
-                                 modoVisualizacao === "grid"
-                                    ? "center"
-                                    : "center",
-                              justifyContent: "space-between",
-                              padding: "16px",
-                              transition:
-                                 "all 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
-                              transform: "scale(1)",
-                           }}
-                        >
-                           <ProductCard
-                              id={produto.id}
-                              titulo={produto.titulo}
-                              descricao={produto.descricao}
-                              preco={produto.preco}
-                              modoVisualizacao={modoVisualizacao}
-                           />
-                        </Link>
-                     ))}
-                  </div>
-                  <span
-                     className="font-semibold text-green-700"
-                     style={{
-                        marginTop: modoVisualizacao === "grid" ? "auto" : "0",
-                        transition: "all 0.7s ease-out",
-                     }}
-                  >
-                     R$ {produto.preco}
-                  </span>
+                  <ProductCard
+                     id={produto.id}
+                     titulo={produto.titulo}
+                     descricao={produto.descricao}
+                     preco={produto.preco}
+                     modoVisualizacao={modoVisualizacao}
+                  />
                </Link>
             ))}
          </div>
