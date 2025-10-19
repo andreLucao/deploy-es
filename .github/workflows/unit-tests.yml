@@ -1,0 +1,31 @@
+name: Testes Unitarios
+
+# Define quando o workflow deve ser executado
+on:
+   push:
+      branches: [main, master, develop]
+   pull_request:
+      branches: [main, master, develop]
+
+jobs:
+   run-jest-tests:
+      runs-on: ubuntu-latest
+
+      steps:
+         - uses: actions/checkout@v4
+
+         # Configuração do Node.js
+         - name: Configurar Node.js
+           uses: actions/setup-node@v4
+           with:
+              node-version: "20"
+
+         # Instalação das Dependências
+         - name: Instalar dependências (Client)
+           run: npm install
+           working-directory: ./client
+
+         # Configuração do Jest
+         - name: Rodar Testes Unitários
+           run: npm test
+           working-directory: ./client
