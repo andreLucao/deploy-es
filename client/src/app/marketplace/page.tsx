@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/marketplace/Header";
 import Destaque from "@/components/marketplace/Destaque";
 import Filtro from "@/components/marketplace/Filtro";
@@ -15,21 +15,49 @@ type Produto = {
    preco: number;
 };
 
-const produtosMock: Produto[] = [];
-for (let i = 1; i <= 16; i++) {
-   produtosMock.push({
-      id: i,
-      titulo: `Produto ${i}`,
-      descricao: `Descrição ${i}`,
-      preco: i * 100,
-   });
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function Marketplace() {
    const [modoVisualizacao, setModoVisualizacao] = useState<"grid" | "list">(
       "grid"
    );
    const [produtosPorPagina, setProdutosPorPagina] = useState(8);
+   const [produtos, setProdutos] = useState<Produto[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState<string | null>(null);
+
+   useEffect(() => {
+      async function fetchAdProducts() {
+         try {
+            setLoading(true);
+            const response = await fetch(`${API_URL}/api/adProducts`);
+
+            if (!response.ok) {
+               throw new Error('Falha ao carregar anúncios');
+            }
+
+            const data = await response.json();
+
+            // Mapeia os dados da API para o formato esperado
+            const produtosFormatados = data.map((ad: any) => ({
+               id: ad.id,
+               titulo: ad.title,
+               descricao: ad.description,
+               preco: ad.price
+            }));
+
+            setProdutos(produtosFormatados);
+            setError(null);
+         } catch (err) {
+            console.error('Erro ao buscar anúncios:', err);
+            setError('Não foi possível carregar os anúncios');
+         } finally {
+            setLoading(false);
+         }
+      }
+
+      fetchAdProducts();
+   }, []);
 
    return (
       <div className="flex flex-col min-h-screen custom-gradient">
@@ -45,11 +73,21 @@ export default function Marketplace() {
                setProdutosPorPagina={setProdutosPorPagina}
             />
             <div className="flex">
-               <Produtos
-                  produtos={produtosMock}
-                  produtosPorPagina={produtosPorPagina}
-                  modoVisualizacao={modoVisualizacao}
-               />
+               {loading ? (
+                  <div className="flex justify-center items-center w-full min-h-[400px]">
+                     <p className="text-lg">Carregando anúncios...</p>
+                  </div>
+               ) : error ? (
+                  <div className="flex justify-center items-center w-full min-h-[400px]">
+                     <p className="text-lg text-red-500">{error}</p>
+                  </div>
+               ) : (
+                  <Produtos
+                     produtos={produtos}
+                     produtosPorPagina={produtosPorPagina}
+                     modoVisualizacao={modoVisualizacao}
+                  />
+               )}
             </div>
             <CreateAdButton />
          </div>
