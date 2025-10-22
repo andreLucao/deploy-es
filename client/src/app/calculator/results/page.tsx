@@ -24,8 +24,13 @@ export default function CalculatorResults() {
     };
 
     const getDetailedResults = () => {
-        const results = [];
-        
+        const results: Array<{
+            scope: string;
+            type: string;
+            description: string | number | boolean;
+            index: number;
+        }> = [];
+
         // Escopo 1
         data.scope1.emissions.forEach((emission, index) => {
             results.push({

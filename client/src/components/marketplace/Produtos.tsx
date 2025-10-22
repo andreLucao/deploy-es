@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "./product-card";
 import Link from "next/link"; //Necessário para os redirecionamentos
@@ -12,21 +12,20 @@ type Produto = {
 
 type ProdutosProps = {
    produtos: Produto[];
-   produtosPorPagina?: number;
    modoVisualizacao: "grid" | "list";
+   paginaAtual: number;
+   totalPaginas: number;
+   setPaginaAtual: Dispatch<SetStateAction<number>>;
 };
 
 export default function Produtos({
    produtos,
-   produtosPorPagina = 10,
    modoVisualizacao,
+   paginaAtual,
+   totalPaginas,
+   setPaginaAtual,
 }: ProdutosProps) {
-   const [paginaAtual, setPaginaAtual] = useState(1);
-
-   const totalPaginas = Math.ceil(produtos.length / produtosPorPagina);
-   const indiceInicial = (paginaAtual - 1) * produtosPorPagina;
-   const indiceFinal = indiceInicial + produtosPorPagina;
-   const produtosPagina = produtos.slice(indiceInicial, indiceFinal);
+   const produtosPagina = produtos;
 
    const irParaPagina = (pagina: number) => {
       if (pagina >= 1 && pagina <= totalPaginas) {

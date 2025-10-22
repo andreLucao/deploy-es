@@ -51,7 +51,7 @@ export default function CalculatorForm() {
     removeEmission(getCurrentScope() as keyof typeof data, emissionId);
   };
 
-  const handleUpdateEmission = (emissionId: string, emissionData: any) => {
+  const handleUpdateEmission = (emissionId: string, emissionData: Record<string, string | number | boolean>) => {
     updateEmission(getCurrentScope() as keyof typeof data, emissionId, emissionData);
   };
 

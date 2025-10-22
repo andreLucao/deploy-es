@@ -1,11 +1,12 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Company {
@@ -15,13 +16,14 @@ model Company {
   stripeCustomerId String? @unique @map("stripe_customer_id")
 
   balance    Int @default(0)
-  emissions  Emission[]
   adProducts AdProduct[]
   comments   Comment[]
+  commentLikes CommentLike[]
 
   cart       Cart?
   orders     Order[]
   payments   Payment[]
+  inventories EmissionInventory[]
 
   @@map("companies")
 }
@@ -55,20 +57,24 @@ model EmissionFactor {
 model Emission {
   id String @id @default(uuid())
 
-  companyId         String @map("company_id")
+  scope        Int       // 1, 2, 3
+  emissionType String    // "combustao_movel", "eletricidade", etc.
+  formData     Json?     // JSON com os dados do formulário da calculadora
+  deletedAt    DateTime? @map("deleted_at") // Pro soft delete
+
+  inventoryId       String @map("inventory_id")
   emissionProductId String @map("emission_product_id")
 
-  year           Int
   quantity       Int
   calculatedCo2e Float     @map("calculated_co2e")
   registeredAt   DateTime? @map("registered_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   description    String?
 
-  company         Company         @relation(fields: [companyId], references: [id])
+  inventory       EmissionInventory @relation(fields: [inventoryId], references: [id])
   emissionProduct EmissionProduct @relation(fields: [emissionProductId], references: [id])
 
-  @@unique([companyId, emissionProductId, year])
+  @@unique([inventoryId, emissionProductId]) // Evita duplicar um produto no mesmo inventário
   @@map("emissions")
 }
 
@@ -118,10 +124,25 @@ model Comment {
   adProductId String @map("ad_product_id")
   companyId   String @map("company_id")
 
-  adProduct AdProduct @relation(fields: [adProductId], references: [id])
-  company   Company   @relation(fields: [companyId], references: [id])
+  adProduct AdProduct    @relation(fields: [adProductId], references: [id])
+  company   Company      @relation(fields: [companyId], references: [id])
+  likes     CommentLike[]
 
   @@map("comments")
+}
+
+model CommentLike {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  commentId String @map("comment_id")
+  companyId String @map("company_id")
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([commentId, companyId]) // Evita likes duplicados
+  @@map("comment_likes")
 }
 
 model Cart {
@@ -152,15 +173,15 @@ model CartItem {
 }
 
 model Order {
-  id                    String         @id @default(uuid())
-  companyId             String         @map("company_id")
-  totalAmount           Int            @map("total_amount") // Armazenado em centavos, R$ 99,90 = 9990
-  status                OrderStatus
-  createdAt             DateTime       @default(now()) @map("created_at")
-  updatedAt             DateTime       @updatedAt @map("updated_at")
+  id          String      @id @default(uuid())
+  companyId   String      @map("company_id")
+  totalAmount Int         @map("total_amount") // Armazenado em centavos, R$ 99,90 = 9990
+  status      OrderStatus
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
-  company               Company        @relation(fields: [companyId], references: [id])
-  items                 OrderItem[]
+  company     Company     @relation(fields: [companyId], references: [id])
+  items       OrderItem[]
 
   @@map("orders")
 }
@@ -180,19 +201,19 @@ model OrderItem {
 }
 
 model Payment {
-  id                      String        @id @default(uuid())  
+  id                      String        @id @default(uuid())
   adId                    String        @map("ad_id")
   companyId               String        @map("company_id")
 
   amount                  Int           // Armazenado em centavos, R$ 99,90 = 9990
   currency                String        @default("brl") // ex: "brl", "usd"
   creditsBought           Int           @map("credits_bought")
-  
+
   paymentMethod           String?       @map("payment_method") // ex: "card", "pix"
   stripePaymentIntentId   String?       @unique @map("stripe_payment_intent_id")
-  
+
   createdAt               DateTime      @default(now()) @map("created_at")
- 
+
   adProduct               AdProduct     @relation(fields: [adId], references: [id])
   company                 Company       @relation(fields: [companyId], references: [id])
 
@@ -214,4 +235,27 @@ enum PaymentStatus {
   SUCCEEDED
   FAILED
   CANCELLED
+}
+
+model EmissionInventory {
+  id        String    @id @default(uuid())
+  companyId String    @map("company_id")
+  year      Int
+  name      String    // Ex: "Inventário Anual 2024"
+  status    InventoryStatus @default(DRAFT) // (DRAFT, PUBLISHED, etc.)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  company   Company     @relation(fields: [companyId], references: [id])
+  emissions Emission[]  // Cada inventário possui seus registros de emissão
+
+  @@unique([companyId, year]) // Pra garantir que cada empresa só tenha um inventário por ano
+  @@map("emission_inventories")
+}
+
+enum InventoryStatus {
+  DRAFT     // Rascunho, está sendo editado
+  PUBLISHED // Foi finalizado e publicado
+  AUDITED   // O inventário foi auditado (algo futuro, verificado por terceiros...)
 }

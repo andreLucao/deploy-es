@@ -94,7 +94,7 @@ export default function AdFormModal({
 
       try {
          // First check if user is authenticated
-         const authCheck = await fetch("http://localhost:3001/api/auth/me", {
+         const authCheck = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
             method: "GET",
             credentials: "include",
             headers: {
@@ -108,7 +108,7 @@ export default function AdFormModal({
             );
          }
 
-         const response = await fetch("http://localhost:3001/api/adProducts", {
+         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/adProducts`, {
             method: "POST",
             credentials: "include",
             headers: {

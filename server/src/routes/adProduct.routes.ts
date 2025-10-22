@@ -31,13 +31,18 @@ const verifyToken = (req: AuthRequest, res: Response, next: any): void => {
    }
 };
 
-const router = Router();
+const router: Router = Router();
 const adProductService = new AdProductService();
 
 // GET /adProducts - Listar todos os anúncios
 router.get("/", async (req: Request, res: Response) => {
    try {
+      const start = performance.now();
       const adProducts = await adProductService.findAll();
+      
+      const end = performance.now();
+      console.log(`Tempo de resposta da rota de anuncios: ${end - start} ms`);
+
       return res.status(200).json(adProducts);
    } catch (error) {
       console.error("Erro ao buscar anúncios:", error);

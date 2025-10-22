@@ -1,5 +1,5 @@
 import prisma from "../config/database";
-import { Order } from "../generated/prisma/client";
+import { Order } from "../../generated/prisma/client";
 
 interface CartItemData {
    creditId: string;
