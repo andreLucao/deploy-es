@@ -6,7 +6,7 @@ export interface EmissionInput {
   quantity: number;
   emissionType: string;
   scope: number;
-  formData: any;
+  formData: Record<string, unknown>;
   description?: string;
 }
 
@@ -26,15 +26,27 @@ export interface InventoryResult {
   scopeBreakdown?: { scope: number; total: number; count: number }[];
 }
 
+export interface EmissionData {
+  id: string;
+  co2e: number;
+  type: string;
+  description?: string;
+}
+
 export interface ScopeResult {
   scope: number;
   totalCo2e: number;
   emissionsCount: number;
-  emissions: any[];
+  emissions: EmissionData[];
+}
+
+export interface Company {
+  id: string;
+  email: string;
 }
 
 export interface EmissionsSummary {
-  company: any;
+  company: Company;
   summaryByYear: {
     year: number;
     inventoryId: string;
