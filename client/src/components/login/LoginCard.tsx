@@ -33,7 +33,7 @@ export default function RegisterCard() {
         setLoginState('loading');
         
         try {
-            const response = await fetch('http://localhost:3001/api/auth/magic-link', {
+            const response = await fetch('http://API_URL/api/auth/magic-link', {
                  method: 'POST',
                  headers: {
                      'Content-Type': 'application/json',
