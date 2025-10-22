@@ -8,8 +8,6 @@ import Produtos from "@/components/marketplace/Produtos";
 import Footer from "@/components/Footer";
 import CreateAdButton from "@/components/marketplace/CreateAdButton";
 
-
-
 type Produto = {
   id: number;
   titulo: string;
@@ -19,45 +17,51 @@ type Produto = {
   tipoCertificado?: string;
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 export default function Marketplace() {
-   const [modoVisualizacao, setModoVisualizacao] = useState<"grid" | "list">(
-      "grid"
-   );
-   const [produtosPorPagina, setProdutosPorPagina] = useState(8);
+  const [modoVisualizacao, setModoVisualizacao] = useState<"grid" | "list">("grid");
+  const [produtosPorPagina, setProdutosPorPagina] = useState(8);
   const [ordenacao, setOrdenacao] = useState<'relevancia' | 'precoAsc' | 'precoDesc'>('relevancia');
   const [filtro, setFiltro] = useState<string | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [loading, setLoading] = useState(false);
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [busca, setBusca] = useState<string>("");
 
   useEffect(() => {
     async function fetchProdutos() {
-      setLoading(true);
+      try {
+        setLoading(true);
+        setError(null);
 
-      const params = new URLSearchParams({
-        pagina: paginaAtual.toString(),
-        limite: produtosPorPagina.toString(),
-        ordenacao,
-      });
+        const params = new URLSearchParams({
+          pagina: paginaAtual.toString(),
+          limite: produtosPorPagina.toString(),
+          ordenacao,
+        });
 
-      if (filtro) params.append("filtro", filtro);
-      if (busca) params.append("busca", busca);
+        if (filtro) params.append("filtro", filtro);
+        if (busca) params.append("busca", busca);
 
-      // chama API do server
-      const res = await fetch(`${process.env.NEXT_PUBLIC_PORT_URL}/api/products?${params.toString()}`);
-      const json = await res.json();
-    
-      if (res.ok) {
+        // Chama API do server
+        const response = await fetch(`${process.env.NEXT_PUBLIC_PORT_URL}/api/products?${params.toString()}`);
+
+        if (!response.ok) {
+          throw new Error('Falha ao carregar produtos');
+        }
+
+        const json = await response.json();
         setProdutos(json.produtos);
         setTotalPaginas(json.totalPaginas);
-      } else {
-        console.error(json.error);
+      } catch (err) {
+        console.error('Erro ao buscar produtos:', err);
+        setError('Não foi possível carregar os produtos');
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     fetchProdutos();
@@ -85,20 +89,25 @@ export default function Marketplace() {
             setFiltro(f);
             setPaginaAtual(1); 
           }}
-           busca={busca}
-           setBusca={(valor) => {
-           setBusca(valor);
-           setPaginaAtual(1);
-  }}
-
+          busca={busca}
+          setBusca={(valor) => {
+            setBusca(valor);
+            setPaginaAtual(1);
+          }}
         />
 
         <div className="flex">
           {loading ? (
-            <p className="p-4">Carregando produtos...</p>
+            <div className="flex justify-center items-center w-full min-h-[400px]">
+              <p className="text-lg">Carregando produtos...</p>
+            </div>
+          ) : error ? (
+            <div className="flex justify-center items-center w-full min-h-[400px]">
+              <p className="text-lg text-red-500">{error}</p>
+            </div>
           ) : produtos.length === 0 ? (
             <p className="p-4">Nenhum produto encontrado.</p>
-  ) : (
+          ) : (
             <Produtos 
               produtos={produtos}
               modoVisualizacao={modoVisualizacao}
