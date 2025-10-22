@@ -25,7 +25,7 @@ export default function LandingPage() {
    };
 
    return (
-      <main className="bg-[#efefef]">
+      <main className="bg-[#efefef] min-h-screen">
          <Header
             onScrollToKnowUs={() => scrollToSection(knowUsRef, 60)}
             onScrollToCertificacoes={() =>
@@ -34,19 +34,19 @@ export default function LandingPage() {
             onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
          />
 
-         <section>
+         <section className="w-full">
             <Hero />
          </section>
-         <section ref={knowUsRef}>
+         <section ref={knowUsRef} className="w-full">
             <KnowUs />
          </section>
-         <section ref={certificacoesRef}>
+         <section ref={certificacoesRef} className="w-full">
             <Certificacoes />
          </section>
-         <section ref={solucoesRef}>
+         <section ref={solucoesRef} className="w-full">
             <Solucoes />
          </section>
-         <section>
+         <section className="w-full">
             <footer>
                <Footer />
             </footer>
