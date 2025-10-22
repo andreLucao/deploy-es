@@ -19,7 +19,32 @@ export default function CheckoutPage() {
    const handleGoBack = () => {
       router.push("/marketplace");
    };
-   const handleProcessCheckout = async () => {};
+   const handleProcessCheckout = async () => {
+      try {
+         const response = await fetch("/api/payment/create-payment", {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+               amount: getTotalPrice(),
+               buyerUuid: "user-uuid", // TODO: obter do contexto de autenticação
+               adUuid: items[0]?.creditId, // TODO: ajustar para múltiplos produtos
+               amount_purchased: items.length,
+            }),
+         });
+
+         const data = await response.json();
+
+         if (data.success && data.payment_url) {
+            window.location.href = data.payment_url;
+         } else {
+            console.error("Erro ao gerar link de pagamento:", data.error);
+         }
+      } catch (error) {
+         console.error("Erro ao processar checkout:", error);
+      }
+   };
 
    return (
       <div className="py-8 px-4">
