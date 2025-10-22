@@ -34,7 +34,7 @@ interface ProductData {
     batch_discount: number;
     size_batch: number;
     image_ad?: string;
-    carousel_images?: any;
+    carousel_images?: string[];
     verified_stamp?: boolean;
     active?: boolean;
     problem?: string;
@@ -63,11 +63,53 @@ interface Comment {
     };
 }
 
+// Create a separate Accordion Item component to use hooks properly
+function AccordionItemComponent({ item, index, isOpen, onToggle }: {
+    item: AccordionItem;
+    index: number;
+    isOpen: boolean;
+    onToggle: (index: number) => void;
+}) {
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [maxHeight, setMaxHeight] = useState("0px");
+
+    useEffect(() => {
+        if (contentRef.current) {
+            setMaxHeight(isOpen ? `${contentRef.current.scrollHeight}px` : "0px");
+        }
+    }, [isOpen]);
+
+    return (
+        <div key={index} className="border rounded-2xl shadow">
+            <button
+                onClick={() => onToggle(index)}
+                className="w-full text-left p-6 flex justify-between items-center bg-white rounded-2xl hover:bg-gray-50 transition-colors"
+            >
+                <span className="font-semibold text-lg text-gray-800">{item.title}</span>
+                <ChevronDown
+                    className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+                        isOpen ? "rotate-180" : ""
+                    }`}
+                />
+            </button>
+            <div
+                ref={contentRef}
+                style={{ maxHeight }}
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+            >
+                <div className="p-6 pt-2 bg-gray-50 text-gray-700 rounded-b-2xl">
+                    {item.content}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function ProductPage({ params }: ProductPageProps) {
     const { id } = use(params);
     const [productData, setProductData] = useState<ProductData | null>(null);
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [loadingComments, setLoadingComments] = useState(true);
+    const [, setComments] = useState<Comment[]>([]);
+    const [, setLoadingComments] = useState(true);
 
     // Função para buscar comentários
     const fetchComments = async () => {
@@ -269,40 +311,15 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <h1 className="text-4xl font-bold flex flex-col items-center justify-center">Conheça melhor</h1>
 
                 <div className="max-w-md mx-auto mt-8 space-y-4">
-                    {accordionData.map((item, index) => {
-                        const contentRef = useRef<HTMLDivElement>(null);
-                        const [maxHeight, setMaxHeight] = useState("0px");
-                        const isOpen = openIndexes.includes(index);
-
-                        useEffect(() => {
-                        if (contentRef.current) {
-                            setMaxHeight(isOpen ? `${contentRef.current.scrollHeight}px` : "0px");
-                        }
-                        }, [isOpen]);
-
-                        return (
-                        <div key={index} className="border rounded-2xl shadow">
-                            <div
-                            className="p-4 flex justify-between items-center cursor-pointer bg-white rounded-t-2xl"
-                            onClick={() => toggleAccordion(index)}
-                            >
-                            <h3 className="text-lg font-semibold">{item.title}</h3>
-                            <ChevronDown
-                                className={`w-6 h-6 transition-transform duration-300 ${
-                                isOpen ? "rotate-180" : ""
-                                }`}
-                            />
-                            </div>
-                            <div
-                            ref={contentRef}
-                            style={{ maxHeight }}
-                            className="overflow-hidden transition-max-height duration-500 ease-in-out border-t bg-gray-50 rounded-b-2xl"
-                            >
-                            <div className="p-4 text-gray-700">{item.content}</div>
-                            </div>
-                        </div>
-                        );
-                    })}
+                    {accordionData.map((item, index) => (
+                        <AccordionItemComponent
+                            key={index}
+                            item={item}
+                            index={index}
+                            isOpen={openIndexes.includes(index)}
+                            onToggle={toggleAccordion}
+                        />
+                    ))}
                 </div>
 
                 <div className="mt-10 flex justify-center items-center"> 

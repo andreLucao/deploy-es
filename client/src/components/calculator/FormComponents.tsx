@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from 'react';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface SelectBoxProps {
   options: { value: string; label: string; unit?: string }[];
@@ -81,7 +82,7 @@ interface EmissionFormProps {
   initialData?: any;
 }
 
-export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, initialData }: EmissionFormProps) => {
+export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: EmissionFormProps) => {
   const [formData, setFormData] = useState(initialData || {});
 
   const updateField = (field: string, value: any) => {
