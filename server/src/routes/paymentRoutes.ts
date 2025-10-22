@@ -7,7 +7,7 @@ const router = Router();
 
 router.post('/create-payment', async (req: Request, res: Response) => {
   try {
-    const { amount } = req.body;
+    const { amount, buyerUuid, adUuid, amount_purchased } = req.body;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -25,6 +25,11 @@ router.post('/create-payment', async (req: Request, res: Response) => {
       mode: 'payment',
       success_url: 'https://seusite.com/sucesso',
       cancel_url: 'https://seusite.com/cancelado',
+      metadata: {
+        buyerUuid,
+        adUuid,
+        amount_purchased: amount_purchased.toString(),
+      },
     });
 
     res.json({

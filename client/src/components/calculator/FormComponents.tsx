@@ -17,20 +17,6 @@ interface SelectBoxProps {
   className?: string;
 }
 
-//Função async para buscar produtos de emissão
-async function fetchEmissionProducts() {
-  const { data, error } = await supabase
-    .from("emission_products")
-    .select("name, unit");
-
-    if (error) {
-      console.error("Erro ao buscar produtos: ", error);
-      return [];
-    }
-
-    return data ?? [];
-}
-
 export const SelectBox = ({ options, value, onChange, placeholder, className = "" }: SelectBoxProps) => {
   return (
     <select
@@ -115,25 +101,69 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
       return <div>Erro: Tipo de emissão não encontrado</div>;
     }
 
-    const [products, setProducts] = useState<{value: string, label: string, unit: string}[]>([]);
+    const [stationaryCombustionList, setStationaryCombustionList] = useState<{value: string, label: string, unit: string}[]>([]);
+    const [monthsList, setMonthsList] = useState<{value: string, label: string, unit: string}[]>([]);
+    const [businessTravelList, setBusinessTravelList] = useState<{value: string, label: string, unit: string}[]>([]);
 
+    //"Fetch" dos produtos a partir do banco de dados
     useEffect(() => {
     const fetchProducts = async () => {
-      const { data, error } = await supabase
+      const { data: data1, error: error1 } = await supabase
         .from("emission_products")
-        .select("name, unit");
+        .select("name, unit")
+        .eq("scope", 1);
 
-      if (!error && data) {
-        const formatted = data
+      if (!error1 && data1) {
+        const formatted1 = data1
           .map((item) => ({
             value: item.name.toLowerCase().replace(/\s+/g, "_"),
             label: item.name,
             unit: item.unit,
           }))
-          //Ordena os produtos em ordem alfabética
-          .sort((a, b) => a.label.localeCompare(b.label));
+        //Ordena os produtos em ordem alfabética
+        .sort((a, b) => a.label.localeCompare(b.label));
 
-        setProducts(formatted);
+        setStationaryCombustionList(formatted1);
+      }
+
+      const { data: data2, error: error2 } = await supabase
+        .from("emission_products")
+        .select("name, unit")
+        .eq("scope", 2);
+
+      if (!error2 && data2) {
+        const monthOrder = [
+          "Janeiro", "Fevereiro", "Março", "Abril",
+          "Maio", "Junho", "Julho", "Agosto",
+          "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+
+        const formatted2 = data2
+          ?.map(item => item.name)
+          .sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b))
+          .map(month => ({
+            value: month.toLowerCase(),
+            label: month,
+            unit: ""
+          })) ?? [];
+      
+        setMonthsList(formatted2);
+      }
+
+      const { data: data3, error: error3 } = await supabase
+        .from("emission_products")
+        .select("name, unit")
+        .eq("scope", 3);
+
+      if (!error3 && data3) {
+        const formatted3 = data3
+          .map((item) => ({
+            value: item.name.toLowerCase().replace(/\s+/g, "_"),
+            label: item.name,
+            unit: item.unit,
+          }))
+      
+        setBusinessTravelList(formatted3);
       }
     };
 
@@ -156,7 +186,7 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
                 Selecione o Combustível <span className="text-red-500">*</span>
               </label>
               <SelectBox
-                options={products} //Dados vindo da tabela do supabase
+                options={stationaryCombustionList} //Dados vindo da tabela do supabase
                 value={formData.fuel || ''}
                 onChange={(value) => updateField('fuel', value)}
                 placeholder="Selecione o combustível"
@@ -480,10 +510,21 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
               placeholder="Descreva a compra"
               required
             />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Selecione o Mês <span className="text-red-500">*</span>
+              </label>
+              <SelectBox
+                options={monthsList} //Dados vindo da tabela do supabase
+                placeholder="Mês"
+                value={formData.posteriorUse || ''}
+                onChange={(value) => updateField('posteriorUse', value)}
+              />
+            </div>
             <InputField
-              label="Compra anual de eletricidade"
-              value={formData.annualPurchase || ''}
-              onChange={(value) => updateField('annualPurchase', value)}
+              label="Compra mensal de eletricidade"
+              value={formData.monthlyPurchase || ''}
+              onChange={(value) => updateField('monthlyPurchase', value)}
               type="number"
               placeholder="0"
               unit="MWh"
@@ -502,10 +543,21 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
               placeholder="Descreva as perdas"
               required
             />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Selecione o Mês <span className="text-red-500">*</span>
+              </label>
+              <SelectBox
+                options={monthsList} //Dados vindo da tabela do supabase
+                placeholder="Mês"
+                value={formData.posteriorUse || ''}
+                onChange={(value) => updateField('posteriorUse', value)}
+              />
+            </div>
             <InputField
-              label="Perda anual de eletricidade"
-              value={formData.annualLoss || ''}
-              onChange={(value) => updateField('annualLoss', value)}
+              label="Perda mensal de eletricidade"
+              value={formData.monthlyLoss || ''}
+              onChange={(value) => updateField('monthlyLoss', value)}
               type="number"
               placeholder="0"
               unit="MWh"
@@ -529,7 +581,7 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
                 Selecione o combustível <span className="text-red-500">*</span>
               </label>
               <SelectBox
-                options={stationaryCombustionFuels}
+                options={stationaryCombustionList}
                 value={formData.fuel || ''}
                 onChange={(value) => updateField('fuel', value)}
                 placeholder="Selecione o combustível"
@@ -680,7 +732,7 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
                   Selecione o tipo de transporte <span className="text-red-500">*</span>
                 </label>
                 <SelectBox
-                  options={transportTypes.filter(t => t.value !== 'ferroviario')}
+                  options={businessTravelList}
                   value={formData.transportType || ''}
                   onChange={(value) => updateField('transportType', value)}
                   placeholder="Selecione o tipo"
@@ -772,4 +824,5 @@ import {
   effluentTypes,
   transportTypes,
   railwayConcessions
-} from '@/data/emissionData';
+} from '@/data/emissionData';import { data } from "motion/react-client";
+
