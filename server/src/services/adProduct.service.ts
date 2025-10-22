@@ -1,5 +1,4 @@
 import prisma from "../config/database";
-import { AdProduct, Comment } from "../generated/prisma";
 
 export class AdProductService {
    // Buscar todos os anúncios

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export const Card = React.memo(
   ({
@@ -48,9 +49,10 @@ export const Card = React.memo(
               backfaceVisibility: "hidden",
             }}
           >
-            <img
+            <Image
               src={card.src}
               alt={card.title}
+              fill
               className="object-cover absolute inset-0"
             />
             <div

@@ -1,5 +1,5 @@
 import prisma from "../config/database";
-import { Company } from "../generated/prisma";
+import { Company } from "../../generated/prisma";
 
 export class CompaniesService {
    async findByEmail(email: string): Promise<Company | null> {

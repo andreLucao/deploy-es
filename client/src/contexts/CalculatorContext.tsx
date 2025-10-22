@@ -27,7 +27,7 @@ export interface CalculatorData {
 interface CalculatorContextType {
   // Estado local
   data: CalculatorData;
-  updateEmission: (scope: keyof CalculatorData, emissionId: string, emissionData: EmissionData) => void;
+  updateEmission: (scope: keyof CalculatorData, emissionId: string, emissionData: Record<string, string | number | boolean>) => void;
   addEmission: (scope: keyof CalculatorData, emissionType: string) => void;
   removeEmission: (scope: keyof CalculatorData, emissionId: string) => void;
   clearScope: (scope: keyof CalculatorData) => void;
@@ -78,7 +78,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
     setError(null);
   }, []);
 
-  const updateEmission = (scope: keyof CalculatorData, emissionId: string, emissionData: any) => {
+  const updateEmission = (scope: keyof CalculatorData, emissionId: string, emissionData: Record<string, string | number | boolean>) => {
     setData(prev => ({
       ...prev,
       [scope]: {

@@ -4,7 +4,7 @@ import {
    EmissionFactor,
    Company,
    EmissionInventory,
-} from "../generated/prisma";
+} from "../../generated/prisma";
 
 // Estava com problema em importar o prisma, então o JsonValue teve que ser criado assim
 type JsonValue =
