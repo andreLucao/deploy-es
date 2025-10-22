@@ -1,12 +1,16 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { calculatorAPI, InventoryInput, InventoryResult, EmissionsSummary } from '@/lib/calculatorApi';
 
 export interface EmissionData {
   id: string;
   description: string;
   type: string;
   fields: Record<string, any>;
+  quantity?: number;
+  emissionProductId?: string;
+  emissionType?: string;
 }
 
 export interface ScopeData {
@@ -20,12 +24,25 @@ export interface CalculatorData {
 }
 
 interface CalculatorContextType {
+  // Estado local
   data: CalculatorData;
   updateEmission: (scope: keyof CalculatorData, emissionId: string, emissionData: EmissionData) => void;
   addEmission: (scope: keyof CalculatorData, emissionType: string) => void;
   removeEmission: (scope: keyof CalculatorData, emissionId: string) => void;
   clearScope: (scope: keyof CalculatorData) => void;
   clearAllData: () => void;
+  
+  // Estado da API
+  isLoading: boolean;
+  error: string | null;
+  lastResult: InventoryResult | null;
+  
+  // Ações da API
+  saveInventory: (companyId: string, year: number) => Promise<InventoryResult | null>;
+  loadInventory: (companyId: string, year?: number) => Promise<any>;
+  calculateTotal: (companyId: string, year: number) => Promise<number>;
+  getEmissionsSummary: (companyId: string) => Promise<EmissionsSummary | null>;
+  clearError: () => void;
 }
 
 const CalculatorContext = createContext<CalculatorContextType | undefined>(undefined);
@@ -43,12 +60,21 @@ interface CalculatorProviderProps {
 }
 
 export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
+  // Estado local
   const [data, setData] = useState<CalculatorData>({
     scope1: { emissions: [] },
     scope2: { emissions: [] },
     scope3: { emissions: [] }
   });
 
+  // Estado da API
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastResult, setLastResult] = useState<InventoryResult | null>(null);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   const updateEmission = (scope: keyof CalculatorData, emissionId: string, emissionData: any) => {
     setData(prev => ({
@@ -56,7 +82,12 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
       [scope]: {
         ...prev[scope],
         emissions: prev[scope].emissions.map(emission =>
-          emission.id === emissionId ? { ...emission, fields: emissionData } : emission
+          emission.id === emissionId ? { 
+            ...emission, 
+            fields: emissionData,
+            quantity: parseFloat(emissionData.quantity) || 0,
+            description: emissionData.description || ''
+          } : emission
         )
       }
     }));
@@ -67,7 +98,8 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
       id: `${Date.now()}-${Math.random()}`,
       description: '',
       type: emissionType,
-      fields: {}
+      fields: {},
+      emissionType
     };
 
     setData(prev => ({
@@ -104,14 +136,134 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
     });
   };
 
+  // Funções da API
+  const saveInventory = useCallback(async (companyId: string, year: number): Promise<InventoryResult | null> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Converter dados locais para formato da API
+      const inventoryData: InventoryInput = {
+        companyId,
+        year,
+        scopes: {
+          '1': {
+            emissions: data.scope1.emissions.map(emission => ({
+              type: emission.type,
+              emissionProductId: emission.emissionProductId || 'default-product',
+              quantity: emission.quantity || 0,
+              emissionType: emission.emissionType || emission.type,
+              scope: 1,
+              formData: emission.fields,
+              description: emission.description
+            }))
+          },
+          '2': {
+            emissions: data.scope2.emissions.map(emission => ({
+              type: emission.type,
+              emissionProductId: emission.emissionProductId || 'default-product',
+              quantity: emission.quantity || 0,
+              emissionType: emission.emissionType || emission.type,
+              scope: 2,
+              formData: emission.fields,
+              description: emission.description
+            }))
+          },
+          '3': {
+            emissions: data.scope3.emissions.map(emission => ({
+              type: emission.type,
+              emissionProductId: emission.emissionProductId || 'default-product',
+              quantity: emission.quantity || 0,
+              emissionType: emission.emissionType || emission.type,
+              scope: 3,
+              formData: emission.fields,
+              description: emission.description
+            }))
+          }
+        }
+      };
+
+      const result = await calculatorAPI.calculateInventory(inventoryData);
+      setLastResult(result);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  const loadInventory = useCallback(async (companyId: string, year?: number) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await calculatorAPI.getInventory(companyId, year);
+      return result;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar inventário';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const calculateTotal = useCallback(async (companyId: string, year: number): Promise<number> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const total = await calculatorAPI.calculateTotal(companyId, year);
+      return total;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao calcular total';
+      setError(errorMessage);
+      return 0;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const getEmissionsSummary = useCallback(async (companyId: string): Promise<EmissionsSummary | null> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const summary = await calculatorAPI.getEmissionsSummary(companyId);
+      return summary;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar resumo';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   return (
     <CalculatorContext.Provider value={{
+      // Estado local
       data,
       updateEmission,
       addEmission,
       removeEmission,
       clearScope,
-      clearAllData
+      clearAllData,
+      
+      // Estado da API
+      isLoading,
+      error,
+      lastResult,
+      
+      // Ações da API
+      saveInventory,
+      loadInventory,
+      calculateTotal,
+      getEmissionsSummary,
+      clearError
     }}>
       {children}
     </CalculatorContext.Provider>

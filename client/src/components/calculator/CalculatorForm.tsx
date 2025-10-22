@@ -11,7 +11,12 @@ import {
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 
 export default function CalculatorForm() {
-  const { data, addEmission, removeEmission, updateEmission } = useCalculator();
+  const { 
+    data, 
+    addEmission, 
+    removeEmission, 
+    updateEmission
+  } = useCalculator();
   const [currentStep, setCurrentStep] = useState(1);
 
   const steps = [
@@ -71,6 +76,17 @@ export default function CalculatorForm() {
     const scope = getCurrentScope();
     const emissions = data[scope as keyof typeof data].emissions;
     return emissions.length;
+  };
+
+  const getTotalEmissions = () => {
+    let total = 0;
+    ['scope1', 'scope2', 'scope3'].forEach(scope => {
+      const scopeData = data[scope as keyof typeof data];
+      scopeData.emissions.forEach(emission => {
+        total += emission.quantity || 0;
+      });
+    });
+    return total;
   };
 
   return (
