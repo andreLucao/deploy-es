@@ -16,10 +16,15 @@ export default function Header() {
                 </div>
                 
                 <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl flex space-x-8 gap-6">
-                    <a className="text-white hover:text-gray-300 cursor-pointer">Calculadora</a>
-                    <a className="text-white hover:text-gray-300 cursor-pointer">Calculadora</a>
-                    <a className="text-white hover:text-gray-300 cursor-pointer">Calculadora</a>
-                    <a className="text-white hover:text-gray-300 cursor-pointer">Calculadora</a>
+                    <a className="text-white hover:text-gray-300 cursor-pointer font-bold border-b-2 border-white">Calculadora</a>
+                    <a 
+                        className="text-white hover:text-gray-300 cursor-pointer" 
+                        onClick={() => router.push("/marketplace")}
+                    >
+                        Marketplace
+                    </a>
+                    <a className="text-white hover:text-gray-300 cursor-pointer">Relatórios</a>
+                    <a className="text-white hover:text-gray-300 cursor-pointer">Compensação</a>
                 </div>
 
                 <div className="ml-auto flex items-center">

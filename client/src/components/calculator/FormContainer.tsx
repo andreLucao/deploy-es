@@ -8,8 +8,8 @@ export default function FormContainer() {
 
     if (!showForm) {
         return (
-            <div className="w-[1640px] min-h-[700px] flex flex-col items-center justify-center bg-[#d9d9d9] p-8">
-                <div className="w-[1270px] flex flex-col items-center">
+            <div className="w-full min-h-[700px] flex flex-col items-center justify-center bg-[#d9d9d9] p-8 rounded-xl">
+                <div className="w-full max-w-4xl flex flex-col items-center">
                     <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
                         Calculadora de Emissões de Gases de Efeito Estufa
                     </h2>
@@ -52,7 +52,7 @@ export default function FormContainer() {
     }
 
     return (
-        <div className="w-full min-h-screen bg-[#d9d9d9] p-8">
+        <div className="w-full min-h-[700px] bg-[#d9d9d9] p-8 rounded-xl">
             <CalculatorForm />
         </div>
     );

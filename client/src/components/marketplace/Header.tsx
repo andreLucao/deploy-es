@@ -22,17 +22,20 @@ export default function Header() {
             </div>
 
             <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl flex space-x-8 gap-6">
-               <a className="text-white hover:text-gray-300 cursor-pointer">
+               <a 
+                  className="text-white hover:text-gray-300 cursor-pointer font-medium transition-colors"
+                  onClick={() => router.push("/calculator")}
+               >
                   Calculadora
                </a>
-               <a className="text-white hover:text-gray-300 cursor-pointer">
-                  Calculadora
+               <a className="text-white hover:text-gray-300 cursor-pointer transition-colors">
+                  Marketplace
                </a>
-               <a className="text-white hover:text-gray-300 cursor-pointer">
-                  Calculadora
+               <a className="text-white hover:text-gray-300 cursor-pointer transition-colors">
+                  Certificações
                </a>
-               <a className="text-white hover:text-gray-300 cursor-pointer">
-                  Calculadora
+               <a className="text-white hover:text-gray-300 cursor-pointer transition-colors">
+                  Relatórios
                </a>
             </div>
 
