@@ -123,12 +123,11 @@ export default function CalculatorResults() {
                                     <h2 className="text-responsive-lg font-semibold text-gray-800 mb-4">
                                         Resumo do Seu Inventário de Emissões
                                     </h2>
-<<<<<<< Updated upstream
                                     {/* Total Geral em Destaque */}
-                                    <div className="bg-[#008F70] text-white p-6 rounded-lg mb-6">
+                                    <div className="bg-[#008F70] text-white spacing-responsive-md rounded-lg mb-6">
                                         <div className="text-center">
-                                            <div className="text-4xl font-bold">{getTotalEmissions().toFixed(2)} tCO2e</div>
-                                            <div className="text-lg mt-2">Total de Emissões do Inventário</div>
+                                            <div className="text-2xl sm:text-4xl font-bold">{getTotalEmissions().toFixed(2)} tCO2e</div>
+                                            <div className="text-sm sm:text-lg mt-2">Total de Emissões do Inventário</div>
                                         </div>
                                     </div>
 
