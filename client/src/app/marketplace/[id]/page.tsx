@@ -73,7 +73,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     const fetchComments = async () => {
         try {
             setLoadingComments(true);
-            const response = await fetch(`http://API_URL/api/comments/get-ad-comments?adProductId=${id}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/get-ad-comments?adProductId=${id}`);
             
             if (!response.ok) {
                 throw new Error('Erro ao carregar comentários');
@@ -95,7 +95,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
     useEffect(() => {
         const fetchProductData = async () => {
-            const response = await fetch(`http://API_URL/api/adProducts/${id}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/adProducts/${id}`);
             const data = await response.json();
             setProductData(data);
         };

@@ -30,7 +30,7 @@ export default function CreateCommentBox({ adProductId, onCommentAdded }: Create
         
         try {
             // First check if user is authenticated (igual ao AdFormModal)
-            const authCheck = await fetch("http://API_URL/api/auth/me", {
+            const authCheck = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
                 method: "GET",
                 credentials: "include",
                 headers: {
@@ -49,7 +49,7 @@ export default function CreateCommentBox({ adProductId, onCommentAdded }: Create
             const companyId = userData.user.id;
 
             // Chamar a API para publicar o comentário
-            const response = await fetch('http://API_URL/api/comments/post-comment', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/post-comment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -34,7 +34,7 @@ export default function VerifyPage() {
     const verifyMagicLink = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`,
           {
             method: 'GET',
             credentials: 'include', // CRITICAL: This allows HTTP-only cookies to be set

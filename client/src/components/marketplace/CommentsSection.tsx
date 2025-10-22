@@ -39,7 +39,7 @@ export default function CommentsSection({ adProductId }: CommentsSectionProps) {
         const fetchComments = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`http://API_URL/api/comments/get-ad-comments?adProductId=${adProductId}`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/get-ad-comments?adProductId=${adProductId}`);
                 
                 if (!response.ok) {
                     throw new Error('Erro ao carregar comentários');
@@ -61,7 +61,7 @@ export default function CommentsSection({ adProductId }: CommentsSectionProps) {
         // Buscar dados do usuário logado
         const fetchUserData = async () => {
             try {
-                const response = await fetch("http://API_URL/api/auth/me", {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
                     method: "GET",
                     credentials: "include",
                     headers: {
@@ -97,7 +97,7 @@ export default function CommentsSection({ adProductId }: CommentsSectionProps) {
             setLikingComment(commentId);
             
             // Verificar se o usuário está autenticado
-            const authCheck = await fetch("http://API_URL/api/auth/me", {
+            const authCheck = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
                 method: "GET",
                 credentials: "include",
                 headers: {
@@ -121,7 +121,7 @@ export default function CommentsSection({ adProductId }: CommentsSectionProps) {
             
             if (existingLike) {
                 // Se já curtiu, remover o like (unlike)
-                response = await fetch('http://API_URL/api/comments/unlike-comment', {
+                response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/unlike-comment`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ export default function CommentsSection({ adProductId }: CommentsSectionProps) {
                 });
             } else {
                 // Se não curtiu, adicionar o like
-                response = await fetch('http://API_URL/api/comments/like-comment', {
+                response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/like-comment`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -150,7 +150,7 @@ export default function CommentsSection({ adProductId }: CommentsSectionProps) {
             if (response.ok) {
                 // Recarregar comentários para mostrar a mudança
                 const fetchComments = async () => {
-                    const response = await fetch(`http://API_URL/api/comments/get-ad-comments?adProductId=${adProductId}`);
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/get-ad-comments?adProductId=${adProductId}`);
                     if (response.ok) {
                         const data = await response.json();
                         setComments(data.comments || []);

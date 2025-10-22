@@ -17,7 +17,6 @@ type Produto = {
   tipoCertificado?: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://API_URL';
 
 export default function Marketplace() {
   const [modoVisualizacao, setModoVisualizacao] = useState<"grid" | "list">("grid");
@@ -47,7 +46,7 @@ export default function Marketplace() {
         if (busca) params.append("busca", busca);
 
         // Chama API do server
-        const response = await fetch(`${process.env.NEXT_PUBLIC_PORT_URL}/api/products?${params.toString()}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products?${params.toString()}`);
 
         if (!response.ok) {
           throw new Error('Falha ao carregar produtos');
