@@ -26,6 +26,11 @@ export interface InventoryResult {
   scopeBreakdown?: { scope: number; total: number; count: number }[];
 }
 
+export interface InventoryResponse {
+  inventory: InventoryResult;
+  scopes: ScopeResult[];
+}
+
 export interface EmissionData {
   id: string;
   co2e: number;
@@ -98,7 +103,7 @@ class CalculatorAPI {
     return result.totalCo2e;
   }
 
-  async getInventory(companyId: string, year?: number) {
+  async getInventory(companyId: string, year?: number): Promise<InventoryResponse> {
     const yearParam = year ? `&year=${year}` : '';
     return this.fetchAPI(`/inventory?companyId=${companyId}${yearParam}`);
   }
