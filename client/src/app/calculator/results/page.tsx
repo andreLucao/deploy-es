@@ -48,7 +48,7 @@ export default function CalculatorResults() {
                 results.push({
                     scope: 'Escopo 1 - Emissões Diretas',
                     type: emission.type,
-                    description: emission.description || emission.fields?.description || 'Sem descrição',
+                    description: emission.description || String(emission.fields?.description || 'Sem descrição'),
                     quantity: emission.quantity || 0,
                     co2e: emission.calculatedCo2e,
                     index: index + 1
@@ -62,7 +62,7 @@ export default function CalculatorResults() {
                 results.push({
                     scope: 'Escopo 2 - Energia Indireta',
                     type: emission.type,
-                    description: emission.description || emission.fields?.description || 'Sem descrição',
+                    description: emission.description || (emission.fields?.description ? String(emission.fields.description) : 'Sem descrição'),
                     quantity: emission.quantity || 0,
                     co2e: emission.calculatedCo2e,
                     index: index + 1
@@ -76,7 +76,7 @@ export default function CalculatorResults() {
                 results.push({
                     scope: 'Escopo 3 - Outras Emissões Indiretas',
                     type: emission.type,
-                    description: emission.description || emission.fields?.description || 'Sem descrição',
+                    description: emission.description || (emission.fields?.description ? String(emission.fields.description) : 'Sem descrição'),
                     quantity: emission.quantity || 0,
                     co2e: emission.calculatedCo2e,
                     index: index + 1
