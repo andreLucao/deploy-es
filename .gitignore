@@ -6,6 +6,9 @@
 /node_modules
 /client/node_modules
 /server/node_modules
+
+/server/generated
+
  
 # next.js
 /.next/

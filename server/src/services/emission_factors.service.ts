@@ -1,5 +1,5 @@
 import prisma from "../config/database";
-import { EmissionFactor } from "../generated/prisma";
+import { EmissionFactor } from "../../generated/prisma";
 
 export class EmissionFactorsService {
    async createEmissionFactor(
