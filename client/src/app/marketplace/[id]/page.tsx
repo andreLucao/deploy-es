@@ -4,6 +4,8 @@ import { use, useState, useRef, useEffect } from 'react';
 import { ShoppingCart, Repeat, ClipboardList, Leaf, MapPin, Info, FileText, ChevronDown } from 'lucide-react';
 import Header from "@/components/marketplace/Header";
 import Footer from "@/components/Footer";
+import CreateCommentBox from '@/components/marketplace/CreateCommentBox';
+import CommentsSection from '@/components/marketplace/CommentsSection';
 
 type ProductPageProps = {
     params: Promise<{ id: string }>;
@@ -20,8 +22,85 @@ const accordionData: AccordionItem[] = [
     { title: "Impacto gerado", content: "Conteúdo" },
 ];
 
+// Adicione esta interface após as outras interfaces (linha 22)
+interface ProductData {
+    id: string;
+    title: string;
+    credit_type: string;
+    certification_type: string;
+    price: number;
+    description: string;
+    supply: number;
+    batch_discount: number;
+    size_batch: number;
+    image_ad?: string;
+    carousel_images?: any;
+    verified_stamp?: boolean;
+    active?: boolean;
+    problem?: string;
+    solution?: string;
+    impact?: string;
+    co2_reduction?: number;
+    local?: string;
+    status: string;
+    standard?: string;
+    biome?: string;
+    project_type?: string;
+    sold?: number;
+    createdAt: string;
+    comments?: Comment[];
+}
+
+// Adicionar esta interface ou importar do CommentsSection
+interface Comment {
+    id: string;
+    content: string;
+    companyId: string;
+    adProductId: string;
+    createdAt: string;
+    company?: {
+        name: string;
+    };
+}
+
 export default function ProductPage({ params }: ProductPageProps) {
     const { id } = use(params);
+    const [productData, setProductData] = useState<ProductData | null>(null);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [loadingComments, setLoadingComments] = useState(true);
+
+    // Função para buscar comentários
+    const fetchComments = async () => {
+        try {
+            setLoadingComments(true);
+            const response = await fetch(`http://localhost:3001/api/comments/get-ad-comments?adProductId=${id}`);
+            
+            if (!response.ok) {
+                throw new Error('Erro ao carregar comentários');
+            }
+            
+            const data = await response.json();
+            setComments(data.comments || []);
+        } catch (err) {
+            console.error('Erro ao carregar comentários:', err);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
+    // Carregar comentários quando o componente monta
+    useEffect(() => {
+        fetchComments();
+    }, [id]);
+
+    useEffect(() => {
+        const fetchProductData = async () => {
+            const response = await fetch(`http://localhost:3001/api/adProducts/${id}`);
+            const data = await response.json();
+            setProductData(data);
+        };
+        fetchProductData();
+    }, [id]);
 
     const cards = [
         { id: 1, icon: <Repeat size={24} />, text: <>Toneladas de CO<sub>2eq</sub> Compensados</>, subText: 'Quantidade' },
@@ -224,6 +303,23 @@ export default function ProductPage({ params }: ProductPageProps) {
                         </div>
                         );
                     })}
+                </div>
+
+                <div className="mt-10 flex justify-center items-center"> 
+                    <h1 className="text-4xl font-bold">Deixe seu comentário</h1>
+                </div>
+
+                <div className="mt-10 flex justify-center items-center"> 
+                    <CreateCommentBox 
+                    adProductId={id}
+                    onCommentAdded={fetchComments} // Passar função para recarregar comentários
+                    />
+                </div>
+
+                <div className="mt-10 flex justify-center items-center"> 
+                    <CommentsSection 
+                    adProductId={id}
+                    />
                 </div>
             </div>
 
