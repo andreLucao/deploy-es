@@ -21,7 +21,8 @@ export default function CheckoutPage() {
    };
    const handleProcessCheckout = async () => {
       try {
-         const response = await fetch("/api/payment/create-payment", {
+         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+         const response = await fetch(`${apiUrl}/api/payment/create-payment`, {
             method: "POST",
             headers: {
                "Content-Type": "application/json",
