@@ -17,43 +17,71 @@ export default function CalculatorResults() {
     }, []);
 
     const getTotalEmissions = () => {
-        const totalScope1 = data.scope1.emissions.length;
-        const totalScope2 = data.scope2.emissions.length;
-        const totalScope3 = data.scope3.emissions.length;
-        return totalScope1 + totalScope2 + totalScope3;
+        let total = 0;
+        
+        // Somar CO2e de todos os escopos
+        ['scope1', 'scope2', 'scope3'].forEach(scope => {
+            const scopeData = data[scope as keyof typeof data];
+            scopeData.emissions.forEach(emission => {
+                if (emission.calculatedCo2e && emission.calculatedCo2e > 0) {
+                    total += emission.calculatedCo2e;
+                }
+            });
+        });
+        
+        return total;
     };
 
     const getDetailedResults = () => {
-        const results = [];
+        const results: Array<{
+            scope: string;
+            type: string;
+            description: string;
+            quantity: number;
+            co2e: number;
+            index: number;
+        }> = [];
         
         // Escopo 1
         data.scope1.emissions.forEach((emission, index) => {
-            results.push({
-                scope: 'Escopo 1 - Emissões Diretas',
-                type: emission.type,
-                description: emission.fields.description || 'Sem descrição',
-                index: index + 1
-            });
+            if (emission.calculatedCo2e && emission.calculatedCo2e > 0) {
+                results.push({
+                    scope: 'Escopo 1 - Emissões Diretas',
+                    type: emission.type,
+                    description: emission.description || emission.fields?.description || 'Sem descrição',
+                    quantity: emission.quantity || 0,
+                    co2e: emission.calculatedCo2e,
+                    index: index + 1
+                });
+            }
         });
 
         // Escopo 2
         data.scope2.emissions.forEach((emission, index) => {
-            results.push({
-                scope: 'Escopo 2 - Energia Indireta',
-                type: emission.type,
-                description: emission.fields.description || 'Sem descrição',
-                index: index + 1
-            });
+            if (emission.calculatedCo2e && emission.calculatedCo2e > 0) {
+                results.push({
+                    scope: 'Escopo 2 - Energia Indireta',
+                    type: emission.type,
+                    description: emission.description || emission.fields?.description || 'Sem descrição',
+                    quantity: emission.quantity || 0,
+                    co2e: emission.calculatedCo2e,
+                    index: index + 1
+                });
+            }
         });
 
         // Escopo 3
         data.scope3.emissions.forEach((emission, index) => {
-            results.push({
-                scope: 'Escopo 3 - Outras Emissões Indiretas',
-                type: emission.type,
-                description: emission.fields.description || 'Sem descrição',
-                index: index + 1
-            });
+            if (emission.calculatedCo2e && emission.calculatedCo2e > 0) {
+                results.push({
+                    scope: 'Escopo 3 - Outras Emissões Indiretas',
+                    type: emission.type,
+                    description: emission.description || emission.fields?.description || 'Sem descrição',
+                    quantity: emission.quantity || 0,
+                    co2e: emission.calculatedCo2e,
+                    index: index + 1
+                });
+            }
         });
 
         return results;
@@ -97,23 +125,35 @@ export default function CalculatorResults() {
                                     <h2 className="text-xl font-semibold text-gray-800 mb-4">
                                         Resumo do Seu Inventário de Emissões
                                     </h2>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                        <div className="bg-white p-4 rounded-lg text-center">
-                                            <div className="text-3xl font-bold text-[#008F70]">{data.scope1.emissions.length}</div>
-                                            <div className="text-sm text-gray-600">Escopo 1 - Emissões Diretas</div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-lg text-center">
-                                            <div className="text-3xl font-bold text-[#008F70]">{data.scope2.emissions.length}</div>
-                                            <div className="text-sm text-gray-600">Escopo 2 - Energia Indireta</div>
-                                        </div>
-                                        <div className="bg-white p-4 rounded-lg text-center">
-                                            <div className="text-3xl font-bold text-[#008F70]">{data.scope3.emissions.length}</div>
-                                            <div className="text-sm text-gray-600">Escopo 3 - Outras Emissões Indiretas</div>
+                                    {/* Total Geral em Destaque */}
+                                    <div className="bg-[#008F70] text-white p-6 rounded-lg mb-6">
+                                        <div className="text-center">
+                                            <div className="text-4xl font-bold">{getTotalEmissions().toFixed(2)} tCO2e</div>
+                                            <div className="text-lg mt-2">Total de Emissões do Inventário</div>
                                         </div>
                                     </div>
-                                    <div className="text-center">
-                                        <div className="text-xl font-semibold text-gray-800">
-                                            Total de {getTotalEmissions()} fonte(s) de emissão identificada(s)
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                        <div className="bg-white p-4 rounded-lg text-center border-l-4 border-red-500">
+                                            <div className="text-2xl font-bold text-gray-800">
+                                                {data.scope1.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Escopo 1 - Emissões Diretas (tCO2e)</div>
+                                            <div className="text-xs text-gray-500 mt-1">{data.scope1.emissions.length} emissões</div>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg text-center border-l-4 border-yellow-500">
+                                            <div className="text-2xl font-bold text-gray-800">
+                                                {data.scope2.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Escopo 2 - Energia Indireta (tCO2e)</div>
+                                            <div className="text-xs text-gray-500 mt-1">{data.scope2.emissions.length} emissões</div>
+                                        </div>
+                                        <div className="bg-white p-4 rounded-lg text-center border-l-4 border-blue-500">
+                                            <div className="text-2xl font-bold text-gray-800">
+                                                {data.scope3.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Escopo 3 - Outras Emissões Indiretas (tCO2e)</div>
+                                            <div className="text-xs text-gray-500 mt-1">{data.scope3.emissions.length} emissões</div>
                                         </div>
                                     </div>
                                 </div>
@@ -126,16 +166,29 @@ export default function CalculatorResults() {
                                         </h2>
                                         <div className="space-y-3">
                                             {getDetailedResults().map((result, index) => (
-                                                <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                                    <div>
-                                                        <div className="font-semibold text-gray-800">
-                                                            {result.scope}
+                                                <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="flex-1">
+                                                            <div className="font-semibold text-gray-800">
+                                                                {result.scope}
+                                                            </div>
+                                                            <div className="text-sm text-gray-600 capitalize">
+                                                                {result.type.replace(/_/g, ' ')}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500 mt-1">
+                                                                {result.description}
+                                                            </div>
+                                                            <div className="text-xs text-gray-400 mt-1">
+                                                                Quantidade: {result.quantity}
+                                                            </div>
                                                         </div>
-                                                        <div className="text-sm text-gray-600 capitalize">
-                                                            {result.type.replace(/_/g, ' ')}
-                                                        </div>
-                                                        <div className="text-xs text-gray-500 mt-1">
-                                                            {result.description}
+                                                        <div className="text-right">
+                                                            <div className="text-lg font-bold text-[#008F70]">
+                                                                {result.co2e.toFixed(2)} tCO2e
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">
+                                                                Emissão calculada
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

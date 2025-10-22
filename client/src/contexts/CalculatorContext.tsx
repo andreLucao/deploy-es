@@ -11,6 +11,7 @@ export interface EmissionData {
   quantity?: number;
   emissionProductId?: string;
   emissionType?: string;
+  calculatedCo2e?: number;
 }
 
 export interface ScopeData {
@@ -31,6 +32,7 @@ interface CalculatorContextType {
   removeEmission: (scope: keyof CalculatorData, emissionId: string) => void;
   clearScope: (scope: keyof CalculatorData) => void;
   clearAllData: () => void;
+  calculateTotalEmissions: () => number;
   
   // Estado da API
   isLoading: boolean;
@@ -81,14 +83,22 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
       ...prev,
       [scope]: {
         ...prev[scope],
-        emissions: prev[scope].emissions.map(emission =>
-          emission.id === emissionId ? { 
-            ...emission, 
-            fields: emissionData,
-            quantity: parseFloat(emissionData.quantity) || 0,
-            description: emissionData.description || ''
-          } : emission
-        )
+        emissions: prev[scope].emissions.map(emission => {
+          if (emission.id === emissionId) {
+            const quantity = parseFloat(emissionData.quantity) || 0;
+            const emissionFactor = 2.5; // Fator padrão (pode ser melhorado com dados reais)
+            const calculatedCo2e = quantity > 0 ? quantity * emissionFactor : 0;
+            
+            return { 
+              ...emission, 
+              fields: emissionData,
+              quantity: quantity,
+              description: emissionData.description || '',
+              calculatedCo2e: calculatedCo2e
+            };
+          }
+          return emission;
+        })
       }
     }));
   };
@@ -134,6 +144,22 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
       scope2: { emissions: [] },
       scope3: { emissions: [] }
     });
+  };
+
+  const calculateTotalEmissions = () => {
+    let total = 0;
+    
+    // Somar todas as emissões de todos os escopos
+    ['scope1', 'scope2', 'scope3'].forEach(scope => {
+      const scopeData = data[scope as keyof CalculatorData];
+      scopeData.emissions.forEach(emission => {
+        if (emission.calculatedCo2e && emission.calculatedCo2e > 0) {
+          total += emission.calculatedCo2e;
+        }
+      });
+    });
+    
+    return total;
   };
 
   // Funções da API
@@ -252,6 +278,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
       removeEmission,
       clearScope,
       clearAllData,
+      calculateTotalEmissions,
       
       // Estado da API
       isLoading,

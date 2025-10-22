@@ -41,10 +41,27 @@ export class CalculatorService {
    async calculateAndSaveInventory(data: any): Promise<any> {
       const { companyId, year, scopes } = data;
 
-      const company = await prisma.company.findUnique({
+      // Buscar ou criar empresa automaticamente
+      let company = await prisma.company.findUnique({
          where: { id: companyId },
       });
-      if (!company) throw new Error("Empresa não encontrada.");
+      
+      if (!company) {
+         // Criar empresa automaticamente se não existir
+         try {
+            company = await prisma.company.create({
+               data: {
+                  id: companyId,
+                  email: `${companyId}@teste.com`,
+                  balance: 0
+               }
+            });
+            console.log(`✅ Empresa criada automaticamente: ${company.id}`);
+         } catch (error) {
+            console.error('Erro ao criar empresa:', error);
+            throw new Error("Erro ao criar empresa automaticamente");
+         }
+      }
 
       const currentYear = year;
 
