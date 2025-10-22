@@ -1,13 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { calculatorAPI, InventoryInput, InventoryResult, EmissionsSummary } from '@/lib/calculatorApi';
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { calculatorAPI, InventoryInput, InventoryResult, EmissionsSummary, InventoryResponse } from '@/lib/calculatorApi';
 
 export interface EmissionData {
   id: string;
   description: string;
   type: string;
-  fields: Record<string, any>;
+  fields: Record<string, string | number | boolean>;
   quantity?: number;
   emissionProductId?: string;
   emissionType?: string;
@@ -41,7 +41,7 @@ interface CalculatorContextType {
   
   // Ações da API
   saveInventory: (companyId: string, year: number) => Promise<InventoryResult | null>;
-  loadInventory: (companyId: string, year?: number) => Promise<any>;
+  loadInventory: (companyId: string, year?: number) => Promise<InventoryResponse | null>;
   calculateTotal: (companyId: string, year: number) => Promise<number>;
   getEmissionsSummary: (companyId: string) => Promise<EmissionsSummary | null>;
   clearError: () => void;
@@ -85,15 +85,17 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
         ...prev[scope],
         emissions: prev[scope].emissions.map(emission => {
           if (emission.id === emissionId) {
-            const quantity = parseFloat(emissionData.quantity) || 0;
+            const quantity = typeof emissionData.quantity === 'number'
+              ? emissionData.quantity
+              : parseFloat(String(emissionData.quantity || 0)) || 0;
             const emissionFactor = 2.5; // Fator padrão (pode ser melhorado com dados reais)
             const calculatedCo2e = quantity > 0 ? quantity * emissionFactor : 0;
-            
-            return { 
-              ...emission, 
+
+            return {
+              ...emission,
               fields: emissionData,
               quantity: quantity,
-              description: emissionData.description || '',
+              description: String(emissionData.description || ''),
               calculatedCo2e: calculatedCo2e
             };
           }
