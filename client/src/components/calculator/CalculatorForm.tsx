@@ -8,10 +8,20 @@ import {
   scope2EmissionTypes, 
   scope3EmissionTypes 
 } from '@/data/emissionData';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function CalculatorForm() {
-  const { data, addEmission, removeEmission, updateEmission } = useCalculator();
+  const { 
+    data, 
+    addEmission, 
+    removeEmission, 
+    updateEmission,
+    calculateTotalEmissions,
+    saveInventory,
+    isLoading
+  } = useCalculator();
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
 
   const steps = [
@@ -71,6 +81,26 @@ export default function CalculatorForm() {
     const scope = getCurrentScope();
     const emissions = data[scope as keyof typeof data].emissions;
     return emissions.length;
+  };
+
+  const handleFinishCalculation = async () => {
+    try {
+      // Salvar inventário no banco de dados
+      const companyId = 'comp' + Math.floor(Math.random() * 1000); // ID simples para teste
+      const year = new Date().getFullYear();
+      
+      const result = await saveInventory(companyId, year);
+      
+      if (result) {
+        // Navegar para página de resultados
+        router.push('/calculator/results');
+      } else {
+        alert('Erro ao salvar o inventário. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao finalizar cálculo:', error);
+      alert('Erro ao processar os dados. Tente novamente.');
+    }
   };
 
   return (
@@ -219,21 +249,71 @@ export default function CalculatorForm() {
         <h3 className="text-lg font-semibold text-gray-800 mb-4">
           Resumo dos Dados
         </h3>
+        
+        {/* Total Geral */}
+        <div className="bg-[#008F70] text-white p-6 rounded-lg mb-6">
+          <div className="text-center">
+            <div className="text-3xl font-bold">{calculateTotalEmissions().toFixed(2)} tCO2e</div>
+            <div className="text-lg">Total de Emissões Calculadas</div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-lg">
-            <div className="text-2xl font-bold text-[#008F70]">{data.scope1.emissions.length}</div>
-            <div className="text-sm text-gray-600">Escopo 1 - Emissões Diretas</div>
+          <div className="bg-white p-4 rounded-lg border-l-4 border-red-500">
+            <div className="text-2xl font-bold text-gray-800">
+              {data.scope1.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
+            </div>
+            <div className="text-sm text-gray-600">Escopo 1 - Emissões Diretas (tCO2e)</div>
+            <div className="text-xs text-gray-500 mt-1">{data.scope1.emissions.length} emissões</div>
           </div>
-          <div className="bg-white p-4 rounded-lg">
-            <div className="text-2xl font-bold text-[#008F70]">{data.scope2.emissions.length}</div>
-            <div className="text-sm text-gray-600">Escopo 2 - Energia Indireta</div>
+          <div className="bg-white p-4 rounded-lg border-l-4 border-yellow-500">
+            <div className="text-2xl font-bold text-gray-800">
+              {data.scope2.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
+            </div>
+            <div className="text-sm text-gray-600">Escopo 2 - Energia Indireta (tCO2e)</div>
+            <div className="text-xs text-gray-500 mt-1">{data.scope2.emissions.length} emissões</div>
           </div>
-          <div className="bg-white p-4 rounded-lg">
-            <div className="text-2xl font-bold text-[#008F70]">{data.scope3.emissions.length}</div>
-            <div className="text-sm text-gray-600">Escopo 3 - Outras Emissões Indiretas</div>
+          <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+            <div className="text-2xl font-bold text-gray-800">
+              {data.scope3.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
+            </div>
+            <div className="text-sm text-gray-600">Escopo 3 - Outras Emissões Indiretas (tCO2e)</div>
+            <div className="text-xs text-gray-500 mt-1">{data.scope3.emissions.length} emissões</div>
           </div>
         </div>
       </div>
+
+      {/* Botão Finalizar Cálculo */}
+      {calculateTotalEmissions() > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Pronto para Finalizar seu Inventário?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Você calculou um total de <strong>{calculateTotalEmissions().toFixed(2)} tCO2e</strong> em emissões. 
+              Clique no botão abaixo para salvar seu inventário e ver os resultados completos.
+            </p>
+            <button
+              onClick={handleFinishCalculation}
+              disabled={isLoading}
+              className="bg-[#008F70] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#007563] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto transition-colors"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Salvando Inventário...
+                </>
+              ) : (
+                <>
+                  <Check className="mr-2" size={20} />
+                  Finalizar e Ver Resultados
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
