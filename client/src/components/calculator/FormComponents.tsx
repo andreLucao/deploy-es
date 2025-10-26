@@ -1,13 +1,7 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
 import { useEffect, useState } from 'react';
 import { Trash2, Plus } from 'lucide-react';
-
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 interface SelectBoxProps {
   options: { value: string; label: string; unit?: string }[];
@@ -15,6 +9,12 @@ interface SelectBoxProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
+}
+
+interface ProductsByScope {
+  scope1: string[];
+  scope2: string[];
+  scope3: string[];
 }
 
 export const SelectBox = ({ options, value, onChange, placeholder, className = "" }: SelectBoxProps) => {
@@ -105,70 +105,42 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
     const [monthsList, setMonthsList] = useState<{value: string, label: string, unit: string}[]>([]);
     const [businessTravelList, setBusinessTravelList] = useState<{value: string, label: string, unit: string}[]>([]);
 
-    //"Fetch" dos produtos a partir do banco de dados
     useEffect(() => {
-    const fetchProducts = async () => {
-      const { data: data1, error: error1 } = await supabase
-        .from("emission_products")
-        .select("name, unit")
-        .eq("scope", 1);
+      fetch("http://localhost:3001/api/emission-products")
+        .then(res => res.json())
+        .then((data: { 
+          scope1: { name: string, unit: string }[], 
+          scope2: { name: string, unit: string }[], 
+          scope3: { name: string, unit: string }[]
+        }) => {
 
-      if (!error1 && data1) {
-        const formatted1 = data1
-          .map((item) => ({
-            value: item.name.toLowerCase().replace(/\s+/g, "_"),
-            label: item.name,
-            unit: item.unit,
-          }))
-        //Ordena os produtos em ordem alfabética
-        .sort((a, b) => a.label.localeCompare(b.label));
+          setStationaryCombustionList(
+            data.scope1.map(p => ({
+              value: p.name,
+              label: `${p.name} (${p.unit})`,
+              unit: p.unit
+            }))
+          );
 
-        setStationaryCombustionList(formatted1);
-      }
+          setMonthsList(
+            data.scope2.map(p => ({
+              value: p.name,
+              label: `${p.name} (${p.unit})`,
+              unit: p.unit
+            }))
+          );
 
-      const { data: data2, error: error2 } = await supabase
-        .from("emission_products")
-        .select("name, unit")
-        .eq("scope", 2);
+          setBusinessTravelList(
+            data.scope3.map(p => ({
+              value: p.name,
+              label: `${p.name} (${p.unit})`,
+              unit: p.unit
+            }))
+          );
 
-      if (!error2 && data2) {
-        const monthOrder = [
-          "Janeiro", "Fevereiro", "Março", "Abril",
-          "Maio", "Junho", "Julho", "Agosto",
-          "Setembro", "Outubro", "Novembro", "Dezembro"
-        ];
-
-        const formatted2 = data2
-          ?.map(item => item.name)
-          .sort((a, b) => monthOrder.indexOf(a) - monthOrder.indexOf(b))
-          .map(month => ({
-            value: month.toLowerCase(),
-            label: month,
-            unit: ""
-          })) ?? [];
-      
-        setMonthsList(formatted2);
-      }
-
-      const { data: data3, error: error3 } = await supabase
-        .from("emission_products")
-        .select("name, unit")
-        .eq("scope", 3);
-
-      if (!error3 && data3) {
-        const formatted3 = data3
-          .map((item) => ({
-            value: item.name.toLowerCase().replace(/\s+/g, "_"),
-            label: item.name,
-            unit: item.unit,
-          }))
-      
-        setBusinessTravelList(formatted3);
-      }
-    };
-
-    fetchProducts();
-  }, []);
+        })
+        .catch(err => console.error("Erro ao buscar produtos:", err))
+    }, []);
 
     switch (emissionType) {
       case 'combustao_estacionaria':
