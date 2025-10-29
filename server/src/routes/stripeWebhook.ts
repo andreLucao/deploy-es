@@ -5,6 +5,18 @@ import prisma from "../config/database";
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
+function generateOrderNumber(): string {
+   const now = new Date();
+   const year = now.getFullYear();
+   const month = String(now.getMonth() + 1).padStart(2, "0");
+   const day = String(now.getDate()).padStart(2, "0");
+   const random = Math.floor(Math.random() * 100000)
+      .toString()
+      .padStart(5, "0");
+
+   return `ORD-${year}${month}${day}-${random}`;
+}
+
 async function updateAdProductSupply(adUuid: string, amount_purchased: number) {
    const adProduct = await prisma.adProduct.findUnique({
       where: { id: adUuid },
@@ -67,6 +79,8 @@ async function updatePayment(
       throw new Error("Company not found");
    }
 
+   const orderNumber = generateOrderNumber();
+
    await prisma.payment.create({
       data: {
          adId,
@@ -76,9 +90,12 @@ async function updatePayment(
          creditsBought,
          paymentMethod: "card",
          stripePaymentIntentId,
+         orderNumber,
          createdAt,
       },
    });
+
+   return orderNumber;
 }
 
 router.post("/", async (req: Request, res: Response) => {
@@ -120,7 +137,7 @@ router.post("/", async (req: Request, res: Response) => {
 
             await updateAdProductSupply(adUuid, parseInt(amount_purchased));
             await updateUserBalance(buyerUuid, parseInt(amount_purchased));
-            await updatePayment(
+            const orderNumber = await updatePayment(
                adUuid,
                buyerUuid,
                parseInt(amount),
@@ -129,8 +146,8 @@ router.post("/", async (req: Request, res: Response) => {
                new Date()
             );
 
-            console.log("Payment processed successfully");
-            return res.status(200).json({ received: true });
+            console.log("Payment processed successfully", { orderNumber });
+            return res.status(200).json({ received: true, orderNumber });
 
          default:
             console.log(`Unhandled event type: ${event.type}`);

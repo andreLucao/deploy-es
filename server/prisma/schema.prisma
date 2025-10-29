@@ -211,6 +211,7 @@ model Payment {
 
   paymentMethod           String?       @map("payment_method") // ex: "card", "pix"
   stripePaymentIntentId   String?       @unique @map("stripe_payment_intent_id")
+  orderNumber             String        @unique @map("order_number") // ex: ORD-20250103-12345
 
   createdAt               DateTime      @default(now()) @map("created_at")
 
