@@ -6,6 +6,7 @@ import Header from "@/components/marketplace/Header";
 import Footer from "@/components/Footer";
 import CreateCommentBox from '@/components/marketplace/CreateCommentBox';
 import CommentsSection from '@/components/marketplace/CommentsSection';
+import { useCartStore } from '@/store/cart.store';
 
 type ProductPageProps = {
     params: Promise<{ id: string }>;
@@ -111,6 +112,9 @@ export default function ProductPage({ params }: ProductPageProps) {
     const [error, setError] = useState<string | null>(null);
     const [, setComments] = useState<Comment[]>([]);
     const [, setLoadingComments] = useState(true);
+    const [quantity, setQuantity] = useState(1);
+    const [showCartNotification, setShowCartNotification] = useState(false);
+    const addItem = useCartStore((state) => state.addItem);
 
     // Função para buscar comentários
     const fetchComments = async () => {
@@ -166,10 +170,30 @@ export default function ProductPage({ params }: ProductPageProps) {
     const toggleAccordion = (index: number) => {
         if (openIndexes.includes(index)) {
             setOpenIndexes(openIndexes.filter((i) => i !== index));
-        } 
+        }
         else {
             setOpenIndexes([...openIndexes, index]);
         }
+    };
+
+    const handleAddToCart = () => {
+        if (!productData) return;
+
+        const itemToAdd = {
+            creditId: `CREDIT-${productData.id}`,
+            sellerId: productData.companyId || 'SELLER-UNKNOWN',
+            quantity: quantity,
+            pricePerUnit: productData.price / 100, // Converter de centavos para reais
+        };
+
+        addItem(itemToAdd);
+
+        // Mostrar notificação
+        setShowCartNotification(true);
+        setTimeout(() => setShowCartNotification(false), 3000);
+
+        // Resetar quantidade
+        setQuantity(1);
     };
 
     // Mostrar loading
@@ -278,14 +302,39 @@ export default function ProductPage({ params }: ProductPageProps) {
                             </p>
                         </div>
 
-                        {/* Botão */}
-                        <button
-                        style={{ backgroundColor: "rgb(0, 224, 127)" }}
-                        className="flex items-center gap-2 text-white px-6 py-3 rounded-lg hover:brightness-90"
-                        >
-                        <ShoppingCart size={20} />
-                        Comprar
-                        </button>
+                        {/* Botão e Quantidade */}
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="flex items-center gap-2 bg-black/50 rounded-lg p-2">
+                                <button
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    className="bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded transition"
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max={productData.supply}
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(Math.max(1, Math.min(productData.supply, parseInt(e.target.value) || 1)))}
+                                    className="w-12 text-center bg-black/30 text-white border-0 rounded"
+                                />
+                                <button
+                                    onClick={() => setQuantity(Math.min(productData.supply, quantity + 1))}
+                                    className="bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded transition"
+                                >
+                                    +
+                                </button>
+                            </div>
+                            <button
+                                onClick={handleAddToCart}
+                                style={{ backgroundColor: "rgb(0, 224, 127)" }}
+                                className="flex items-center gap-2 text-white px-6 py-3 rounded-lg hover:brightness-90 transition"
+                            >
+                                <ShoppingCart size={20} />
+                                Comprar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -398,7 +447,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* "Conheça melhor" */}
-            <div className="w-full flex justify-center px-4 mt-8 mb-16">
+            <div className="w-full flex justify-center px-4 mt-8 mb-7">
                 <div className="max-w-4xl w-full">
                     <h2 className="text-3xl font-bold text-[#002E34] mb-8 text-center">
                         Conheça Melhor

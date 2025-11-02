@@ -161,7 +161,7 @@ export default function AdFormModal({
             impact: "",
             co2_reduction: 0,
             local: "",
-            status: "pending",
+            status: "active",
             standard: "",
             biome: "",
             project_type: "",
