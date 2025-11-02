@@ -22,6 +22,32 @@ export class AdProductService {
       });
    }
 
+   // Buscar anúncios destaque
+   async findFeatured(queryLimit: string | undefined) {
+      let take = 4; // Valor padrão
+      if (queryLimit && !isNaN(Number(queryLimit))) {
+         take = Number(queryLimit);
+      }
+      if (take > 10) take = 10; // Teto limite de requisições
+
+      const featuredAds = await prisma.adProduct.findMany({
+         orderBy: {
+            sold: 'desc', // Ordena pelos mais vendidos
+         },
+         take: take,
+         where: {
+            active: true, // Apenas anúncios ativos
+            supply: { gte: 1 }, // Apenas anúncios com estoque
+         },
+         include: {
+            company: true,
+            comments: true
+         }
+      });
+
+      return featuredAds;
+   }
+
    // Criar anúncio
    async create(data: any) {
       return await prisma.adProduct.create({
