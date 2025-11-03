@@ -39,7 +39,7 @@ export default function Produtos({
          <div
             className={`
                w-full max-w-[1200px] p-3 transition-all duration-700 ease-out
-               flex flex-col gap-4 sm:gap-6
+               flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-12
             `}
          >
             {produtosPagina.map((produto) => (
@@ -60,8 +60,8 @@ export default function Produtos({
             ))}
          </div>
 
-         {/* Paginação Responsiva */}
-         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center justify-center mt-8 w-full max-w-4xl">
+         {/* Paginação Responsiva - com mais espaçamento */}
+         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center justify-center py-6 sm:py-8 w-full max-w-4xl bg-white/50 backdrop-blur-sm rounded-lg shadow-sm">
             {/* Botões Anterior/Próxima */}
             <div className="flex gap-4 items-center">
                <button

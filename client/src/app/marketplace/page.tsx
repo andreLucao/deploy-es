@@ -70,13 +70,15 @@ export default function Marketplace() {
     <div className="flex flex-col min-h-screen custom-gradient">
       <Header />
       <div className="flex flex-col container-full">
-        <div className="flex flex-col lg:flex-row spacing-responsive-md">
+        {/* Destaques - com espaço abaixo */}
+        <div className="flex flex-col py-12 lg:flex-row mb-8 sm:mb-12">
           <div className="w-full">
             <Destaque />
           </div>
         </div>
 
-        <div className="container-responsive">
+        {/* Filtros - com mais espaçamento */}
+        <div className="container-responsive mb-8 sm:mb-10">
           <Filtro 
             modoVisualizacao={modoVisualizacao}   
             setModoVisualizacao={setModoVisualizacao}
@@ -99,6 +101,7 @@ export default function Marketplace() {
           />
         </div>
 
+        {/* Produtos */}
         <div className="flex container-responsive">
           {loading ? (
             <div className="flex justify-center items-center w-full min-h-[400px]">

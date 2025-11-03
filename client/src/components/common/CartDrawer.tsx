@@ -42,8 +42,7 @@ export default function CartDrawer() {
          {/* Botão de Carrinho */}
          <button
             onClick={() => setIsOpen(true)}
-            className="p-1 text-white rounded-full hover:opacity-80 transition cursor-pointer"
-            style={{ position: "relative" }}
+            className="p-1 text-white rounded-full hover:opacity-80 transition cursor-pointer relative"
          >
             <ShoppingCart size={24} />
             {items.length > 0 && (
@@ -52,6 +51,14 @@ export default function CartDrawer() {
                </span>
             )}
          </button>
+
+         {/* Overlay - Bloqueia o scroll e fecha ao clicar */}
+         {isOpen && (
+            <div
+               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all duration-300"
+               onClick={() => setIsOpen(false)}
+            />
+         )}
 
          {/* Painel Lateral (Drawer) */}
          <div

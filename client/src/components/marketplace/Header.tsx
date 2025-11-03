@@ -31,7 +31,7 @@ export default function Header() {
 
    return (
       <>
-         <div className="w-full h-20 flex items-center px-4 sm:px-8 lg:px-24 py-3 bg-gradient-to-r from-[#002E34] to-[#004443] shadow-lg backdrop-blur-sm relative z-50 sticky top-0">
+         <div className="w-full h-20 flex items-center px-4 rounded-b-3xl sm:px-8 lg:px-24 py-3 bg-gradient-to-r from-[#002E34] to-[#002E34] shadow-lg backdrop-blur-sm relative z-50 sticky top-0">
             {/* Logo */}
             <div className="flex-shrink-0 cursor-pointer group" onClick={() => router.push("/")}>
                <img
