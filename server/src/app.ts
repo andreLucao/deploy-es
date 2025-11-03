@@ -13,6 +13,7 @@ import paymentRoutes from "./routes/paymentRoutes";
 import stripeWebhook from "./routes/stripeWebhook";
 import commentsRoutes from "./routes/commentsRoutes";
 import productsRoutes from "./routes/products.routes";
+import creditsRoutes from "./routes/credits.routes";
 
 const app: Application = express();
 export const PORT = process.env.PORT || 3001;
@@ -37,5 +38,7 @@ app.use('/api/adProducts', adProductRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/comments", commentsRoutes);
 app.use("/api/products", productsRoutes);
+app.use("/api/credits", creditsRoutes);
+
 
 export default app;
