@@ -19,6 +19,22 @@
   animation: slide-in-right 0.3s ease-out forwards;
 }
 
+/* Animação para dropdown aparecer de cima para baixo */
+@keyframes fade-in-down {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.2s ease-out forwards;
+}
+
 .text-glow {
     text-shadow: 0 0 20px #00D90B, 0 0 30px #00D90B;
 }
