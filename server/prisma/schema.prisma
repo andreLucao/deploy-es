@@ -6,33 +6,31 @@ generator client {
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Company {
-  id    String @id @default(uuid())
-  email String @unique
-
-  stripeCustomerId String? @unique @map("stripe_customer_id")
-
-  balance    Int @default(0)
-  emissions  Emission[]
-  adProducts AdProduct[]
-  comments   Comment[]
-
-  cart       Cart?
-  orders     Order[]
-  payments   Payment[]
+  id                   String                 @id @default(uuid())
+  email                String                 @unique
+  balance              Int                    @default(0)
+  stripeCustomerId     String?                @unique @map("stripe_customer_id")
+  adProducts           AdProduct[]
+  cart                 Cart?
+  comment_likes        comment_likes[]
+  comments             Comment[]
+  emission_inventories emission_inventories[]
+  orders               Order[]
+  payments             Payment[]
 
   @@map("companies")
 }
 
 model EmissionProduct {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  unit      String
-  scope     String?
-  createdAt DateTime @default(now()) @map("created_at")
-
+  id              String           @id @default(uuid())
+  name            String           @unique
+  unit            String
+  scope           String?
+  createdAt       DateTime         @default(now()) @map("created_at")
   emissionFactors EmissionFactor[]
   emissions       Emission[]
 
@@ -40,70 +38,66 @@ model EmissionProduct {
 }
 
 model EmissionFactor {
-  id                String   @id @default(uuid())
-  emissionProductId String   @map("emission_product_id")
+  id                String          @id @default(uuid())
+  emissionProductId String          @map("emission_product_id")
   region            String?
   year              Int?
-  factorValue       Float    @map("factor_value")
-  createdAt         DateTime @default(now()) @map("created_at")
-
-  emissionProduct EmissionProduct @relation(fields: [emissionProductId], references: [id])
+  factorValue       Float           @map("factor_value")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  emissionProduct   EmissionProduct @relation(fields: [emissionProductId], references: [id])
 
   @@map("emission_factors")
 }
 
 model Emission {
-  id String @id @default(uuid())
+  id                   String               @id @default(uuid())
+  emissionProductId    String               @map("emission_product_id")
+  quantity             Int
+  registeredAt         DateTime?            @map("registered_at")
+  createdAt            DateTime             @default(now()) @map("created_at")
+  calculatedCo2e       Float                @map("calculated_co2e")
+  description          String?
+  deleted_at           DateTime?
+  emissionType         String
+  formData             Json?
+  inventory_id         String
+  scope                Int
+  emissionProduct      EmissionProduct      @relation(fields: [emissionProductId], references: [id])
+  emission_inventories emission_inventories @relation(fields: [inventory_id], references: [id])
 
-  companyId         String @map("company_id")
-  emissionProductId String @map("emission_product_id")
-
-  year           Int
-  quantity       Int
-  calculatedCo2e Float     @map("calculated_co2e")
-  registeredAt   DateTime? @map("registered_at")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  description    String?
-
-  company         Company         @relation(fields: [companyId], references: [id])
-  emissionProduct EmissionProduct @relation(fields: [emissionProductId], references: [id])
-
-  @@unique([companyId, emissionProductId, year])
+  @@unique([inventory_id, emissionProductId])
   @@map("emissions")
 }
 
 model AdProduct {
-  id                 String   @id @default(uuid())
-  title              String   @unique
-  credit_type        String   @map("credit_type")
-  certification_type String   @map("certification_type")
-  price              Int      @map("price") // Armazenado em centavos, R$ 99,90 = 9990
-  createdAt          DateTime @default(now()) @map("created_at")
-  description        String   @map("description")
-  supply             Int      @map("supply")
-  batch_discount     Float    @map("batch_discount")
-  size_batch         Int      @map("size_batch")
-  image_ad           String?  @map("image_ad")
-  carousel_images    Json?    @map("carousel_images")
-  verified_stamp     Boolean? @map("verified_stamp")
-  active             Boolean? @map("active")
-  problem            String?  @map("problem")
-  solution           String?  @map("solution")
-  impact             String?  @map("impact")
-  co2_reduction      Float?   @map("co2_reduction")
-  local              String?  @map("local")
-  status             String   @map("status") @default("pending")
-  standard           String?  @map("standard")
-  biome              String?  @map("biome")
-  project_type       String?  @map("project_type")
-  sold               Int?     @map("sold")
-
-  companyId          String   @map("company_id")
-
-  company Company   @relation(fields: [companyId], references: [id])
-  comments Comment[]
-
+  id                 String      @id @default(uuid())
+  title              String      @unique
+  credit_type        String      @map("credit_type")
+  certification_type String      @map("certification_type")
+  price              Int         @map("price")
+  createdAt          DateTime    @default(now()) @map("created_at")
+  description        String      @map("description")
+  supply             Int         @map("supply")
+  batch_discount     Float       @map("batch_discount")
+  size_batch         Int         @map("size_batch")
+  verified_stamp     Boolean?    @map("verified_stamp")
+  active             Boolean?    @map("active")
+  companyId          String      @map("company_id")
+  biome              String?     @map("biome")
+  carousel_images    Json?       @map("carousel_images")
+  co2_reduction      Float?      @map("co2_reduction")
+  image_ad           String?     @map("image_ad")
+  impact             String?     @map("impact")
+  local              String?     @map("local")
+  problem            String?     @map("problem")
+  project_type       String?     @map("project_type")
+  solution           String?     @map("solution")
+  standard           String?     @map("standard")
+  status             String      @default("pending") @map("status")
+  sold               Int?        @map("sold")
+  company            Company     @relation(fields: [companyId], references: [id])
   cartItems          CartItem[]
+  comments           Comment[]
   orderItems         OrderItem[]
   payments           Payment[]
 
@@ -111,92 +105,107 @@ model AdProduct {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
-  content   String
-  createdAt DateTime @default(now()) @map("created_at")
-
-  adProductId String @map("ad_product_id")
-  companyId   String @map("company_id")
-
-  adProduct AdProduct @relation(fields: [adProductId], references: [id])
-  company   Company   @relation(fields: [companyId], references: [id])
+  id            String          @id @default(uuid())
+  content       String
+  createdAt     DateTime        @default(now()) @map("created_at")
+  adProductId   String          @map("ad_product_id")
+  companyId     String          @map("company_id")
+  comment_likes comment_likes[]
+  adProduct     AdProduct       @relation(fields: [adProductId], references: [id])
+  company       Company         @relation(fields: [companyId], references: [id])
 
   @@map("comments")
 }
 
 model Cart {
-  id        String   @id @default(uuid())
-  companyId String   @unique @map("company_id")
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  company   Company    @relation(fields: [companyId], references: [id])
+  id        String     @id @default(uuid())
+  companyId String     @unique @map("company_id")
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
   items     CartItem[]
+  company   Company    @relation(fields: [companyId], references: [id])
 
   @@map("carts")
 }
 
 model CartItem {
-  id          String   @id @default(uuid())
-  cartId      String   @map("cart_id")
-  adProductId String   @map("ad_product_id")
+  id          String    @id @default(uuid())
+  cartId      String    @map("cart_id")
+  adProductId String    @map("ad_product_id")
   quantity    Int
-  addedAt     DateTime @default(now()) @map("added_at")
-
-  cart        Cart      @relation(fields: [cartId], references: [id])
+  addedAt     DateTime  @default(now()) @map("added_at")
   adProduct   AdProduct @relation(fields: [adProductId], references: [id])
+  cart        Cart      @relation(fields: [cartId], references: [id])
 
-  @@unique([cartId, adProductId]) // Evita duplicatas no carrinho
+  @@unique([cartId, adProductId])
   @@map("cart_items")
 }
 
 model Order {
-  id                    String         @id @default(uuid())
-  companyId             String         @map("company_id")
-  totalAmount           Int            @map("total_amount") // Armazenado em centavos, R$ 99,90 = 9990
-  status                OrderStatus
-  createdAt             DateTime       @default(now()) @map("created_at")
-  updatedAt             DateTime       @updatedAt @map("updated_at")
-
-  company               Company        @relation(fields: [companyId], references: [id])
-  items                 OrderItem[]
+  id          String      @id @default(uuid())
+  companyId   String      @map("company_id")
+  totalAmount Int         @map("total_amount")
+  status      OrderStatus
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  items       OrderItem[]
+  company     Company     @relation(fields: [companyId], references: [id])
 
   @@map("orders")
 }
 
 model OrderItem {
-  id          String @id @default(uuid())
-  orderId     String @map("order_id")
-  adProductId String @map("ad_product_id")
+  id          String    @id @default(uuid())
+  orderId     String    @map("order_id")
+  adProductId String    @map("ad_product_id")
   quantity    Int
-  unitPrice   Int  @map("unit_price") // Preço unitário no momento da compra
-  totalPrice  Int  @map("total_price") // quantity * unitPrice
-
-  order       Order     @relation(fields: [orderId], references: [id])
+  unitPrice   Int       @map("unit_price")
+  totalPrice  Int       @map("total_price")
   adProduct   AdProduct @relation(fields: [adProductId], references: [id])
+  order       Order     @relation(fields: [orderId], references: [id])
 
   @@map("order_items")
 }
 
 model Payment {
-  id                      String        @id @default(uuid())  
-  adId                    String        @map("ad_id")
-  companyId               String        @map("company_id")
-
-  amount                  Int           // Armazenado em centavos, R$ 99,90 = 9990
-  currency                String        @default("brl") // ex: "brl", "usd"
-  creditsBought           Int           @map("credits_bought")
-  
-  paymentMethod           String?       @map("payment_method") // ex: "card", "pix"
-  stripePaymentIntentId   String?       @unique @map("stripe_payment_intent_id")
-  
-  createdAt               DateTime      @default(now()) @map("created_at")
- 
-  adProduct               AdProduct     @relation(fields: [adId], references: [id])
-  company                 Company       @relation(fields: [companyId], references: [id])
+  id                    String    @id @default(uuid())
+  stripePaymentIntentId String?   @unique @map("stripe_payment_intent_id")
+  amount                Int
+  currency              String    @default("brl")
+  paymentMethod         String?   @map("payment_method")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  adId                  String    @map("ad_id")
+  companyId             String    @map("company_id")
+  creditsBought         Int       @map("credits_bought")
+  adProduct             AdProduct @relation(fields: [adId], references: [id])
+  company               Company   @relation(fields: [companyId], references: [id])
 
   @@map("payments")
+}
+
+model comment_likes {
+  id         String   @id
+  created_at DateTime @default(now())
+  comment_id String
+  company_id String
+  comments   Comment  @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  companies  Company  @relation(fields: [company_id], references: [id])
+
+  @@unique([comment_id, company_id])
+}
+
+model emission_inventories {
+  id         String          @id
+  company_id String
+  year       Int
+  name       String
+  status     InventoryStatus @default(DRAFT)
+  created_at DateTime        @default(now())
+  updated_at DateTime
+  companies  Company         @relation(fields: [company_id], references: [id])
+  emissions  Emission[]
+
+  @@unique([company_id, year])
 }
 
 enum OrderStatus {
@@ -210,8 +219,14 @@ enum OrderStatus {
 
 enum PaymentStatus {
   PENDING
-  REQUIRES_ACTION // Requer ação adicional (3D Secure, etc.)
+  REQUIRES_ACTION
   SUCCEEDED
   FAILED
   CANCELLED
+}
+
+enum InventoryStatus {
+  DRAFT
+  PUBLISHED
+  AUDITED
 }

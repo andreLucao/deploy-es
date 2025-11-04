@@ -114,6 +114,12 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
           scope3: { name: string, unit: string }[]
         }) => {
 
+          const monthsOrder = [
+            "Janeiro", "Fevereiro", "Março", "Abril",
+            "Maio", "Junho", "Julho", "Agosto",
+            "Setembro", "Outubro", "Novembro", "Dezembro"
+          ];
+
           setStationaryCombustionList(
             data.scope1.map(p => ({
               value: p.name,
@@ -123,11 +129,13 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
           );
 
           setMonthsList(
-            data.scope2.map(p => ({
-              value: p.name,
-              label: `${p.name} (${p.unit})`,
-              unit: p.unit
-            }))
+            data.scope2
+              .sort((a,b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name))
+              .map(p => ({
+                  value: p.name,
+                  label: `${p.name}`,
+                  unit: p.unit
+              }))
           );
 
           setBusinessTravelList(
