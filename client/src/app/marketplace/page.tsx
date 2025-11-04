@@ -1,59 +1,56 @@
-'use client';
+"use client";
 
-import { useState } from "react";
-import Header from "@/components/marketplace/Header";
-import Destaque from "@/components/marketplace/Destaque";
-import Filtro from "@/components/marketplace/Filtro";
-import Produtos from "@/components/marketplace/Produtos";
+import { useRef } from "react";
+import Header from "@/components/Header";
+import Certificacoes from "@/components/landingpage/Certificacoes";
+import Hero from "@/components/landingpage/Hero";
+import KnowUs from "@/components/landingpage/KnowUs";
+import Solucoes from "@/components/landingpage/Solucoes";
 import Footer from "@/components/Footer";
-import CreateAdButton from "@/components/marketplace/CreateAdButton";
 
-type Produto = {
-  id: number;
-  titulo: string;
-  descricao: string;
-  preco: number;
-};
+export default function LandingPage() {
+   const knowUsRef = useRef<HTMLElement>(null);
+   const certificacoesRef = useRef<HTMLElement>(null);
+   const solucoesRef = useRef<HTMLElement>(null);
 
-const produtosMock: Produto[] = [];
-for (let i = 1; i <= 16; i++) {
-  produtosMock.push({
-    id: i,
-    titulo: `Produto ${i}`,
-    descricao: `Descrição ${i}`,
-    preco: i * 100,
-  });
-}
+   const scrollToSection = (
+      ref: React.RefObject<HTMLElement | null>,
+      offset = 0
+   ) => {
+      if (ref.current) {
+         const top =
+            ref.current.getBoundingClientRect().top + window.scrollY - offset;
+         window.scrollTo({ top, behavior: "smooth" });
+      }
+   };
 
-export default function Marketplace() {
-  const [modoVisualizacao, setModoVisualizacao] = useState<'grid' | 'list'>('grid');
-  const [produtosPorPagina, setProdutosPorPagina] = useState(8);
+   return (
+      <main className="bg-[#efefef]">
+         <Header
+            onScrollToKnowUs={() => scrollToSection(knowUsRef, 60)}
+            onScrollToCertificacoes={() =>
+               scrollToSection(certificacoesRef, 60)
+            }
+            onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
+         />
 
-  return (
-    <div className="flex flex-col min-h-screen custom-gradient">
-      <Header />
-      <div className="flex flex-col">
-        <div className="flex p-30 h-170">
-          <Destaque />
-        </div>
-        <Filtro 
-          modoVisualizacao={modoVisualizacao}   
-          setModoVisualizacao={setModoVisualizacao}
-          produtosPorPagina={produtosPorPagina}
-          setProdutosPorPagina={setProdutosPorPagina}
-        />
-        <div className="flex">
-          <Produtos 
-            produtos={produtosMock} 
-            produtosPorPagina={produtosPorPagina} 
-            modoVisualizacao={modoVisualizacao}
-          />
-        </div>
-        <CreateAdButton/>
-      </div>
-
-
-      <Footer />
-    </div>
-  );
+         <section>
+            <Hero />
+         </section>
+         <section ref={knowUsRef}>
+            <KnowUs />
+         </section>
+         <section ref={certificacoesRef}>
+            <Certificacoes />
+         </section>
+         <section ref={solucoesRef}>
+            <Solucoes />
+         </section>
+         <section>
+            <footer>
+               <Footer />
+            </footer>
+         </section>
+      </main>
+   );
 }

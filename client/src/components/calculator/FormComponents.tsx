@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 
 interface SelectBoxProps {
   options: { value: string; label: string; unit?: string }[];
@@ -9,12 +9,6 @@ interface SelectBoxProps {
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
-}
-
-interface ProductsByScope {
-  scope1: string[];
-  scope2: string[];
-  scope3: string[];
 }
 
 export const SelectBox = ({ options, value, onChange, placeholder, className = "" }: SelectBoxProps) => {
@@ -121,11 +115,13 @@ export const EmissionForm = ({ emissionId, emissionType, onUpdate, onRemove, ini
           ];
 
           setStationaryCombustionList(
-            data.scope1.map(p => ({
-              value: p.name,
-              label: `${p.name} (${p.unit})`,
-              unit: p.unit
-            }))
+            data.scope1
+              .sort((a,b) => a.name.localeCompare(b.name)) 
+              .map(p => ({
+                value: p.name,
+                label: `${p.name} (${p.unit})`,
+                unit: p.unit
+              }))
           );
 
           setMonthsList(
