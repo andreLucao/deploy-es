@@ -258,4 +258,8 @@ enum InventoryStatus {
   DRAFT     // Rascunho, está sendo editado
   PUBLISHED // Foi finalizado e publicado
   AUDITED   // O inventário foi auditado (algo futuro, verificado por terceiros...)
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/transaction-history--backend

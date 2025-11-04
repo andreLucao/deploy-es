@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
@@ -46,7 +46,7 @@ const generateToken = (email: string) => {
   return { token, expires, email };
 };
 
-const verifyToken = (req: AuthRequest, res: Response, next: any): void => {
+const verifyToken = (req: AuthRequest, res: Response, next: NextFunction): void => {
   // Try to get token from cookie first, then from Authorization header
   const token = req.cookies.authToken || req.headers.authorization?.split(" ")[1];
   
@@ -141,13 +141,14 @@ router.get("/verify", async (req: Request<{}, {}, {}, VerifyQuery>, res: Respons
       }
     );
 
+    // For cross-site requests from the frontend we need SameSite=None and Secure in production
     // Set HTTP-only cookie with JWT token
     res.cookie('authToken', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/'
+      path: '/',
     });
     
     console.log(`🍪 JWT cookie set for company ID: ${company.id}`);

@@ -1,5 +1,5 @@
 import prisma from "../config/database";
-import { EmissionProduct } from "../generated/prisma";
+import { EmissionProduct } from "../../generated/prisma";
 
 export class EmissionProductsService {
    async createEmissionProduct(

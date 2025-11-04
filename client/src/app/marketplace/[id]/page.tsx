@@ -4,6 +4,8 @@ import { use, useState, useRef, useEffect } from 'react';
 import { ShoppingCart, Repeat, ClipboardList, Leaf, MapPin, Info, FileText, ChevronDown } from 'lucide-react';
 import Header from "@/components/marketplace/Header";
 import Footer from "@/components/Footer";
+import CreateCommentBox from '@/components/marketplace/CreateCommentBox';
+import CommentsSection from '@/components/marketplace/CommentsSection';
 
 type ProductPageProps = {
     params: Promise<{ id: string }>;
@@ -20,8 +22,127 @@ const accordionData: AccordionItem[] = [
     { title: "Impacto gerado", content: "Conteúdo" },
 ];
 
+// Adicione esta interface após as outras interfaces (linha 22)
+interface ProductData {
+    id: string;
+    title: string;
+    credit_type: string;
+    certification_type: string;
+    price: number;
+    description: string;
+    supply: number;
+    batch_discount: number;
+    size_batch: number;
+    image_ad?: string;
+    carousel_images?: string[];
+    verified_stamp?: boolean;
+    active?: boolean;
+    problem?: string;
+    solution?: string;
+    impact?: string;
+    co2_reduction?: number;
+    local?: string;
+    status: string;
+    standard?: string;
+    biome?: string;
+    project_type?: string;
+    sold?: number;
+    createdAt: string;
+    comments?: Comment[];
+}
+
+// Adicionar esta interface ou importar do CommentsSection
+interface Comment {
+    id: string;
+    content: string;
+    companyId: string;
+    adProductId: string;
+    createdAt: string;
+    company?: {
+        name: string;
+    };
+}
+
+// Create a separate Accordion Item component to use hooks properly
+function AccordionItemComponent({ item, index, isOpen, onToggle }: {
+    item: AccordionItem;
+    index: number;
+    isOpen: boolean;
+    onToggle: (index: number) => void;
+}) {
+    const contentRef = useRef<HTMLDivElement>(null);
+    const [maxHeight, setMaxHeight] = useState("0px");
+
+    useEffect(() => {
+        if (contentRef.current) {
+            setMaxHeight(isOpen ? `${contentRef.current.scrollHeight}px` : "0px");
+        }
+    }, [isOpen]);
+
+    return (
+        <div key={index} className="border rounded-2xl shadow">
+            <button
+                onClick={() => onToggle(index)}
+                className="w-full text-left p-6 flex justify-between items-center bg-white rounded-2xl hover:bg-gray-50 transition-colors"
+            >
+                <span className="font-semibold text-lg text-gray-800">{item.title}</span>
+                <ChevronDown
+                    className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+                        isOpen ? "rotate-180" : ""
+                    }`}
+                />
+            </button>
+            <div
+                ref={contentRef}
+                style={{ maxHeight }}
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+            >
+                <div className="p-6 pt-2 bg-gray-50 text-gray-700 rounded-b-2xl">
+                    {item.content}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function ProductPage({ params }: ProductPageProps) {
     const { id } = use(params);
+    const [productData, setProductData] = useState<ProductData | null>(null);
+    const [, setComments] = useState<Comment[]>([]);
+    const [, setLoadingComments] = useState(true);
+
+    // Função para buscar comentários
+    const fetchComments = async () => {
+        try {
+            setLoadingComments(true);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/get-ad-comments?adProductId=${id}`);
+            
+            if (!response.ok) {
+                throw new Error('Erro ao carregar comentários');
+            }
+            
+            const data = await response.json();
+            setComments(data.comments || []);
+        } catch (err) {
+            console.error('Erro ao carregar comentários:', err);
+        } finally {
+            setLoadingComments(false);
+        }
+    };
+
+    // Carregar comentários quando o componente monta
+    useEffect(() => {
+        fetchComments();
+    }, [id]);
+
+    useEffect(() => {
+        const fetchProductData = async () => {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/adProducts/${id}`);
+            const data = await response.json();
+            setProductData(data);
+        };
+        fetchProductData();
+    }, [id]);
 
     const cards = [
         { id: 1, icon: <Repeat size={24} />, text: <>Toneladas de CO<sub>2eq</sub> Compensados</>, subText: 'Quantidade' },
@@ -190,40 +311,32 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <h1 className="text-4xl font-bold flex flex-col items-center justify-center">Conheça melhor</h1>
 
                 <div className="max-w-md mx-auto mt-8 space-y-4">
-                    {accordionData.map((item, index) => {
-                        const contentRef = useRef<HTMLDivElement>(null);
-                        const [maxHeight, setMaxHeight] = useState("0px");
-                        const isOpen = openIndexes.includes(index);
+                    {accordionData.map((item, index) => (
+                        <AccordionItemComponent
+                            key={index}
+                            item={item}
+                            index={index}
+                            isOpen={openIndexes.includes(index)}
+                            onToggle={toggleAccordion}
+                        />
+                    ))}
+                </div>
 
-                        useEffect(() => {
-                        if (contentRef.current) {
-                            setMaxHeight(isOpen ? `${contentRef.current.scrollHeight}px` : "0px");
-                        }
-                        }, [isOpen]);
+                <div className="mt-10 flex justify-center items-center"> 
+                    <h1 className="text-4xl font-bold">Deixe seu comentário</h1>
+                </div>
 
-                        return (
-                        <div key={index} className="border rounded-2xl shadow">
-                            <div
-                            className="p-4 flex justify-between items-center cursor-pointer bg-white rounded-t-2xl"
-                            onClick={() => toggleAccordion(index)}
-                            >
-                            <h3 className="text-lg font-semibold">{item.title}</h3>
-                            <ChevronDown
-                                className={`w-6 h-6 transition-transform duration-300 ${
-                                isOpen ? "rotate-180" : ""
-                                }`}
-                            />
-                            </div>
-                            <div
-                            ref={contentRef}
-                            style={{ maxHeight }}
-                            className="overflow-hidden transition-max-height duration-500 ease-in-out border-t bg-gray-50 rounded-b-2xl"
-                            >
-                            <div className="p-4 text-gray-700">{item.content}</div>
-                            </div>
-                        </div>
-                        );
-                    })}
+                <div className="mt-10 flex justify-center items-center"> 
+                    <CreateCommentBox 
+                    adProductId={id}
+                    onCommentAdded={fetchComments} // Passar função para recarregar comentários
+                    />
+                </div>
+
+                <div className="mt-10 flex justify-center items-center"> 
+                    <CommentsSection 
+                    adProductId={id}
+                    />
                 </div>
             </div>
 

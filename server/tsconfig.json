@@ -30,4 +30,8 @@
    },
    "include": ["src/**/*", "generated/**/*"],
    "exclude": ["node_modules", "dist"]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/transaction-history--backend
