@@ -141,12 +141,14 @@ router.get("/verify", async (req: Request<{}, {}, {}, VerifyQuery>, res: Respons
       }
     );
 
-    // For cross-site requests from the frontend we need SameSite=None and Secure in production
+    // For cross-site requests from the frontend we need SameSite=None and Secure
     // Set HTTP-only cookie with JWT token
+    // In development (localhost), sameSite='lax' works fine since both are on localhost
+    // In production with different domains, use sameSite='none' and secure=true
     res.cookie('authToken', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/',
     });
