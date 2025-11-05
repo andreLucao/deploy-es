@@ -3,8 +3,8 @@
 export const stationaryCombustionFuels = [
   { value: 'acetileno', label: 'Acetileno', unit: 'kg' },
   { value: 'alcatrao', label: 'Alcatrão', unit: 'm³' },
-  { value: 'bagaco_cana', label: 'Bagaço de Cana', unit: 'Toneladas' },
   { value: 'asfaltos', label: 'Asfaltos', unit: 'm³' },
+  { value: 'bagaco_cana', label: 'Bagaço de Cana', unit: 'Toneladas' },
   { value: 'biodiesel', label: 'Biodiesel (B100)', unit: 'Litros' },
   { value: 'biogas_outros', label: 'Biogás (outros)', unit: 'Toneladas' },
   { value: 'biogas_aterro', label: 'Biogás de aterro', unit: 'Toneladas' },

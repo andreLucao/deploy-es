@@ -1,12 +1,69 @@
-import Header from "@/components/transactions/Header";
+"use client"
 
+import Header from "@/components/transactions/Header";
+import { useEffect, useState } from "react";
+
+//Teste com lista
 const transactions = [
     { date: "25/10/2025", description: "Compra 1", type: "compra", value: 40 },
     { date: "25/10/2025", description: "Crédito 1", type: "venda", value: 50 },
     { date: "25/10/2025", description: "Crédito 2", type: "venda", value: 10.50 }
 ]
 
+type Order = {
+    id: string;
+    createdAt: string;
+    status: string;
+    items: {
+        quantity: number;
+        unitPrice: number;
+        totalPrice: number;
+        adProductId: string;
+    }[];
+};
+
 export default function Transactions() {
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const companyId = "123"; //Placeholder temporário
+                const res = await fetch(`http://localhost:3001/history/${companyId}`);
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || "Erro ao buscar histórico.");
+
+                setOrders(data.data);
+            }
+            catch (err: any) {
+                setError(err.message);
+            }
+            finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, []);
+
+    if (loading) {
+        return (
+            <main className="flex items-center justify-center min-h-screen bg-gray-100">
+                <p>Carregando histórico...</p>
+            </main>
+        );
+    }
+
+    if (error) {
+        return (
+            <main className="flex items-center justify-center min-h-screen bg-gray-100">
+                <p className="text-red-500">Erro: {error}</p>
+            </main>
+        );
+    }
 
     return (
         <main 
@@ -39,25 +96,22 @@ export default function Transactions() {
                 </thead>
 
                 <tbody>
-                    {transactions.map((t, index) => (
-                        <tr
-                            key={index}
-                            className={`${index % 2 === 0 ? "bg-green-100" : "bg-gray-100"} border-b`}
-                        >
-                            <td className="p-3 text-center">{t.date}</td>
-                            <td className="p-3 text-center">{t.description}</td>
+                    {orders.map((order, index) => {
+                        const date = new Date(order.createdAt).toLocaleDateString("pt-BR");
 
-                            {/* Se compra, mostra débito */}
-                            <td className="p-3 text-red-500 text-left">
-                                {t.type === "compra" ? `-R$${t.value.toFixed(2)}` : ""}
-                            </td>
+                        return order.items.map((item, i) => (
+                            <tr
+                                key={`${order.id}-${i}`}
+                                className={`${(index + i) % 2 === 0 ? "bg-green-100" : "bg-gray-100"} border-b`}
+                            >
+                                <td className="p-3 text-center">{date}</td>
+                                <td className="p-3 text-center">Produto {item.adProductId}</td>
 
-                            {/* Se venda, mostra crédito */}
-                            <td className="p-3 text-green-500 text-left">
-                                {t.type === "venda" ? `+R$${t.value.toFixed(2)}` : ""}
-                            </td>
-                        </tr>
-                    ))}
+                                <td className="p-3 text-red-500 text-right">-40,00</td>
+                                <td className="p-3 text-green-500 text-right">+R${item.totalPrice.toFixed(2)}</td>
+                            </tr>
+                        ));
+                    })}
                 </tbody>
             </table>
         </main>

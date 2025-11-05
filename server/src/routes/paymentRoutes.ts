@@ -1,8 +1,5 @@
 import {Router, Request, Response} from "express";
 import Stripe from "stripe";
-import dotenv from "dotenv";
-
-dotenv.config({ path: ".env.local" });
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 

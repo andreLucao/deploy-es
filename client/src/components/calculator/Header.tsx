@@ -34,14 +34,7 @@ export default function Header() {
                     <div className="flex items-center gap-2">
                         <ShoppingCart className="text-white ml-4" />
                         <Menu className="text-white ml-4" />
-                        <div className="w-13 h-13 bg-gray-300 rounded-full ml-4 hover:brightness-75 transition">
-                            <img 
-                                src="/imgs/avatar.png" 
-                                alt="User" 
-                                className="h-full rounded-full" 
-                                onClick={() => router.push("/transactions")}
-                            />
-                        </div>
+                        <div className="w-13 h-13 bg-gray-300 rounded-full ml-4"></div>
                     </div>
                 </div>
             </div>

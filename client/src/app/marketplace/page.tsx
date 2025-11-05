@@ -1,69 +1,13 @@
 "use client";
 
-<<<<<<< HEAD
-import { useRef } from "react";
-import Header from "@/components/Header";
-import Certificacoes from "@/components/landingpage/Certificacoes";
-import Hero from "@/components/landingpage/Hero";
-import KnowUs from "@/components/landingpage/KnowUs";
-import Solucoes from "@/components/landingpage/Solucoes";
-=======
 import { useState, useEffect } from "react";
 import Header from "@/components/marketplace/Header";
 import Destaque from "@/components/marketplace/Destaque";
 import Filtro from "@/components/marketplace/Filtro";
 import Produtos from "@/components/marketplace/Produtos";
->>>>>>> origin/transaction-history--backend
 import Footer from "@/components/Footer";
 import CreateAdButton from "@/components/marketplace/CreateAdButton";
 
-<<<<<<< HEAD
-export default function LandingPage() {
-   const knowUsRef = useRef<HTMLElement>(null);
-   const certificacoesRef = useRef<HTMLElement>(null);
-   const solucoesRef = useRef<HTMLElement>(null);
-
-   const scrollToSection = (
-      ref: React.RefObject<HTMLElement | null>,
-      offset = 0
-   ) => {
-      if (ref.current) {
-         const top =
-            ref.current.getBoundingClientRect().top + window.scrollY - offset;
-         window.scrollTo({ top, behavior: "smooth" });
-      }
-   };
-
-   return (
-      <main className="bg-[#efefef]">
-         <Header
-            onScrollToKnowUs={() => scrollToSection(knowUsRef, 60)}
-            onScrollToCertificacoes={() =>
-               scrollToSection(certificacoesRef, 60)
-            }
-            onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
-         />
-
-         <section>
-            <Hero />
-         </section>
-         <section ref={knowUsRef}>
-            <KnowUs />
-         </section>
-         <section ref={certificacoesRef}>
-            <Certificacoes />
-         </section>
-         <section ref={solucoesRef}>
-            <Solucoes />
-         </section>
-         <section>
-            <footer>
-               <Footer />
-            </footer>
-         </section>
-      </main>
-   );
-=======
 type Produto = {
   id: number;
   titulo: string;
@@ -177,5 +121,4 @@ export default function Marketplace() {
       <Footer />
     </div>
   );
->>>>>>> origin/transaction-history--backend
 }

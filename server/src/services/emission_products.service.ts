@@ -11,8 +11,4 @@ export class EmissionProductsService {
          data: { name, unit, scope },
       });
    }
-
-   async getAllEmissionProducts(): Promise<EmissionProduct[]> {
-      return prisma.emissionProduct.findMany();
-   }
 }
