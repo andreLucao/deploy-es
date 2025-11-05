@@ -66,9 +66,7 @@ router.get("/get-ad-comments", async (req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({ message: "Error getting comments", error });
     }
-    finally {
-        await prisma.$disconnect();
-    }
+
 });
 
 // Rota de likes para um comentario
@@ -89,9 +87,7 @@ router.post("/like-comment", async (req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({ message: "Error liking comment", error });
     }
-    finally {
-        await prisma.$disconnect();
-    }
+
 });
 
 // Rota de get para pegar os likes de um comentario
@@ -111,9 +107,7 @@ router.get("/get-comment-likes", async (req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({ message: "Error getting comment likes", error });
     }
-    finally {
-        await prisma.$disconnect();
-    }
+
 });
 
 // Rota para remover like de um comentario
@@ -137,9 +131,7 @@ router.delete("/unlike-comment", async (req: Request, res: Response) => {
     } catch (error) {
         return res.status(500).json({ message: "Error unliking comment", error });
     }
-    finally {
-        await prisma.$disconnect();
-    }
+
 });
 
 

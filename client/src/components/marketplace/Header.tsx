@@ -3,11 +3,38 @@
 import { ShoppingCart } from "lucide-react";
 import { Menu } from "lucide-react";
 import { useRouter } from "next/dist/client/components/navigation";
+import { useEffect, useState } from "react";
 
 import CartDrawer from "../common/CartDrawer";
 
 export default function Header() {
    const router = useRouter();
+   const [credits, setCredits] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true); 
+
+  useEffect(() => {
+    async function fetchCredits() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/credits`, {
+          credentials: "include", // envia cookie JWT automaticamente
+        });
+
+        if (!res.ok) {
+          setLoading(false);
+          return; // não logado
+        }
+
+        const data = await res.json();
+        setCredits(data.credits);
+      } catch (err) {
+        console.error("Erro ao carregar créditos:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCredits();
+  }, []);
 
    return (
       <>
@@ -40,12 +67,16 @@ export default function Header() {
             </div>
 
             <div className="ml-auto flex items-center">
-               <div className="flex items-center justify-center bg-gray-300 h-13 w-35 rounded-xl mr-4">
-                  <p className="text-black">
-                     {/* Valor de Créditos Carteira */}
-                     CC : 1000
-                  </p>
-               </div>
+
+               {/* Só mostrar créditos se logado */}
+              {!loading && credits !== null && (
+                <div className="flex items-center gap-2 bg-white border border-[#1AAE9F] px-6 py-2.5 rounded-full mr-4 shadow-sm">
+                 <span className="text-black font-semibold text-base">{credits}</span>
+                <span className="text-[#0E8F85] font-semibold text-sm tracking-wider">CC</span>
+              </div>
+               )}
+
+              
                <div className="flex items-center gap-2">
                   <CartDrawer />
                   <Menu className="text-white ml-4" />

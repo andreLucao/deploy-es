@@ -13,4 +13,11 @@ export class CompaniesService {
          data: { email },
       });
    }
+
+   async getCompanyCreditsByEmail(email: string) {
+       return prisma.company.findUnique({
+    where: { email },
+    select: { balance: true },
+  });
+}
 }
