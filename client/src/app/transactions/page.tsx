@@ -30,8 +30,8 @@ export default function Transactions() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const companyId = "123"; //Placeholder temporário
-                const res = await fetch(`http://localhost:3001/history/${companyId}`);
+                const companyId = "380720e6-152e-4711-94c3-ef7aaec0db72"; //Placeholder temporário
+                const res = await fetch(`http://localhost:3001/api/transactions/history/${companyId}`);
                 const data = await res.json();
 
                 if (!res.ok) throw new Error(data.error || "Erro ao buscar histórico.");
@@ -96,22 +96,34 @@ export default function Transactions() {
                 </thead>
 
                 <tbody>
-                    {orders.map((order, index) => {
-                        const date = new Date(order.createdAt).toLocaleDateString("pt-BR");
-
-                        return order.items.map((item, i) => (
-                            <tr
-                                key={`${order.id}-${i}`}
-                                className={`${(index + i) % 2 === 0 ? "bg-green-100" : "bg-gray-100"} border-b`}
+                    {orders.length === 0 ? (
+                        <tr>
+                            <td
+                                colSpan={4}
+                                className="text-center text-gray-500 p-6 bg-gray-50"
                             >
-                                <td className="p-3 text-center">{date}</td>
-                                <td className="p-3 text-center">Produto {item.adProductId}</td>
+                                Nenhuma transação encontrada para esta empresa.
+                            </td>
+                        </tr>
+                    
+                    ) :  (
+                        orders.map((order, index) => {
+                            const date = new Date(order.createdAt).toLocaleDateString("pt-BR");
 
-                                <td className="p-3 text-red-500 text-right">-40,00</td>
-                                <td className="p-3 text-green-500 text-right">+R${item.totalPrice.toFixed(2)}</td>
-                            </tr>
-                        ));
-                    })}
+                            return order.items.map((item, i) => (
+                                <tr
+                                    key={`${order.id}-${i}`}
+                                    className={`${(index + i) % 2 === 0 ? "bg-green-100" : "bg-gray-100"} border-b`}
+                                >
+                                    <td className="p-3 text-center">{date}</td>
+                                    <td className="p-3 text-center">Produto {item.adProductId}</td>
+
+                                    <td className="p-3 text-red-500 text-right">-40,00</td>
+                                    <td className="p-3 text-green-500 text-right">+R${item.totalPrice.toFixed(2)}</td>
+                                </tr>
+                            ));
+                        })
+                    )}
                 </tbody>
             </table>
         </main>
