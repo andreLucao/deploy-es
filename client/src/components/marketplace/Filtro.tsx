@@ -61,11 +61,11 @@ useEffect(() => {
 
     return (
         <div 
-            className="flex flex-col lg:flex-row h-full justify-between items-center gap-4 py-8 px-6 lg:px-8 bg-white/50 backdrop-blur-sm rounded-lg shadow-sm min-h-[80px] mx-auto"
+            className="flex flex-col lg:flex-row h-full justify-between items-center gap-4 py-8 px-6 lg:px-8 rounded-lg shadow-sm min-h-[80px] mx-auto"
             style={{ maxWidth }}
         >
             {/* Seção Esquerda - Filtros e Ordenação */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full lg:w-auto">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-2 w-full lg:w-auto">
                 {/* Filtros */}
                 <div className="relative" ref={filtroRef}>
                     <button 

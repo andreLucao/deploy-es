@@ -78,7 +78,7 @@ export default function Marketplace() {
         </div>
 
         {/* Filtros - com mais espaçamento */}
-        <div className="container-responsive mb-8 sm:mb-10">
+        <div className="container-responsive mt-8 sm:mt-12 mb-8 sm:mb-10">
           <Filtro 
             modoVisualizacao={modoVisualizacao}   
             setModoVisualizacao={setModoVisualizacao}

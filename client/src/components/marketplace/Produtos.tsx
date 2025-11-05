@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "./product-card";
-import Link from "next/link"; //Necessário para os redirecionamentos
 
 type Produto = {
    id: number;
@@ -34,29 +33,34 @@ export default function Produtos({
    };
 
    return (
-      <div className="flex flex-col justify-items-center items-center w-full px-4 sm:px-6 lg:px-8">
-         {/* Container com Grid Responsivo - 1 coluna, múltiplas linhas */}
+      <div className="flex flex-col justify-items-center items-center w-[3400px] px-4 sm:px-6 lg:px-8">
+         {/* Container com Grid/List Responsivo */}
          <div
             className={`
-               w-full max-w-[1200px] p-3 transition-all duration-700 ease-out
-               flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-12
+               w-full max-w-[1800px] p-3 transition-all duration-700 ease-out
+               mb-8 sm:mb-12
+               ${modoVisualizacao === 'grid' 
+                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8' 
+                  : 'flex flex-col gap-4 sm:gap-6'}
             `}
          >
             {produtosPagina.map((produto) => (
-               <Link
+               <div
                   key={produto.id}
-                  href={`/marketplace/${produto.id}`}
-                  className="rounded-lg cursor-pointer overflow-hidden transition-all duration-[450ms] 
-                     hover:shadow-xl hover:scale-[1.02] flex flex-col sm:flex-row h-auto w-full bg-white"
+                  className={`rounded-lg overflow-hidden transition-all duration-[450ms] 
+                     hover:shadow-xl hover:scale-[1.02] bg-white
+                     ${modoVisualizacao === 'grid' 
+                        ? 'flex flex-col aspect-square' 
+                        : 'flex flex-col sm:flex-row h-auto w-full'}`}
                >
                   <ProductCard
                      id={produto.id}
                      titulo={produto.titulo}
                      descricao={produto.descricao}
                      preco={produto.preco}
-                     modoVisualizacao="list"
+                     modoVisualizacao={modoVisualizacao}
                   />
-               </Link>
+               </div>
             ))}
          </div>
 

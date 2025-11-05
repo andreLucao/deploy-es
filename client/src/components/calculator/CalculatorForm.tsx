@@ -168,22 +168,18 @@ export default function CalculatorForm() {
               <ChevronLeft size={20} />
               <span>Anterior</span>
             </button>
-            {currentStep === 3 ? (
-              <button
-                onClick={() => window.location.href = '/calculator/results'}
-                className="px-6 py-2 rounded-lg flex items-center space-x-2 bg-[#008F70] text-white hover:bg-[#004443] font-semibold"
-              >
-                <span>🧮 Calcular</span>
-              </button>
-            ) : (
-              <button
-                onClick={nextStep}
-                className="px-4 py-2 rounded-lg flex items-center space-x-2 bg-[#008F70] text-white hover:bg-[#004443]"
-              >
-                <span>Próximo</span>
-                <ChevronRight size={20} />
-              </button>
-            )}
+            <button
+              onClick={nextStep}
+              disabled={currentStep === 3}
+              className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
+                currentStep === 3
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-[#008F70] text-white hover:bg-[#004443]'
+              }`}
+            >
+              <span>Próximo</span>
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 

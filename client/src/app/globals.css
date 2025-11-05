@@ -200,7 +200,7 @@
 /* Responsive Container Utilities */
 .container-responsive {
   @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
-  max-width: 1200px;
+  max-width: 1900px;
 }
 
 .container-full {
@@ -268,7 +268,7 @@
 }
 
 /* Mobile-first responsive breakpoints */
-@media (max-width: 640px) {
+@media (max-width: 1499px) {
   .hide-mobile {
     display: none !important;
   }
@@ -278,7 +278,7 @@
   }
 }
 
-@media (min-width: 641px) {
+@media (min-width: 1500px) {
   .hide-desktop {
     display: none !important;
   }

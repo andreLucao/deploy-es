@@ -143,7 +143,7 @@ export default function RegisterCard() {
     };
 
     return (           
-        <div className="bg-white bg-opacity-20 flex flex-col lg:flex-row backdrop-blur-lg rounded-2xl sm:rounded-3xl lg:rounded-4xl shadow-lg p-4 sm:p-8 lg:p-23 gap-4 sm:gap-8 lg:gap-30 max-w-sm sm:max-w-2xl lg:max-w-7xl mx-auto relative">
+        <div className="bg-white bg-opacity-20 flex flex-col lg:flex-row backdrop-blur-lg rounded-2xl sm:rounded-3xl lg:rounded-4xl shadow-lg p-6 sm:p-8 lg:p-23 gap-6 sm:gap-8 lg:gap-30 max-w-sm sm:max-w-2xl lg:max-w-7xl mx-auto relative">
             {/* Botão de voltar */}
             <div className="absolute top-3 sm:top-5 lg:top-7 right-3 sm:right-5 lg:right-8 cursor-pointer z-10">
                 <CircleChevronLeft className="w-6 sm:w-7 lg:w-8 h-6 sm:h-7 lg:h-8 text-[#002E34] hover:text-[#004443] transition hover:scale-105" onClick={() => window.location.href = '/'}/>
@@ -155,10 +155,10 @@ export default function RegisterCard() {
             </div>
 
             {/* Imagem */}
-            <div className="w-full lg:w-1/2 h-48 sm:h-64 lg:h-full flex items-center justify-center order-1 lg:order-2">
+            <div className="w-full lg:w-1/2 h-40 sm:h-56 lg:h-full flex items-center justify-center order-1 lg:order-2">
                 <img 
                     src="/imgs/card2.png" 
-                    className="rounded-xl sm:rounded-2xl lg:rounded-4xl w-full h-full sm:h-auto lg:h-132 object-cover lg:object-contain max-w-full" 
+                    className="rounded-xl sm:rounded-2xl lg:rounded-4xl w-full h-full object-cover lg:h-132 lg:object-contain max-w-full" 
                     alt="Ilustração" 
                 />
             </div>
