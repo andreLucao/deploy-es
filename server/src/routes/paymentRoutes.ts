@@ -10,6 +10,11 @@ router.post('/create-payment', async (req: Request, res: Response) => {
   try {
     const { amount, buyerUuid, adUuid, amount_purchased } = req.body;
 
+    // URLs dinâmicas baseadas em variáveis de ambiente
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const successUrl = `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${baseUrl}/payment-cancelled?session_id={CHECKOUT_SESSION_ID}`;
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
@@ -24,8 +29,8 @@ router.post('/create-payment', async (req: Request, res: Response) => {
         quantity: 1,
       }],
       mode: 'payment',
-      success_url: `${process.env.FRONTEND_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: 'https://seusite.com/cancelado',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         buyerUuid,
         adUuid,
