@@ -50,6 +50,19 @@ router.get("/", async (req: Request, res: Response) => {
    }
 });
 
+// GET /api/adProducts/featured - Listar anúncios destaque
+router.get("/featured", async (req: Request, res: Response) => {
+   try {
+      const queryLimit = req.query.limit as string;
+      const featuredAds = await adProductService.findFeatured(queryLimit);
+      return res.status(200).json(featuredAds);
+      
+   } catch (error) {
+      console.error("Erro ao buscar anúncios destaque:", error);
+      return res.status(500).json({ error: "Erro interno no servidor." });
+   }
+});
+
 // GET /adProducts/:id - Buscar um anúncio específico
 router.get("/:id", async (req: Request, res: Response) => {
    try {
