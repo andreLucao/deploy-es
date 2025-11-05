@@ -46,6 +46,41 @@ export default function AdFormModal({
    const [carouselImages, setCarouselImages] = useState<File[]>([]);
    const [carouselPreviews, setCarouselPreviews] = useState<string[]>([]);
 
+   // Função para comprimir imagem antes de converter para base64
+   const compressImage = (file: File, maxWidth: number = 1920, quality: number = 0.8): Promise<string> => {
+      return new Promise((resolve, reject) => {
+         const reader = new FileReader();
+         reader.readAsDataURL(file);
+         reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+               const canvas = document.createElement('canvas');
+               let width = img.width;
+               let height = img.height;
+
+               // Redimensionar se necessário
+               if (width > maxWidth) {
+                  height = (height * maxWidth) / width;
+                  width = maxWidth;
+               }
+
+               canvas.width = width;
+               canvas.height = height;
+
+               const ctx = canvas.getContext('2d');
+               ctx?.drawImage(img, 0, 0, width, height);
+
+               // Converter para base64 com compressão
+               const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+               resolve(compressedBase64);
+            };
+            img.onerror = reject;
+         };
+         reader.onerror = reject;
+      });
+   };
+
    // Controlar animações de entrada e saída e buscar companyId
    useEffect(() => {
       if (isOpen) {
@@ -53,36 +88,9 @@ export default function AdFormModal({
       }
    }, [isOpen]);
 
-   // Limpar URLs dos blobs quando o componente for desmontado
-   useEffect(() => {
-      return () => {
-         if (formData.image_ad && formData.image_ad.startsWith("blob:")) {
-            URL.revokeObjectURL(formData.image_ad);
-         }
-         if (Array.isArray(formData.carousel_images)) {
-            formData.carousel_images.forEach((url: string) => {
-               if (url.startsWith("blob:")) {
-                  URL.revokeObjectURL(url);
-               }
-            });
-         }
-      };
-   }, [formData.image_ad, formData.carousel_images]);
-
    const handleClose = () => {
       setIsVisible(false);
       setTimeout(() => {
-         // Limpar URLs dos blobs para evitar vazamentos de memória
-         if (formData.image_ad && formData.image_ad.startsWith("blob:")) {
-            URL.revokeObjectURL(formData.image_ad);
-         }
-         if (Array.isArray(formData.carousel_images)) {
-            formData.carousel_images.forEach((url: string) => {
-               if (url.startsWith("blob:")) {
-                  URL.revokeObjectURL(url);
-               }
-            });
-         }
          onClose();
       }, 200);
    };
@@ -108,13 +116,19 @@ export default function AdFormModal({
             );
          }
 
+         // Converter preço de reais para centavos antes de enviar
+         const dataToSend = {
+            ...formData,
+            price: Math.round(formData.price * 100), // Converter para centavos
+         };
+
          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/adProducts`, {
             method: "POST",
             credentials: "include",
             headers: {
                "Content-Type": "application/json",
             },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(dataToSend),
          });
 
          if (!response.ok) {
@@ -147,7 +161,7 @@ export default function AdFormModal({
             impact: "",
             co2_reduction: 0,
             local: "",
-            status: "pending",
+            status: "active",
             standard: "",
             biome: "",
             project_type: "",
@@ -165,7 +179,7 @@ export default function AdFormModal({
       }
    };
 
-   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) {
          // Validar tipo de arquivo
@@ -183,25 +197,24 @@ export default function AdFormModal({
          setSelectedImage(file);
          setError(null);
 
-         // Criar preview da imagem
-         const reader = new FileReader();
-         reader.onload = (e) => {
-            setImagePreview(e.target?.result as string);
-         };
-         reader.readAsDataURL(file);
+         try {
+            // Comprimir e converter para base64
+            const compressedBase64 = await compressImage(file);
+            setImagePreview(compressedBase64);
 
-         // Converter para blob e gerar URL
-         const blob = new Blob([file], { type: file.type });
-         const imageUrl = URL.createObjectURL(blob);
-
-         setFormData((prev) => ({
-            ...prev,
-            image_ad: imageUrl,
-         }));
+            // Armazenar base64 comprimido no formData
+            setFormData((prev) => ({
+               ...prev,
+               image_ad: compressedBase64,
+            }));
+         } catch (err) {
+            setError("Erro ao processar a imagem. Tente novamente.");
+            console.error("Erro ao comprimir imagem:", err);
+         }
       }
    };
 
-   const handleCarouselImagesChange = (
+   const handleCarouselImagesChange = async (
       e: React.ChangeEvent<HTMLInputElement>
    ) => {
       const files = Array.from(e.target.files || []);
@@ -230,31 +243,22 @@ export default function AdFormModal({
       setCarouselImages(files);
       setError(null);
 
-      // Criar previews das imagens
-      const previewPromises = files.map((file) => {
-         return new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-               resolve(e.target?.result as string);
-            };
-            reader.readAsDataURL(file);
-         });
-      });
+      try {
+         // Comprimir e converter para base64 (imagens do carousel com qualidade menor)
+         const compressedPromises = files.map((file) => compressImage(file, 1920, 0.7));
+         const compressedBase64Strings = await Promise.all(compressedPromises);
 
-      Promise.all(previewPromises).then((previews) => {
-         setCarouselPreviews(previews);
-      });
+         setCarouselPreviews(compressedBase64Strings);
 
-      // Converter para blobs e gerar URLs
-      const imageUrls = files.map((file) => {
-         const blob = new Blob([file], { type: file.type });
-         return URL.createObjectURL(blob);
-      });
-
-      setFormData((prev) => ({
-         ...prev,
-         carousel_images: imageUrls,
-      }));
+         // Armazenar base64 comprimidos no formData
+         setFormData((prev) => ({
+            ...prev,
+            carousel_images: compressedBase64Strings,
+         }));
+      } catch (err) {
+         setError("Erro ao processar as imagens. Tente novamente.");
+         console.error("Erro ao comprimir imagens do carousel:", err);
+      }
    };
 
    const removeCarouselImage = (index: number) => {
@@ -264,15 +268,10 @@ export default function AdFormModal({
       setCarouselImages(newImages);
       setCarouselPreviews(newPreviews);
 
-      // Regenerar URLs dos blobs
-      const newUrls = newImages.map((file) => {
-         const blob = new Blob([file], { type: file.type });
-         return URL.createObjectURL(blob);
-      });
-
+      // Atualizar formData com as previews (que já são base64)
       setFormData((prev) => ({
          ...prev,
-         carousel_images: newUrls,
+         carousel_images: newPreviews,
       }));
    };
 

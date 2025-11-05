@@ -6,6 +6,7 @@ import Header from "@/components/marketplace/Header";
 import Footer from "@/components/Footer";
 import CreateCommentBox from '@/components/marketplace/CreateCommentBox';
 import CommentsSection from '@/components/marketplace/CommentsSection';
+import { useCartStore } from '@/store/cart.store';
 
 type ProductPageProps = {
     params: Promise<{ id: string }>;
@@ -16,13 +17,7 @@ type AccordionItem = {
     content: string;
 };
 
-const accordionData: AccordionItem[] = [
-    { title: "O problema", content: "Conteúdo" },
-    { title: "A solução do produto", content: "Conteúdo" },
-    { title: "Impacto gerado", content: "Conteúdo" },
-];
-
-// Adicione esta interface após as outras interfaces (linha 22)
+// Interface atualizada para corresponder ao schema do banco de dados
 interface ProductData {
     id: string;
     title: string;
@@ -48,6 +43,11 @@ interface ProductData {
     project_type?: string;
     sold?: number;
     createdAt: string;
+    companyId: string;
+    company?: {
+        id: string;
+        email: string;
+    };
     comments?: Comment[];
 }
 
@@ -80,14 +80,14 @@ function AccordionItemComponent({ item, index, isOpen, onToggle }: {
     }, [isOpen]);
 
     return (
-        <div key={index} className="border rounded-2xl shadow">
+        <div key={index} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
             <button
                 onClick={() => onToggle(index)}
-                className="w-full text-left p-6 flex justify-between items-center bg-white rounded-2xl hover:bg-gray-50 transition-colors"
+                className="w-full text-left p-5 flex justify-between items-center hover:bg-gray-50 transition-colors duration-200"
             >
-                <span className="font-semibold text-lg text-gray-800">{item.title}</span>
+                <span className="font-semibold text-lg text-[#002E34]">{item.title}</span>
                 <ChevronDown
-                    className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+                    className={`w-6 h-6 text-[#002E34] transition-transform duration-300 flex-shrink-0 ml-4 ${
                         isOpen ? "rotate-180" : ""
                     }`}
                 />
@@ -97,7 +97,7 @@ function AccordionItemComponent({ item, index, isOpen, onToggle }: {
                 style={{ maxHeight }}
                 className="overflow-hidden transition-all duration-300 ease-in-out"
             >
-                <div className="p-6 pt-2 bg-gray-50 text-gray-700 rounded-b-2xl">
+                <div className="px-5 pb-5 pt-2 bg-gray-50 text-gray-700 text-base leading-relaxed border-t border-gray-200">
                     {item.content}
                 </div>
             </div>
@@ -108,8 +108,13 @@ function AccordionItemComponent({ item, index, isOpen, onToggle }: {
 export default function ProductPage({ params }: ProductPageProps) {
     const { id } = use(params);
     const [productData, setProductData] = useState<ProductData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [, setComments] = useState<Comment[]>([]);
     const [, setLoadingComments] = useState(true);
+    const [quantity, setQuantity] = useState(1);
+    const [showCartNotification, setShowCartNotification] = useState(false);
+    const addItem = useCartStore((state) => state.addItem);
 
     // Função para buscar comentários
     const fetchComments = async () => {
@@ -137,63 +142,152 @@ export default function ProductPage({ params }: ProductPageProps) {
 
     useEffect(() => {
         const fetchProductData = async () => {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/adProducts/${id}`);
-            const data = await response.json();
-            setProductData(data);
+            try {
+                setLoading(true);
+                setError(null);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/adProducts/${id}`);
+
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar produto');
+                }
+
+                const data = await response.json();
+                setProductData(data);
+            } catch (err) {
+                console.error('Erro ao buscar produto:', err);
+                setError('Não foi possível carregar o produto');
+            } finally {
+                setLoading(false);
+            }
         };
         fetchProductData();
     }, [id]);
 
-    const cards = [
-        { id: 1, icon: <Repeat size={24} />, text: <>Toneladas de CO<sub>2eq</sub> Compensados</>, subText: 'Quantidade' },
-        { id: 2, icon: <ClipboardList size={24} />, text: 'Tipo de projeto', subText: 'Reflorestamento' },
-        { id: 3, icon: <Leaf size={24} />, text: 'Bioma', subText: 'Mata Atlântica' },
-        { id: 4, icon: <MapPin size={24} />, text: 'Local', subText: 'São Paulo' },
-        { id: 5, icon: <Info size={24} />, text: 'Status', subText: 'Ativo' },
-        { id: 6, icon: <FileText size={24} />, text: 'Padrão', subText: 'X'},
-    ];
-
-    const images = [
-        { src: "/images/placeholder.jpg", alt: "Imagem 1" },
-        { src: "/images/placeholder.jpg", alt: "Imagem 2" },
-        { src: "/images/placeholder.jpg", alt: "Imagem 3" },
-        { src: "/images/placeholder.jpg", alt: "Imagem 4" },
-        { src: "/images/placeholder.jpg", alt: "Imagem 5" },
-        { src: "/images/placeholder.jpg", alt: "Imagem 6" },
-    ];
-
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isTransitioning, setIsTransitioning] = useState(true);
-
-    // Sempre que desligar a transição, reativa logo depois (hack p/ suavizar)
-    useEffect(() => {
-        if (!isTransitioning) {
-        const timeout = setTimeout(() => setIsTransitioning(true), 50);
-        return () => clearTimeout(timeout);
-        }
-    }, [isTransitioning]);
 
     const [openIndexes, setOpenIndexes] = useState<number[]>([]);
 
     const toggleAccordion = (index: number) => {
         if (openIndexes.includes(index)) {
             setOpenIndexes(openIndexes.filter((i) => i !== index));
-        } 
+        }
         else {
             setOpenIndexes([...openIndexes, index]);
         }
     };
 
+    const handleAddToCart = () => {
+        if (!productData) return;
+
+        const itemToAdd = {
+            creditId: `CREDIT-${productData.id}`,
+            sellerId: productData.companyId || 'SELLER-UNKNOWN',
+            quantity: quantity,
+            pricePerUnit: productData.price / 100, // Converter de centavos para reais
+        };
+
+        addItem(itemToAdd);
+
+        // Mostrar notificação
+        setShowCartNotification(true);
+        setTimeout(() => setShowCartNotification(false), 3000);
+
+        // Resetar quantidade
+        setQuantity(1);
+    };
+
+    // Mostrar loading
+    if (loading) {
+        return (
+            <div className="w-full flex flex-col min-h-screen gap-8" style={{ backgroundColor: 'rgba(239, 239, 239, 1)' }}>
+                <Header />
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <p className="text-lg">Carregando produto...</p>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
+    // Mostrar erro
+    if (error || !productData) {
+        return (
+            <div className="w-full flex flex-col min-h-screen gap-8" style={{ backgroundColor: 'rgba(239, 239, 239, 1)' }}>
+                <Header />
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <p className="text-lg text-red-500">{error || 'Produto não encontrado'}</p>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
+    // Dados dos cards com informações reais do produto
+    const cards = [
+        {
+            id: 1,
+            icon: <Repeat size={24} />,
+            text: <>Toneladas de CO<sub>2eq</sub> Compensados</>,
+            subText: productData.co2_reduction ? `${productData.co2_reduction} t` : 'N/A'
+        },
+        {
+            id: 2,
+            icon: <ClipboardList size={24} />,
+            text: 'Tipo de projeto',
+            subText: productData.project_type || 'N/A'
+        },
+        {
+            id: 3,
+            icon: <Leaf size={24} />,
+            text: 'Bioma',
+            subText: productData.biome || 'N/A'
+        },
+        {
+            id: 4,
+            icon: <MapPin size={24} />,
+            text: 'Local',
+            subText: productData.local || 'N/A'
+        },
+        {
+            id: 5,
+            icon: <Info size={24} />,
+            text: 'Status',
+            subText: productData.status === 'pending' ? 'Pendente' : productData.status === 'active' ? 'Ativo' : productData.status
+        },
+        {
+            id: 6,
+            icon: <FileText size={24} />,
+            text: 'Padrão',
+            subText: productData.standard || 'N/A'
+        },
+    ];
+
+    // Processar imagens do carousel - usar carousel_images do banco ou placeholder
+    const carouselImages = productData.carousel_images && Array.isArray(productData.carousel_images)
+        ? productData.carousel_images
+        : [];
+
+    const images = carouselImages.length > 0
+        ? carouselImages.map((src: string, idx: number) => ({
+            src: src,
+            alt: `${productData.title} - Imagem ${idx + 1}`
+        }))
+        : [
+            { src: productData.image_ad || "/images/placeholder.jpg", alt: productData.title },
+            { src: "/images/placeholder.jpg", alt: "Imagem 2" },
+            { src: "/images/placeholder.jpg", alt: "Imagem 3" },
+        ];
+
     return (
-        <div className="w-full flex flex-col min-h-screen gap-8 overflow-hidden" style={{ backgroundColor: 'rgba(239, 239, 239, 1)' }}>
+        <div className="w-full flex flex-col min-h-screen gap-8" style={{ backgroundColor: 'rgba(239, 239, 239, 1)' }}>
             <Header />
 
             <div className="flex flex-col items-center p-8">
                 <div className="relative w-[99%] h-[700px] rounded-2xl overflow-hidden shadow-lg">
                     {/* Imagem de fundo*/}
                     <img
-                        src="https://via.placeholder.com/1200x600"
-                        alt={`Imagem produto ${id}`}
+                        src={productData.image_ad || "https://via.placeholder.com/1200x600"}
+                        alt={productData.title}
                         className="w-full h-full object-cover"
                     />
 
@@ -201,18 +295,46 @@ export default function ProductPage({ params }: ProductPageProps) {
                     <div className="absolute top-1/2 left-6 right-6 -translate-y-1/2 flex justify-between items-center">
                         {/* Texto */}
                         <div className="bg-black/50 text-white p-4 rounded-lg max-w-md">
-                            <h1 className="text-4xl lg:text-7xl font-bold">Produto {id}</h1>
-                            <p className="text-sm mt-4">X Créditos de carbono</p>
+                            <h1 className="text-4xl lg:text-7xl font-bold">{productData.title}</h1>
+                            <p className="text-sm mt-4">{productData.credit_type}</p>
+                            <p className="text-lg mt-2 font-semibold">
+                                R$ {(productData.price / 100).toFixed(2)}
+                            </p>
                         </div>
 
-                        {/* Botão */}
-                        <button
-                        style={{ backgroundColor: "rgb(0, 224, 127)" }}
-                        className="flex items-center gap-2 text-white px-6 py-3 rounded-lg hover:brightness-90"
-                        >
-                        <ShoppingCart size={20} />
-                        Comprar
-                        </button>
+                        {/* Botão e Quantidade */}
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="flex items-center gap-2 bg-black/50 rounded-lg p-2">
+                                <button
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    className="bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded transition"
+                                >
+                                    −
+                                </button>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max={productData.supply}
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(Math.max(1, Math.min(productData.supply, parseInt(e.target.value) || 1)))}
+                                    className="w-12 text-center bg-black/30 text-white border-0 rounded"
+                                />
+                                <button
+                                    onClick={() => setQuantity(Math.min(productData.supply, quantity + 1))}
+                                    className="bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded transition"
+                                >
+                                    +
+                                </button>
+                            </div>
+                            <button
+                                onClick={handleAddToCart}
+                                style={{ backgroundColor: "rgb(0, 224, 127)" }}
+                                className="flex items-center gap-2 text-white px-6 py-3 rounded-lg hover:brightness-90 transition"
+                            >
+                                <ShoppingCart size={20} />
+                                Comprar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -241,106 +363,135 @@ export default function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Carrossel de imagens */}
-            <div className="w-full flex flex-col items-center mt-10">
-                <div className="flex flex-col items-center w-[90%] max-w-4xl">
-                    <div
-                    className={`flex transition-transform duration-500 ease-in-out`}
-                    style={{
-                        transform: `translateX(calc(-${currentIndex * 70}% + 15%))`, 
-                    }}
-                    >
-                    {images.map((img, idx) => (
-                        <div
-                        key={idx}
-                        className="min-w-[70%] flex-shrink-0 px-2" 
-                        >
-                        <div className="aspect-square w-full">
-                            <img
-                            src={img.src}
-                            alt={img.alt}
-                            className="w-full h-full object-cover rounded-xl shadow-xl
-                            transform transition-transform duration-300 ease-in-out
-                            hover:scale-105"
-                            />
-                        </div>
-                        </div>
-                    ))}
-                    </div>
-                </div>
+            <div className="w-full flex flex-col items-center mt-10 mb-8">
+                <h2 className="text-3xl font-bold text-[#002E34] mb-8">Fotos do Projeto</h2>
 
-                <div className="flex items-center gap-4 mt-4">
-                    {/* Botão anterior */}
-                    <button
-                    onClick={() => setCurrentIndex((prev) => Math.max(prev - 1, 0))}
-                    className="text-2xl px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                    >
-                    &lt;
-                    </button>
+                <div className="relative w-full max-w-3xl px-4 overflow-visible">
+                    {/* Imagem Principal do Carousel */}
+                    <div className="relative w-full h-[500px] bg-gray-100 rounded-2xl overflow-hidden shadow-xl group">
+                        <img
+                            src={images[currentIndex].src}
+                            alt={images[currentIndex].alt}
+                            className="w-full h-full object-contain"
+                        />
 
-                    {/* Bolinhas */}
-                    <div className="flex gap-2">
-                    {images.map((_, idx) => (
-                        <span
-                        key={idx}
-                        className={`w-3 h-3 rounded-full ${
-                            idx === currentIndex ? "bg-gray-800" : "bg-gray-400"
-                        }`}
-                        ></span>
-                    ))}
+                        {/* Botões de Navegação */}
+                        {images.length > 1 && (
+                            <>
+                                <button
+                                    onClick={() => setCurrentIndex((prev) => Math.max(prev - 1, 0))}
+                                    disabled={currentIndex === 0}
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-all disabled:opacity-30 disabled:cursor-not-allowed opacity-0 group-hover:opacity-100"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    onClick={() => setCurrentIndex((prev) => Math.min(prev + 1, images.length - 1))}
+                                    disabled={currentIndex === images.length - 1}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-3 rounded-full hover:bg-black/70 transition-all disabled:opacity-30 disabled:cursor-not-allowed opacity-0 group-hover:opacity-100"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </>
+                        )}
+
+                        {/* Contador de imagens */}
+                        <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                            {currentIndex + 1} / {images.length}
+                        </div>
                     </div>
 
-                    {/* Botão próximo */}
-                    <button
-                    onClick={() =>
-                        setCurrentIndex((prev) => Math.min(prev + 1, images.length - 1))
-                    }
-                    className="text-2xl px-3 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
-                    >
-                    &gt;
-                    </button>
+                    {/* Miniaturas */}
+                    {images.length > 1 && (
+                        <div className="flex justify-center gap-2 mt-6 overflow-x-auto px-2 pt-2 pb-4">
+                            {images.map((img, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setCurrentIndex(idx)}
+                                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                                        idx === currentIndex
+                                            ? 'border-[#002E34] scale-110 shadow-lg'
+                                            : 'border-gray-300 hover:border-gray-400 opacity-70 hover:opacity-100'
+                                    }`}
+                                    style={{ transformOrigin: 'center top' }}
+                                >
+                                    <img
+                                        src={img.src}
+                                        alt={img.alt}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Descrição detalhada do produto */}
-            <div className="p-8 space-y-4 mt-10">
-                <span className="block">Descrição detalhada do produto</span>
+            <div className="w-full flex justify-center px-4 mt-7 mb-8">
+                <div className="bg-white rounded-2xl shadow-lg p-8 max-w-4xl w-full">
+                    <h2 className="text-3xl font-bold text-[#002E34] mb-6 text-center">
+                        Sobre o Projeto
+                    </h2>
+                    <div className="prose prose-lg max-w-none">
+                        <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-line text-justify">
+                            {productData.description || 'Descrição não disponível.'}
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* "Conheça melhor" */}
-            <div className="p-8 space-y-6 mt-6">
-                <h1 className="text-4xl font-bold flex flex-col items-center justify-center">Conheça melhor</h1>
+            <div className="w-full flex justify-center px-4 mt-8 mb-7">
+                <div className="max-w-4xl w-full">
+                    <h2 className="text-3xl font-bold text-[#002E34] mb-8 text-center">
+                        Conheça Melhor
+                    </h2>
 
-                <div className="max-w-md mx-auto mt-8 space-y-4">
-                    {accordionData.map((item, index) => (
-                        <AccordionItemComponent
-                            key={index}
-                            item={item}
-                            index={index}
-                            isOpen={openIndexes.includes(index)}
-                            onToggle={toggleAccordion}
+                    <div className="space-y-3">
+                        {[
+                            { title: "O problema", content: productData.problem || "Informação não disponível" },
+                            { title: "A solução do produto", content: productData.solution || "Informação não disponível" },
+                            { title: "Impacto gerado", content: productData.impact || "Informação não disponível" },
+                        ].map((item, index) => (
+                            <AccordionItemComponent
+                                key={index}
+                                item={item}
+                                index={index}
+                                isOpen={openIndexes.includes(index)}
+                                onToggle={toggleAccordion}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Seção de Comentários */}
+            <div className="w-full flex flex-col items-center px-4 mb-16">
+                <div className="max-w-4xl w-full">
+                    <h2 className="text-3xl font-bold text-[#002E34] mb-8 text-center">
+                        Deixe seu comentário
+                    </h2>
+
+                    <div className="mb-8">
+                        <CreateCommentBox
+                            adProductId={id}
+                            onCommentAdded={fetchComments}
                         />
-                    ))}
-                </div>
+                    </div>
 
-                <div className="mt-10 flex justify-center items-center"> 
-                    <h1 className="text-4xl font-bold">Deixe seu comentário</h1>
-                </div>
-
-                <div className="mt-10 flex justify-center items-center"> 
-                    <CreateCommentBox 
-                    adProductId={id}
-                    onCommentAdded={fetchComments} // Passar função para recarregar comentários
-                    />
-                </div>
-
-                <div className="mt-10 flex justify-center items-center"> 
-                    <CommentsSection 
-                    adProductId={id}
+                    <CommentsSection
+                        adProductId={id}
                     />
                 </div>
             </div>
 
             <Footer />
-        </div>    
+        </div>
     );
 }
