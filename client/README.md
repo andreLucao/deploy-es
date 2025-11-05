@@ -1,5 +1,32 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Responsive Design
+
+This project implements a mobile-first responsive design approach using Tailwind CSS with the following features:
+
+### Global Responsive Classes
+- `container-responsive`: Responsive container with proper padding
+- `container-full`: Full-width container with responsive padding
+- `grid-responsive-1` to `grid-responsive-4`: Responsive grid layouts
+- `text-responsive-sm` to `text-responsive-2xl`: Responsive typography
+- `spacing-responsive-sm` to `spacing-responsive-lg`: Responsive spacing
+- `flex-responsive-col` and `flex-responsive-row`: Responsive flex layouts
+
+### Breakpoints
+- `sm`: 640px+ (Mobile landscape)
+- `md`: 768px+ (Tablet)
+- `lg`: 1024px+ (Desktop)
+- `xl`: 1280px+ (Large desktop)
+- `2xl`: 1536px+ (Extra large desktop)
+
+### Utility Hooks
+- `useBreakpoint()`: Detect current breakpoint
+- `useMediaQuery()`: Custom media query hook
+
+### Components
+- `ResponsiveWrapper`: Container component with responsive options
+- `ResponsiveGrid`: Grid component with responsive columns
+
 ## Getting Started
 
 First, run the development server:

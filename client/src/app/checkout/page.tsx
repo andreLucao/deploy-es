@@ -48,24 +48,24 @@ export default function CheckoutPage() {
    };
 
    return (
-      <div className="py-8 px-4">
+      <div className="container-responsive spacing-responsive-md min-h-screen bg-gray-50">
          {" "}
          {/* Botão de Voltar */}
          <button
             onClick={handleGoBack}
-            className="flex items-center text-blue-600 hover:text-blue-800 transition mb-4 cursor-pointer"
+            className="flex items-center text-blue-600 hover:text-blue-800 transition mb-4 cursor-pointer text-responsive-sm"
          >
             <ArrowLeft size={20} className="mr-2" />
             Voltar ao Marketplace
          </button>
-         <div className="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
+         <div className="max-w-4xl mx-auto bg-white spacing-responsive-md rounded-xl shadow-2xl">
             {" "}
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">
+            <h1 className="text-responsive-xl font-bold mb-6 text-gray-800">
                Sua Transação
             </h1>{" "}
             {items.length === 0 ? (
-               <div className="text-center py-10 border-dashed border-2 rounded-lg">
-                  <p className="text-lg text-gray-500">
+               <div className="text-center spacing-responsive-lg border-dashed border-2 rounded-lg">
+                  <p className="text-responsive-base text-gray-500">
                      Seu carrinho está vazio.
                   </p>{" "}
                </div>
@@ -77,61 +77,62 @@ export default function CheckoutPage() {
                      {items.map((item) => (
                         <li
                            key={item.creditId}
-                           className="flex justify-between items-center bg-gray-50 p-3 rounded-lg"
+                           className="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-gray-50 spacing-responsive-sm rounded-lg gap-4"
                         >
-                           <div className="flex-1 min-w-0 mr-4">
-                              <p className="font-semibold text-base truncate">
+                           <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-responsive-sm truncate">
                                  {item.creditId.substring(0, 25)}...
                               </p>{" "}
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs sm:text-sm text-gray-500">
                                  R$ {item.pricePerUnit.toFixed(2)} por unidade
                               </p>
                            </div>
 
-                           <div className="flex items-center space-x-2 text-base">
+                           <div className="flex items-center justify-between sm:justify-start space-x-2 text-responsive-sm">
                               {" "}
                               {/* Botões de quantidade */}
-                              <button
-                                 onClick={() => decreaseQuantity(item.creditId)}
-                                 className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
-                              >
-                                 {" "}
-                                 <Minus size={14} />{" "}
-                              </button>
-                              <span className="font-bold w-4 text-center">
-                                 {item.quantity}
-                              </span>
-                              <button
-                                 onClick={() => increaseQuantity(item.creditId)}
-                                 className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
+                              <div className="flex items-center space-x-2">
+                                 <button
+                                    onClick={() => decreaseQuantity(item.creditId)}
+                                    className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
+                                 >
+                                    {" "}
+                                    <Minus size={14} />{" "}
+                                 </button>
+                                 <span className="font-bold w-4 text-center">
+                                    {item.quantity}
+                                 </span>
+                                 <button
+                                    onClick={() => increaseQuantity(item.creditId)}
+                                    className="p-1 border rounded-full hover:bg-gray-200 cursor-pointer"
                               >
                                  {" "}
                                  <Plus size={14} />{" "}
                               </button>
                            </div>
 
-                           <div className="ml-4 w-28 text-right">
-                              <span className="font-bold text-lg text-indigo-700">
-                                 {" "}
-                                 R${" "}
-                                 {(item.quantity * item.pricePerUnit).toFixed(
-                                    2
-                                 )}
-                              </span>
-                              <button
-                                 onClick={() => removeItem(item.creditId)}
-                                 className="ml-2 text-red-500 hover:text-red-700 transition cursor-pointer"
-                              >
-                                 <Trash2 size={16} />
-                              </button>
+                              <div className="flex items-center space-x-2">
+                                 <span className="font-semibold text-green-600 text-responsive-sm">
+                                    R${" "}
+                                    {(item.quantity * item.pricePerUnit).toFixed(
+                                       2
+                                    )}
+                                 </span>
+                                 <button
+                                    onClick={() => removeItem(item.creditId)}
+                                    className="text-red-500 hover:text-red-700 transition cursor-pointer"
+                                 >
+                                    <Trash2 size={16} />
+                                 </button>
+                              </div>
                            </div>
                         </li>
                      ))}
                   </ul>
 
                   {/* Resumo Final */}
-                  <div className="text-right mt-6">
-                     <span className="text-xl font-extrabold text-green-700 border-t-2 pt-2">
+                  <div className="text-center sm:text-right mt-6">
+                     <span className="text-responsive-lg font-extrabold text-green-700 border-t-2 pt-2 block">
                         {" "}
                         TOTAL: R$ {getTotalPrice().toFixed(2)}
                      </span>
@@ -140,7 +141,7 @@ export default function CheckoutPage() {
                   {/* Botão de Finalizar */}
                   <button
                      onClick={handleProcessCheckout}
-                     className="w-full mt-6 py-3 bg-green-600 text-white text-lg font-bold rounded-lg hover:bg-green-700 transition shadow-lg cursor-pointer"
+                     className="w-full mt-6 spacing-responsive-sm bg-green-600 text-white text-responsive-base font-bold rounded-lg hover:bg-green-700 transition shadow-lg cursor-pointer"
                   >
                      Confirmar e Pagar
                   </button>

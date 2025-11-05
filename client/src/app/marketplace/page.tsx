@@ -69,43 +69,50 @@ export default function Marketplace() {
   return (
     <div className="flex flex-col min-h-screen custom-gradient">
       <Header />
-      <div className="flex flex-col">
-        <div className="flex p-30 h-170">
-          <Destaque />
+      <div className="flex flex-col container-full">
+        {/* Destaques - com espaço abaixo */}
+        <div className="flex flex-col py-12 lg:flex-row mb-8 sm:mb-12">
+          <div className="w-full">
+            <Destaque />
+          </div>
         </div>
 
-        <Filtro 
-          modoVisualizacao={modoVisualizacao}   
-          setModoVisualizacao={setModoVisualizacao}
-          produtosPorPagina={produtosPorPagina}
-          setProdutosPorPagina={(qtd) => {
-            setProdutosPorPagina(qtd);
-            setPaginaAtual(1); 
-          }}
-          ordenacao={ordenacao}
-          setOrdenacao={setOrdenacao}
-          setFiltro={(f) => {
-            setFiltro(f);
-            setPaginaAtual(1); 
-          }}
-          busca={busca}
-          setBusca={(valor) => {
-            setBusca(valor);
-            setPaginaAtual(1);
-          }}
-        />
+        {/* Filtros - com mais espaçamento */}
+        <div className="container-responsive mt-8 sm:mt-12 mb-8 sm:mb-10">
+          <Filtro 
+            modoVisualizacao={modoVisualizacao}   
+            setModoVisualizacao={setModoVisualizacao}
+            produtosPorPagina={produtosPorPagina}
+            setProdutosPorPagina={(qtd) => {
+              setProdutosPorPagina(qtd);
+              setPaginaAtual(1); 
+            }}
+            ordenacao={ordenacao}
+            setOrdenacao={setOrdenacao}
+            setFiltro={(f) => {
+              setFiltro(f);
+              setPaginaAtual(1); 
+            }}
+            busca={busca}
+            setBusca={(valor) => {
+              setBusca(valor);
+              setPaginaAtual(1);
+            }}
+          />
+        </div>
 
-        <div className="flex">
+        {/* Produtos */}
+        <div className="flex container-responsive">
           {loading ? (
             <div className="flex justify-center items-center w-full min-h-[400px]">
-              <p className="text-lg">Carregando produtos...</p>
+              <p className="text-responsive-base">Carregando produtos...</p>
             </div>
           ) : error ? (
             <div className="flex justify-center items-center w-full min-h-[400px]">
-              <p className="text-lg text-red-500">{error}</p>
+              <p className="text-responsive-base text-red-500">{error}</p>
             </div>
           ) : produtos.length === 0 ? (
-            <p className="p-4">Nenhum produto encontrado.</p>
+            <p className="spacing-responsive-sm text-responsive-sm">Nenhum produto encontrado.</p>
           ) : (
             <Produtos 
               produtos={produtos}
