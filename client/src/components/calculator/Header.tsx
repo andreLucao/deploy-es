@@ -72,12 +72,6 @@ export default function Header() {
 
             {/* Desktop Right Section - Modernizado */}
             <div className="ml-auto hidden xl:flex items-center gap-4">
-               {/* Créditos */}
-               <div className="flex items-center justify-center bg-gradient-to-r from-[#00e07f] to-[#00b865] h-11 px-5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                  <span className="text-[#002E34] font-bold text-sm">💎</span>
-                  <span className="text-[#002E34] font-bold ml-2">1,000 CC</span>
-               </div>
-
                {/* Carrinho */}
                <CartDrawer />
 
@@ -186,12 +180,6 @@ export default function Header() {
                      <button onClick={() => setIsMenuOpen(false)} className="text-white hover:bg-white/10 p-2 rounded-lg transition-colors">
                         <X size={24} />
                      </button>
-                  </div>
-
-                  {/* Mobile Credits */}
-                  <div className="flex items-center justify-center bg-gradient-to-r from-[#00e07f] to-[#00b865] h-12 rounded-xl mb-6 shadow-md">
-                     <span className="text-[#002E34] font-bold text-sm">💎</span>
-                     <span className="text-[#002E34] font-bold ml-2">1,000 CC</span>
                   </div>
 
                   {/* Mobile Navigation */}

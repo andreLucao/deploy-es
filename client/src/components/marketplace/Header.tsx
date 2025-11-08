@@ -1,11 +1,9 @@
 "use client";
 
 import { User, LogOut, Settings, ChevronDown, Menu, X } from "lucide-react";
-import { useRouter } from "next/dist/client/components/navigation";
+import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
-
 import CartDrawer from "../common/CartDrawer";
 
 export default function Header() {
@@ -13,11 +11,38 @@ export default function Header() {
    const [isMenuOpen, setIsMenuOpen] = useState(false);
    const [isProfileOpen, setIsProfileOpen] = useState(false);
    const [mounted, setMounted] = useState(false);
+   const [credits, setCredits] = useState<number | null>(null);
+   const [loading, setLoading] = useState(true);
    const profileRef = useRef<HTMLDivElement>(null);
 
    // Garantir que está montado no cliente
    useEffect(() => {
       setMounted(true);
+   }, []);
+
+   // Buscar créditos do usuário
+   useEffect(() => {
+      async function fetchCredits() {
+         try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/credits`, {
+               credentials: "include",
+            });
+            
+            if (!res.ok) {
+               setLoading(false);
+               return;
+            }
+
+            const data = await res.json();
+            setCredits(data.credits);
+         } catch (err) {
+            console.error("Erro ao carregar créditos:", err);
+         } finally {
+            setLoading(false);
+         }
+      }
+
+      fetchCredits();
    }, []);
 
    // Fechar dropdown ao clicar fora
@@ -36,42 +61,16 @@ export default function Header() {
          document.removeEventListener("mousedown", handleClickOutside);
       };
    }, [isProfileOpen]);
-   const [credits, setCredits] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true); 
-
-  useEffect(() => {
-    async function fetchCredits() {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/credits`, {
-          credentials: "include", // envia cookie JWT automaticamente
-        });
-
-        if (!res.ok) {
-          setLoading(false);
-          return; // não logado
-        }
-
-        const data = await res.json();
-        setCredits(data.credits);
-      } catch (err) {
-        console.error("Erro ao carregar créditos:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCredits();
-  }, []);
 
    return (
       <>
-         <div className="w-full h-16 sm:h-20 flex items-center px-3 sm:px-6 lg:px-24 py-3 bg-gradient-to-r from-[#002E34] to-[#002E34] shadow-lg backdrop-blur-sm sticky top-0 z-50">
+         <div className="w-full h-16 sm:h-20 flex items-center px-3 sm:px-6 lg:px-12 xl:px-24 py-3 bg-gradient-to-r from-[#002E34] to-[#002E34] shadow-lg backdrop-blur-sm sticky top-0 z-50">
             {/* Logo */}
             <div className="flex-shrink-0 cursor-pointer group" onClick={() => router.push("/marketplace")}>
                <img
                   src="/imgs/Logo.png"
                   alt="Logo"
-                  className="h-10 sm:h-12 lg:h-16 transition-transform duration-300 group-hover:scale-105"
+                  className="h-10 sm:h-12 lg:h-14 xl:h-16 transition-transform duration-300 group-hover:scale-105"
                />
             </div>
 
@@ -100,10 +99,12 @@ export default function Header() {
             {/* Desktop Right Section - Modernizado */}
             <div className="ml-auto hidden xl:flex items-center gap-4">
                {/* Créditos */}
-               <div className="flex items-center justify-center bg-gradient-to-r from-[#00e07f] to-[#00b865] h-11 px-5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                  <span className="text-[#002E34] font-bold text-sm">💎</span>
-                  <span className="text-[#002E34] font-bold ml-2">1,000 CC</span>
-               </div>
+               {!loading && credits !== null && (
+                  <div className="flex items-center justify-center bg-white border-2 border-[#00e07f] h-10 xl:h-11 px-4 xl:px-5 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                     <span className="text-[#002E34] font-bold text-sm xl:text-base">{credits}</span>
+                     <span className="text-[#00e07f] font-semibold text-xs xl:text-sm ml-1">CC</span>
+                  </div>
+               )}
 
                {/* Carrinho */}
                <CartDrawer />
@@ -112,38 +113,19 @@ export default function Header() {
                <div className="relative" ref={profileRef}>
                   <button
                      onClick={() => setIsProfileOpen(!isProfileOpen)}
-                     className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-1.5 pr-3 transition-all duration-300 group"
+                     className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-1.5 xl:pr-3 transition-all duration-300 group"
                   >
-                     <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-[#00e07f]/50 group-hover:ring-[#00e07f] transition-all duration-300">
+                     <div className="w-9 h-9 xl:w-10 xl:h-10 rounded-full overflow-hidden ring-2 ring-[#00e07f]/50 group-hover:ring-[#00e07f] transition-all duration-300">
                         <img
                            src="/imgs/avatar.png"
                            alt="User"
                            className="w-full h-full object-cover"
                         />
                      </div>
-                     <span className="text-white font-medium text-sm hidden xl:block">Usuário</span>
+                     <span className="text-white font-medium text-sm hidden 2xl:block">Usuário</span>
                      <ChevronDown 
                         size={16} 
-                        className={`text-white transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`}
-            <div className="ml-auto flex items-center">
-
-               {/* Só mostrar créditos se logado */}
-              {!loading && credits !== null && (
-                <div className="flex items-center gap-2 bg-white border border-[#1AAE9F] px-6 py-2.5 rounded-full mr-4 shadow-sm">
-                 <span className="text-black font-semibold text-base">{credits}</span>
-                <span className="text-[#0E8F85] font-semibold text-sm tracking-wider">CC</span>
-              </div>
-               )}
-
-              
-               <div className="flex items-center gap-2">
-                  <CartDrawer />
-                  <Menu className="text-white ml-4" />
-                  <div className="w-13 h-13 bg-gray-300 rounded-full ml-4">
-                     <img
-                        src="/imgs/avatar.png"
-                        alt="User"
-                        className="h-full rounded-full"
+                        className={`text-white transition-transform duration-300 hidden xl:block ${isProfileOpen ? 'rotate-180' : ''}`}
                      />
                   </button>
 
@@ -235,10 +217,12 @@ export default function Header() {
                   </div>
 
                   {/* Mobile Credits */}
-                  <div className="flex items-center justify-center bg-gradient-to-r from-[#00e07f] to-[#00b865] h-12 rounded-xl mb-6 shadow-md">
-                     <span className="text-[#002E34] font-bold text-sm">💎</span>
-                     <span className="text-[#002E34] font-bold ml-2">1,000 CC</span>
-                  </div>
+                  {!loading && credits !== null && (
+                     <div className="flex items-center justify-center bg-white border-2 border-[#00e07f] h-12 rounded-xl mb-6 shadow-md">
+                        <span className="text-[#002E34] font-bold">{credits}</span>
+                        <span className="text-[#00e07f] font-semibold text-sm ml-1">CC</span>
+                     </div>
+                  )}
 
                   {/* Mobile Navigation */}
                   <nav className="space-y-2">

@@ -69,7 +69,7 @@ export default function Marketplace() {
   return (
     <div className="flex flex-col min-h-screen custom-gradient">
       <Header />
-      <div className="flex flex-col container-full">
+      <div className="flex-1 flex flex-col container-full">
         {/* Destaques - com espaço abaixo */}
         <div className="flex flex-col py-12 lg:flex-row mb-8 sm:mb-12">
           <div className="w-full">
