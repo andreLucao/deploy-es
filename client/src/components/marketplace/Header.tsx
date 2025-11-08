@@ -4,7 +4,6 @@ import { User, LogOut, Settings, ChevronDown, Menu, X } from "lucide-react";
 import { useRouter } from "next/dist/client/components/navigation";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
 
 import CartDrawer from "../common/CartDrawer";
 
@@ -122,28 +121,9 @@ export default function Header() {
                         />
                      </div>
                      <span className="text-white font-medium text-sm hidden xl:block">Usuário</span>
-                     <ChevronDown 
-                        size={16} 
+                     <ChevronDown
+                        size={16}
                         className={`text-white transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`}
-            <div className="ml-auto flex items-center">
-
-               {/* Só mostrar créditos se logado */}
-              {!loading && credits !== null && (
-                <div className="flex items-center gap-2 bg-white border border-[#1AAE9F] px-6 py-2.5 rounded-full mr-4 shadow-sm">
-                 <span className="text-black font-semibold text-base">{credits}</span>
-                <span className="text-[#0E8F85] font-semibold text-sm tracking-wider">CC</span>
-              </div>
-               )}
-
-              
-               <div className="flex items-center gap-2">
-                  <CartDrawer />
-                  <Menu className="text-white ml-4" />
-                  <div className="w-13 h-13 bg-gray-300 rounded-full ml-4">
-                     <img
-                        src="/imgs/avatar.png"
-                        alt="User"
-                        className="h-full rounded-full"
                      />
                   </button>
 

@@ -184,6 +184,7 @@ export default function ProductPage({ params }: ProductPageProps) {
             sellerId: productData.companyId || 'SELLER-UNKNOWN',
             quantity: quantity,
             pricePerUnit: productData.price / 100, // Converter de centavos para reais
+            productName: productData.title,
         };
 
         addItem(itemToAdd);
