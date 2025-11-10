@@ -2,6 +2,8 @@
 
 import { CircleChevronLeft } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 type LoginState = 'form' | 'loading' | 'success' | 'error';
 
@@ -9,6 +11,8 @@ export default function RegisterCard() {
     const [email, setEmail] = useState("");
     const [isValid, setIsValid] = useState(true);
     const [loginState, setLoginState] = useState<LoginState>('form');
+    const { login } = useAuth();
+    const router = useRouter();
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -41,13 +45,21 @@ export default function RegisterCard() {
                  body: JSON.stringify({ email }),
             });
 
-            // Caso der certo, setar o estado de sucesso; Setei como true para testar
-            if (true) {
+            if (response.ok) {
                 setLoginState('success');
+                // Tentar fazer login no contexto de autenticação
+                // Nota: isso pode falhar até que o usuário clique no link do email
+                try {
+                    await login(email);
+                } catch (loginError) {
+                    // Ignorar erro - usuário ainda precisa clicar no link do email
+                    console.log('Login automático falhou (esperado até clicar no link):', loginError);
+                }
             } else {
                 setLoginState('error');
             }
         } catch (error) {
+            console.error('Erro ao enviar magic link:', error);
             setLoginState('error');
         }
     };

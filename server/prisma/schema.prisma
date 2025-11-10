@@ -23,7 +23,7 @@ model Company {
   cart       Cart?
   orders     Order[]
   payments   Payment[]
-  inventories EmissionInventory[]
+  emissionInventories EmissionInventory[]
 
   @@map("companies")
 }
@@ -36,7 +36,7 @@ model EmissionProduct {
   createdAt DateTime @default(now()) @map("created_at")
 
   emissionFactors EmissionFactor[]
-  emissions       Emission[]
+  // Removido: emissions Emission[] - não mais necessário
 
   @@map("emission_products")
 }
@@ -54,27 +54,41 @@ model EmissionFactor {
   @@map("emission_factors")
 }
 
+model EmissionInventory {
+  id        String   @id @default(uuid())
+  companyId String   @map("company_id")
+  year      Int
+  name      String
+  status    InventoryStatus @default(DRAFT)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company   Company    @relation(fields: [companyId], references: [id])
+  emissions Emission[]
+
+  // Removido @@unique([companyId, year]) para permitir múltiplos inventários por ano
+  @@map("emission_inventories")
+}
+
 model Emission {
   id String @id @default(uuid())
 
-  scope        Int       // 1, 2, 3
-  emissionType String    // "combustao_movel", "eletricidade", etc.
-  formData     Json?     // JSON com os dados do formulário da calculadora
-  deletedAt    DateTime? @map("deleted_at") // Pro soft delete
-
-  inventoryId       String @map("inventory_id")
-  emissionProductId String @map("emission_product_id")
-
-  quantity       Int
-  calculatedCo2e Float     @map("calculated_co2e")
-  registeredAt   DateTime? @map("registered_at")
+  scope          Int       // 1, 2, 3
+  inventoryId    String    @map("inventory_id")
+  
+  // Dados compilados de TODAS as emissões do escopo
+  emissionsData  Json      // Array com todas as emissões do escopo
+  totalCo2e      Float     @map("total_co2e") // Total calculado do escopo
+  emissionsCount Int       @default(0) @map("emissions_count") // Quantidade de emissões
+  
+  deletedAt      DateTime? @map("deleted_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   description    String?
 
-  inventory       EmissionInventory @relation(fields: [inventoryId], references: [id])
-  emissionProduct EmissionProduct @relation(fields: [emissionProductId], references: [id])
+  inventory EmissionInventory @relation(fields: [inventoryId], references: [id])
 
-  @@unique([inventoryId, emissionProductId]) // Evita duplicar um produto no mesmo inventário
+  // Uma linha por escopo por inventário
+  @@unique([inventoryId, scope])
   @@map("emissions")
 }
 
@@ -238,22 +252,6 @@ enum PaymentStatus {
   CANCELLED
 }
 
-model EmissionInventory {
-  id        String    @id @default(uuid())
-  companyId String    @map("company_id")
-  year      Int
-  name      String    // Ex: "Inventário Anual 2024"
-  status    InventoryStatus @default(DRAFT) // (DRAFT, PUBLISHED, etc.)
-
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-
-  company   Company     @relation(fields: [companyId], references: [id])
-  emissions Emission[]  // Cada inventário possui seus registros de emissão
-
-  @@unique([companyId, year]) // Pra garantir que cada empresa só tenha um inventário por ano
-  @@map("emission_inventories")
-}
 
 enum InventoryStatus {
   DRAFT     // Rascunho, está sendo editado

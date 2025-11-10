@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface User {
   id: string;
@@ -17,6 +18,7 @@ interface VerifyResponse {
 function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Verifying your account...');
 
@@ -47,6 +49,14 @@ function VerifyContent() {
         const data: VerifyResponse = await response.json();
 
         if (response.ok && data.token && data.user) {
+          
+          // Buscar dados completos do usuário autenticado (com UUID correto do JWT)
+          try {
+            await login(data.user.email);
+            console.log('✅ Dados do usuário carregados com sucesso');
+          } catch (loginError) {
+            console.error('❌ Erro ao carregar dados do usuário:', loginError);
+          }
           
           setStatus('success');
           setMessage('Login successful! Redirecting to your dashboard...');
