@@ -78,6 +78,70 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
     setError(null);
   }, []);
 
+  // Função para extrair a quantidade correta baseada no tipo de emissão e seus campos
+  const extractQuantity = (emissionType: string, formData: Record<string, string | number | boolean>): number => {
+    // Mapeamento de tipos de emissão para seus campos de quantidade
+    const quantityFieldMap: Record<string, string[]> = {
+      // Escopo 1
+      'combustao_movel': ['quantity', 'annualConsumption'],
+      'combustao_estacionaria': ['quantity', 'annualConsumption'],
+      'emissoes_fugitivas': ['newUnitsLoad', 'newUnitsCapacity', 'existingUnitsRecharge', 'discardedUnitsCapacity', 'discardedUnitsRecovered'],
+      'processos_industriais': ['quantity', 'annualProduction'],
+      'atividades_agricultura': ['quantity', 'annualProduction'],
+      'mudancas_uso_solo': ['area', 'quantity'],
+      'residuos_solidos': ['mass', 'quantity', 'annualWaste'],
+      'efluentes': ['quantity', 'annualVolume'],
+      
+      // Escopo 2
+      'compra_energia_eletrica': ['annualPurchase'],
+      'perdas_energia': ['annualLoss'],
+      'compra_energia_termica': ['valuePurchased', 'annualConsumption'],
+      
+      // Escopo 3
+      'transporte_distribuicao': ['annualConsumption', 'annualDistance', 'annualWeight'],
+      'residuos_solidos_gerados': ['mass', 'annualWaste'],
+      'efluentes_gerados': ['quantity', 'annualVolume'],
+      'viagens_negocios': ['annualConsumption', 'annualDistance'],
+    };
+
+    const possibleFields = quantityFieldMap[emissionType] || ['quantity'];
+    
+    // Caso especial: emissões fugitivas precisam somar todos os campos
+    if (emissionType === 'emissoes_fugitivas') {
+      const fields = ['newUnitsLoad', 'newUnitsCapacity', 'existingUnitsRecharge', 'discardedUnitsCapacity', 'discardedUnitsRecovered'];
+      let total = 0;
+      
+      for (const field of fields) {
+        if (formData[field] !== undefined && formData[field] !== null && formData[field] !== '') {
+          const value = typeof formData[field] === 'number' 
+            ? formData[field] 
+            : parseFloat(String(formData[field]));
+          
+          if (!isNaN(value) && value > 0) {
+            total += value;
+          }
+        }
+      }
+      
+      return total;
+    }
+    
+    // Para outros tipos, tentar extrair quantidade de qualquer um dos campos possíveis
+    for (const field of possibleFields) {
+      if (formData[field] !== undefined && formData[field] !== null && formData[field] !== '') {
+        const value = typeof formData[field] === 'number' 
+          ? formData[field] 
+          : parseFloat(String(formData[field]));
+        
+        if (!isNaN(value) && value > 0) {
+          return value;
+        }
+      }
+    }
+    
+    return 0;
+  };
+
   const updateEmission = (scope: keyof CalculatorData, emissionId: string, emissionData: Record<string, string | number | boolean>) => {
     setData(prev => ({
       ...prev,
@@ -85,9 +149,8 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
         ...prev[scope],
         emissions: prev[scope].emissions.map(emission => {
           if (emission.id === emissionId) {
-            const quantity = typeof emissionData.quantity === 'number'
-              ? emissionData.quantity
-              : parseFloat(String(emissionData.quantity || 0)) || 0;
+            // Extrair quantidade baseada no tipo de emissão
+            const quantity = extractQuantity(emission.type, emissionData);
             const emissionFactor = 2.5; // Fator padrão (pode ser melhorado com dados reais)
             const calculatedCo2e = quantity > 0 ? quantity * emissionFactor : 0;
 
@@ -179,7 +242,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
             emissions: data.scope1.emissions.map(emission => ({
               type: emission.type,
               emissionProductId: emission.emissionProductId || 'default-product',
-              quantity: emission.quantity || 0,
+              quantity: extractQuantity(emission.type, emission.fields || {}),
               emissionType: emission.emissionType || emission.type,
               scope: 1,
               formData: emission.fields,
@@ -190,7 +253,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
             emissions: data.scope2.emissions.map(emission => ({
               type: emission.type,
               emissionProductId: emission.emissionProductId || 'default-product',
-              quantity: emission.quantity || 0,
+              quantity: extractQuantity(emission.type, emission.fields || {}),
               emissionType: emission.emissionType || emission.type,
               scope: 2,
               formData: emission.fields,
@@ -201,7 +264,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
             emissions: data.scope3.emissions.map(emission => ({
               type: emission.type,
               emissionProductId: emission.emissionProductId || 'default-product',
-              quantity: emission.quantity || 0,
+              quantity: extractQuantity(emission.type, emission.fields || {}),
               emissionType: emission.emissionType || emission.type,
               scope: 3,
               formData: emission.fields,
@@ -213,6 +276,39 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
 
       const result = await calculatorAPI.calculateInventory(inventoryData);
       setLastResult(result);
+      
+      // Atualizar os valores calculados no contexto com os resultados do backend
+      if (result?.scopeBreakdown) {
+        const breakdown = result.scopeBreakdown as Record<string, any>;
+        
+        setData(prev => {
+          const updatedData = { ...prev };
+          
+          // O scopeBreakdown agora é um objeto: { scope1: {...}, scope2: {...}, scope3: {...} }
+          Object.entries(breakdown).forEach(([scopeKey, scopeData]) => {
+            const dataKey = scopeKey as keyof CalculatorData;
+            
+            if (scopeData?.emissions && Array.isArray(scopeData.emissions) && updatedData[dataKey]) {
+              updatedData[dataKey] = {
+                ...updatedData[dataKey],
+                emissions: updatedData[dataKey].emissions.map((emission, index) => {
+                  const backendEmission = scopeData.emissions[index];
+                  if (backendEmission?.calculatedCo2e !== undefined) {
+                    return {
+                      ...emission,
+                      calculatedCo2e: backendEmission.calculatedCo2e
+                    };
+                  }
+                  return emission;
+                })
+              };
+            }
+          });
+          
+          return updatedData;
+        });
+      }
+      
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
