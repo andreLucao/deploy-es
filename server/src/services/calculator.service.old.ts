@@ -2,6 +2,7 @@ import prisma from "../config/database";
 import {
    Emission,
    Company,
+   EmissionInventory,
 } from "../../generated/prisma";
 
 type JsonValue =
@@ -32,7 +33,8 @@ interface InventoryInput {
 export class CalculatorService {
    /**
     * Calcula e salva um novo inventário de emissões.
-    * Cria UMA ÚNICA LINHA por cálculo com TODOS os escopos e emissões compilados.
+    * SEMPRE cria um NOVO inventário (não atualiza existente).
+    * Cada escopo é salvo como UMA linha na tabela Emission com todas as emissões compiladas.
     */
    async calculateAndSaveInventory(data: any): Promise<any> {
       const { companyId, year, scopes } = data;
@@ -55,27 +57,57 @@ export class CalculatorService {
          minute: '2-digit',
          second: '2-digit'
       });
-      const inventoryDescription = `Inventário ${currentYear} - ${timestamp}`;
+      const inventoryName = `Inventário ${currentYear} - ${timestamp}`;
 
       console.log(`\n🏭 Criando novo inventário para empresa ${company.email}`);
       console.log(`📅 Ano: ${currentYear}`);
-      console.log(`📝 Descrição: ${inventoryDescription}\n`);
+      console.log(`📝 Nome: ${inventoryName}\n`);
+
+      // Verificar se já existe um inventário para este ano e empresa
+      const existingInventory = await prisma.emissionInventory.findFirst({
+         where: { companyId, year: currentYear }
+      });
+
+      if (existingInventory) {
+         console.log(`⚠️ Já existe inventário para o ano ${currentYear}`);
+         console.log(`🗑️ Deletando inventário antigo: ${existingInventory.id}\n`);
+         
+         // Deletar emissões primeiro (foreign key)
+         await prisma.emission.deleteMany({
+            where: { inventoryId: existingInventory.id }
+         });
+         
+         // Depois deletar o inventário
+         await prisma.emissionInventory.delete({
+            where: { id: existingInventory.id }
+         });
+         
+         console.log(`✅ Inventário e emissões antigas deletadas\n`);
+      }
 
       // Garante a atomicidade da operação
       return await prisma.$transaction(async (tx) => {
-         return await this.processAndSaveAllScopes(tx, scopes, companyId, currentYear, inventoryDescription);
+         // Criar novo inventário
+         const inventory = await tx.emissionInventory.create({
+            data: {
+               companyId,
+               year: currentYear,
+               name: inventoryName,
+               status: "PUBLISHED",
+            },
+         });
+
+         console.log(`✅ Inventário criado: ${inventory.id}\n`);
+         
+         return await this.processEmissions(tx, inventory, scopes, companyId, currentYear, inventoryName);
       });
    }
 
-   private async processAndSaveAllScopes(tx: any, scopes: any, companyId: string, currentYear: number, inventoryDescription: string) {
-      const scopeResults: any = {};
+   private async processEmissions(tx: any, inventory: any, scopes: any, companyId: string, currentYear: number, inventoryName: string) {
+      const scopeResults: any[] = [];
       let totalCo2eAllScopes = 0;
-      let scope1Total = 0;
-      let scope2Total = 0;
-      let scope3Total = 0;
-      let totalEmissionsCount = 0;
 
-      // Processa TODOS os escopos e acumula os dados
+      // Processa cada escopo e cria UMA linha na tabela Emission por escopo
       for (const scopeKey in scopes) {
          const scopeNumber = parseInt(scopeKey);
          const emissions = scopes[scopeKey].emissions;
@@ -90,7 +122,7 @@ export class CalculatorService {
          let totalCo2eScope = 0;
          const processedEmissions: any[] = [];
 
-         // Processa cada emissão individual do escopo
+         // Processa cada emissão individual para calcular CO2e
          for (let i = 0; i < emissions.length; i++) {
             const emission = emissions[i];
             const emissionType = emission.emissionType || emission.type;
@@ -98,30 +130,14 @@ export class CalculatorService {
 
             console.log(`  ${i + 1}. Tipo: ${emissionType} | Quantidade: ${quantity}`);
 
-            // Buscar fator de emissão real do banco de dados
-            const emissionProduct = await tx.emissionProduct.findFirst({
-               where: { name: emissionType },
-               include: {
-                  emissionFactors: {
-                     orderBy: { year: 'desc' },
-                     take: 1,
-                  },
-               },
-            });
-
-            let factorValue = 2.5; // Valor padrão caso não encontre
-            
-            if (emissionProduct && emissionProduct.emissionFactors.length > 0) {
-               factorValue = emissionProduct.emissionFactors[0].factorValue;
-               console.log(`     ✓ Fator encontrado para '${emissionType}': ${factorValue} kg CO2e`);
-            } else {
-               console.log(`     ⚠ Fator não encontrado para '${emissionType}', usando padrão: ${factorValue}`);
-            }
-
+            // TODO: Implementar busca de fatores reais por tipo de emissão
+            // Por enquanto, usa fator fixo para demonstração
+            const factorValue = 2.5; // kg CO2e por unidade (valor exemplo)
             const calculatedCo2e = quantity * factorValue;
+            
             totalCo2eScope += calculatedCo2e;
 
-            console.log(`     ✅ CO2e: ${calculatedCo2e.toFixed(2)} kg`);
+            console.log(`     ✅ CO2e: ${calculatedCo2e.toFixed(2)} kg (fator: ${factorValue})`);
 
             processedEmissions.push({
                type: emissionType,
@@ -131,70 +147,45 @@ export class CalculatorService {
                formData: emission.formData || emission.fields,
                description: emission.description,
             });
-
-            totalEmissionsCount++;
          }
 
          totalCo2eAllScopes += totalCo2eScope;
-         
-         // Atualizar totais por escopo
-         if (scopeNumber === 1) scope1Total = totalCo2eScope;
-         else if (scopeNumber === 2) scope2Total = totalCo2eScope;
-         else if (scopeNumber === 3) scope3Total = totalCo2eScope;
 
-         // Adiciona o escopo processado ao resultado
-         scopeResults[`scope${scopeNumber}`] = {
-            emissions: processedEmissions,
+         // Salva UMA linha por escopo com TODAS as emissões compiladas
+         const savedEmission = await tx.emission.create({
+            data: {
+               inventoryId: inventory.id,
+               scope: scopeNumber,
+               emissionsData: processedEmissions, // JSON com todas as emissões
+               totalCo2e: totalCo2eScope,
+               emissionsCount: emissions.length,
+               description: `Escopo ${scopeNumber} - ${emissions.length} emissões`,
+            },
+         });
+
+         scopeResults.push({
+            scope: scopeNumber,
             totalCo2e: totalCo2eScope,
             emissionsCount: emissions.length,
-         };
+            emissionId: savedEmission.id,
+         });
 
          console.log(`  💰 Total Escopo ${scopeNumber}: ${totalCo2eScope.toFixed(2)} kg CO2e\n`);
       }
 
-      // Salva UMA ÚNICA LINHA com TODOS os escopos
-      const savedEmission = await tx.emission.create({
-         data: {
-            company_id: companyId,
-            year: currentYear,
-            calculator_data: {
-               description: inventoryDescription,
-               timestamp: new Date().toISOString(),
-               scopes: scopeResults,
-               summary: {
-                  totalEmissions: totalCo2eAllScopes,
-                  totalEmissionsCount: totalEmissionsCount,
-                  scope1Total,
-                  scope2Total,
-                  scope3Total,
-               }
-            },
-            totalCo2e: totalCo2eAllScopes,
-            scope1_total: scope1Total,
-            scope2_total: scope2Total,
-            scope3_total: scope3Total,
-            description: inventoryDescription,
-         },
-      });
-
       console.log(`\n✅ Inventário salvo com sucesso!`);
-      console.log(`   - ID da Emissão: ${savedEmission.id}`);
+      console.log(`   - ID: ${inventory.id}`);
       console.log(`   - Empresa (ID): ${companyId}`);
       console.log(`   - Ano: ${currentYear}`);
-      console.log(`   - Total de emissões: ${totalEmissionsCount}`);
-      console.log(`   - Escopos processados: ${Object.keys(scopeResults).length}`);
+      console.log(`   - Escopos processados: ${scopeResults.length}`);
       console.log(`   - CO2e TOTAL: ${totalCo2eAllScopes.toFixed(2)} kg\n`);
 
       return {
-         emissionId: savedEmission.id,
+         inventoryId: inventory.id,
          companyId: companyId,
          year: currentYear,
-         description: inventoryDescription,
+         name: inventoryName,
          totalEmissions: totalCo2eAllScopes,
-         scope1Total,
-         scope2Total,
-         scope3Total,
-         totalEmissionsCount,
          scopeBreakdown: scopeResults,
       };
    }
@@ -206,17 +197,20 @@ export class CalculatorService {
       companyId: string,
       year: number
    ): Promise<number> {
-      const emissions = await prisma.emission.findMany({
-         where: { 
-            company_id: companyId, 
-            year,
-            deletedAt: null 
+      const inventories = await prisma.emissionInventory.findMany({
+         where: { companyId, year },
+         include: {
+            emissions: {
+               where: { deletedAt: null },
+            },
          },
       });
 
       let total = 0;
-      for (const emission of emissions) {
-         total += emission.totalCo2e;
+      for (const inventory of inventories) {
+         for (const emission of inventory.emissions) {
+            total += emission.totalCo2e;
+         }
       }
 
       return total;
@@ -230,56 +224,49 @@ export class CalculatorService {
       year: number,
       scope: number
    ): Promise<Emission[]> {
-      const emissions = await prisma.emission.findMany({
-         where: {
-            company_id: companyId,
-            year,
-            deletedAt: null,
-         },
+      const inventories = await prisma.emissionInventory.findMany({
+         where: { companyId, year },
       });
 
-      // Filtrar pelo escopo dentro dos dados do calculator_data
-      return emissions.filter((emission: any) => {
-         const data = emission.calculator_data as any;
-         return data?.scope === scope;
+      const inventoryIds = inventories.map(inv => inv.id);
+
+      const emissions = await prisma.emission.findMany({
+         where: {
+            inventoryId: { in: inventoryIds },
+            scope: scope,
+            deletedAt: null,
+         },
+         include: { inventory: true },
       });
+
+      return emissions;
    }
 
    /**
-    * Busca inventários de uma empresa (agora busca emissões agrupadas por ano)
+    * Busca inventários de uma empresa
     */
    async getCompanyInventory(companyId: string, year?: number): Promise<any> {
-      const whereClause: any = { 
-         company_id: companyId,
-         deletedAt: null 
-      };
+      const whereClause: any = { companyId };
       if (year) {
          whereClause.year = year;
       }
 
-      const emissions = await prisma.emission.findMany({
+      const inventories = await prisma.emissionInventory.findMany({
          where: whereClause,
+         include: {
+            emissions: {
+               where: { deletedAt: null },
+            },
+         },
          orderBy: [{ createdAt: "desc" }],
       });
 
-      // Agrupar emissões por ano
-      const groupedByYear = emissions.reduce((acc: any, emission) => {
-         const yearKey = emission.year;
-         if (!acc[yearKey]) {
-            acc[yearKey] = {
-               year: yearKey,
-               emissions: [],
-               totalCo2e: 0,
-            };
-         }
-         acc[yearKey].emissions.push(emission);
-         acc[yearKey].totalCo2e += emission.totalCo2e;
-         return acc;
-      }, {});
-
       return {
          company: await prisma.company.findUnique({ where: { id: companyId } }),
-         inventories: Object.values(groupedByYear),
+         inventories: inventories.map(inv => ({
+            ...inv,
+            totalCo2e: inv.emissions.reduce((sum, e) => sum + e.totalCo2e, 0),
+         })),
       };
    }
 
@@ -295,33 +282,44 @@ export class CalculatorService {
          throw new Error("Empresa não encontrada");
       }
 
-      const emissions = await prisma.emission.findMany({
-         where: { 
-            company_id: companyId,
-            deletedAt: null 
+      const inventories = await prisma.emissionInventory.findMany({
+         where: { companyId },
+         include: {
+            emissions: {
+               where: { deletedAt: null },
+            },
          },
          orderBy: { year: "desc" },
       });
 
-      const summaryByYear = emissions.reduce((acc: any[], emission) => {
-         const existingYear = acc.find(item => item.year === emission.year);
+      const summaryByYear = inventories.reduce((acc: any[], inv) => {
+         const existingYear = acc.find(item => item.year === inv.year);
          
-         const scope1Total = emission.scope1_total;
-         const scope2Total = emission.scope2_total;
-         const scope3Total = emission.scope3_total;
-         const emissionTotal = emission.totalCo2e;
+         const scope1Total = inv.emissions
+            .filter(e => e.scope === 1)
+            .reduce((sum, e) => sum + e.totalCo2e, 0);
+         
+         const scope2Total = inv.emissions
+            .filter(e => e.scope === 2)
+            .reduce((sum, e) => sum + e.totalCo2e, 0);
+         
+         const scope3Total = inv.emissions
+            .filter(e => e.scope === 3)
+            .reduce((sum, e) => sum + e.totalCo2e, 0);
+
+         const inventoryTotal = scope1Total + scope2Total + scope3Total;
 
          if (existingYear) {
-            existingYear.total += emissionTotal;
+            existingYear.total += inventoryTotal;
             existingYear.scope1 += scope1Total;
             existingYear.scope2 += scope2Total;
             existingYear.scope3 += scope3Total;
             existingYear.count += 1;
          } else {
             acc.push({
-               year: emission.year,
-               emissionId: emission.id,
-               total: emissionTotal,
+               year: inv.year,
+               inventoryId: inv.id,
+               total: inventoryTotal,
                scope1: scope1Total,
                scope2: scope2Total,
                scope3: scope3Total,
