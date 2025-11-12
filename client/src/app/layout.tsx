@@ -18,10 +18,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <CalculatorProvider>
-          {children}
-        </CalculatorProvider>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body className={`${inter.className} min-h-screen antialiased overflow-x-hidden`}>
+        <div className="flex flex-col min-h-screen">
+          <CalculatorProvider>
+            <main className="flex-1 w-full">
+              {children}
+            </main>
+          </CalculatorProvider>
+        </div>
       </body>
     </html>
   );
