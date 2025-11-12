@@ -2,18 +2,47 @@
 
 import React, { useState, useEffect } from "react";
 import { useCartStore } from "@/store/cart.store";
-import { X, Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
+import { X, Minus, Plus, Trash2, ShoppingCart, Wallet } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function CartDrawer() {
    // Estado local para gerenciar se o painel está aberto ou fechado
    const [isOpen, setIsOpen] = useState(false);
    const [isLoaded, setIsLoaded] = useState(false);
+   const [credits, setCredits] = useState<number | null>(null);
+   const [loadingCredits, setLoadingCredits] = useState(true);
 
    // Efeito para garantir que o componente está montado no lado do cliente
    useEffect(() => {
       setIsLoaded(true);
    }, []); // O array vazio garante que isso rode apenas uma vez, após a primeira renderização do cliente.
+
+   // Buscar créditos da carteira do usuário
+   useEffect(() => {
+      async function fetchCredits() {
+         try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/credits`, {
+               credentials: "include",
+            });
+
+            if (!res.ok) {
+               setLoadingCredits(false);
+               return;
+            }
+
+            const data = await res.json();
+            setCredits(data.credits);
+         } catch (err) {
+            console.error("Erro ao carregar créditos da carteira:", err);
+         } finally {
+            setLoadingCredits(false);
+         }
+      }
+
+      if (isLoaded) {
+         fetchCredits();
+      }
+   }, [isLoaded]);
 
    const {
       items,
@@ -94,6 +123,29 @@ export default function CartDrawer() {
 
             {/* Lista de Itens */}
             <div className="flex-1 p-6 overflow-y-auto">
+               {/* Carteira Digital - Sempre visível */}
+               {!loadingCredits && credits !== null && (
+                  <div className="bg-gradient-to-r from-[#002E34] to-[#004443] p-4 rounded-xl mb-6 shadow-lg">
+                     <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                              <Wallet size={20} className="text-white" />
+                           </div>
+                           <div>
+                              <p className="text-xs text-white/70">Saldo da Carteira</p>
+                              <p className="text-lg font-bold text-white">{credits} CC</p>
+                           </div>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-xs text-white/70">Disponível</p>
+                           <p className="text-sm font-semibold text-[#00e07f]">
+                              R$ {(credits * 1).toFixed(2)}
+                           </p>
+                        </div>
+                     </div>
+                  </div>
+               )}
+
                {items.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center">
                      <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">

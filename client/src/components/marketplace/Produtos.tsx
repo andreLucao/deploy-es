@@ -78,9 +78,24 @@ export default function Produtos({
                   <span className="sm:hidden">Ant</span>
                </button>
 
-               <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                  Página {paginaAtual} de {totalPaginas}
-               </span>
+               {/* Números das páginas - Oculto em mobile, visível em tablet+ */}
+               <div className="hidden md:flex gap-2 flex-wrap justify-center">
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(
+                     (pagina) => (
+                        <button
+                           key={pagina}
+                           onClick={() => irParaPagina(pagina)}
+                           className={`px-3 py-1 rounded transition-all duration-200 text-sm ${
+                              pagina === paginaAtual
+                                 ? "bg-[#002E34] text-white"
+                                 : "bg-gray-200 hover:bg-gray-300"
+                           }`}
+                        >
+                           {pagina}
+                        </button>
+                     )
+                  )}
+               </div>
 
                <button
                   onClick={() => irParaPagina(paginaAtual + 1)}
@@ -93,24 +108,6 @@ export default function Produtos({
                </button>
             </div>
 
-            {/* Números das páginas - Oculto em mobile, visível em tablet+ */}
-            <div className="hidden md:flex gap-2 flex-wrap justify-center">
-               {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(
-                  (pagina) => (
-                     <button
-                        key={pagina}
-                        onClick={() => irParaPagina(pagina)}
-                        className={`px-3 py-1 rounded transition-all duration-200 text-sm ${
-                           pagina === paginaAtual
-                              ? "bg-[#002E34] text-white"
-                              : "bg-gray-200 hover:bg-gray-300"
-                        }`}
-                     >
-                        {pagina}
-                     </button>
-                  )
-               )}
-            </div>
          </div>
       </div>
    );

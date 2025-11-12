@@ -13,6 +13,7 @@ model Company {
   id           String        @id @default(uuid())
   email        String        @unique
   created_at   DateTime      @default(now())
+  balance      Int           @default(0)
   adProducts   AdProduct[]
   cart         Cart?
   commentLikes CommentLike[]
@@ -52,7 +53,7 @@ model Emission {
   company_id      String
   year            Int
   calculator_data Json
-  total_co2e      Float
+  totalCo2e       Float     @map("total_co2e")
   scope1_total    Float     @default(0)
   scope2_total    Float     @default(0)
   scope3_total    Float     @default(0)

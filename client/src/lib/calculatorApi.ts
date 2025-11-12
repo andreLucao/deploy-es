@@ -20,10 +20,22 @@ export interface InventoryInput {
 }
 
 export interface InventoryResult {
-  inventoryId: string;
+  emissionId?: string;
+  inventoryId?: string; // Mantido para compatibilidade
+  companyId?: string;
+  year?: number;
+  description?: string;
   totalEmissions: number;
-  emissionsCount: number;
-  scopeBreakdown?: { scope: number; total: number; count: number }[];
+  totalEmissionsCount?: number;
+  emissionsCount?: number; // Mantido para compatibilidade
+  scope1Total?: number;
+  scope2Total?: number;
+  scope3Total?: number;
+  scopeBreakdown?: { 
+    scope1?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
+    scope2?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
+    scope3?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
+  };
 }
 
 export interface InventoryResponse {
@@ -119,6 +131,15 @@ class CalculatorAPI {
 
   async getEmissionsSummary(companyId: string): Promise<EmissionsSummary> {
     return this.fetchAPI(`/emissions-summary?companyId=${companyId}`);
+  }
+
+  async getEmissionFactors(): Promise<unknown> {
+    const url = `${API_BASE_URL}/api/emission-products`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Erro ao buscar fatores de emissão');
+    }
+    return response.json();
   }
 
   async deleteEmission(emissionId: string) {

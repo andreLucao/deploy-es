@@ -202,7 +202,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         return (
             <div className="w-full flex flex-col min-h-screen gap-8" style={{ backgroundColor: 'rgba(239, 239, 239, 1)' }}>
                 <Header />
-                <div className="flex justify-center items-center min-h-[400px]">
+                <div className="flex-1 flex justify-center items-center min-h-[400px]">
                     <p className="text-lg">Carregando produto...</p>
                 </div>
                 <Footer />
@@ -215,7 +215,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         return (
             <div className="w-full flex flex-col min-h-screen gap-8" style={{ backgroundColor: 'rgba(239, 239, 239, 1)' }}>
                 <Header />
-                <div className="flex justify-center items-center min-h-[400px]">
+                <div className="flex-1 flex justify-center items-center min-h-[400px]">
                     <p className="text-lg text-red-500">{error || 'Produto não encontrado'}</p>
                 </div>
                 <Footer />
@@ -283,7 +283,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         <div className="w-full flex flex-col min-h-screen gap-8" style={{ backgroundColor: 'rgba(239, 239, 239, 1)' }}>
             <Header />
 
-            <div className="flex flex-col items-center p-8">
+            <div className="flex-1 flex flex-col items-center p-8">
                 <div className="relative w-[99%] h-[700px] rounded-2xl overflow-hidden shadow-lg">
                     {/* Imagem de fundo*/}
                     <img
@@ -299,7 +299,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                             <h1 className="text-4xl lg:text-7xl font-bold">{productData.title}</h1>
                             <p className="text-sm mt-4">{productData.credit_type}</p>
                             <p className="text-lg mt-2 font-semibold">
-                                R$ {(productData.price / 100).toFixed(2)}
+                                R$ {(productData.price).toFixed(2)}
                             </p>
                         </div>
 

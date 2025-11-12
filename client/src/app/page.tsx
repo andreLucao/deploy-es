@@ -25,7 +25,7 @@ export default function LandingPage() {
    };
 
    return (
-      <main className="bg-[#efefef] min-h-screen">
+      <main className="bg-[#efefef] min-h-screen flex flex-col">
          <Header
             onScrollToKnowUs={() => scrollToSection(knowUsRef, 60)}
             onScrollToCertificacoes={() =>
@@ -34,23 +34,22 @@ export default function LandingPage() {
             onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
          />
 
-         <section className="w-full">
-            <Hero />
-         </section>
-         <section ref={knowUsRef} className="w-full">
-            <KnowUs />
-         </section>
-         <section ref={certificacoesRef} className="w-full">
-            <Certificacoes />
-         </section>
-         <section ref={solucoesRef} className="w-full">
-            <Solucoes />
-         </section>
-         <section className="w-full">
-            <footer>
-               <Footer />
-            </footer>
-         </section>
+         <div className="flex-1 w-full">
+            <section className="w-full">
+               <Hero />
+            </section>
+            <section ref={knowUsRef} className="w-full">
+               <KnowUs />
+            </section>
+            <section ref={certificacoesRef} className="w-full">
+               <Certificacoes />
+            </section>
+            <section ref={solucoesRef} className="w-full">
+               <Solucoes />
+            </section>
+         </div>
+         
+         <Footer />
       </main>
    );
 }

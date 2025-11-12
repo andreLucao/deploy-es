@@ -54,5 +54,4 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/credits", creditsRoutes);
 app.use("/reports", reportRoutes);
 
-
 export default app;

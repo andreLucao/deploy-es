@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useCalculator } from '@/contexts/CalculatorContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { EmissionForm } from './FormComponents';
 import { 
   scope1EmissionTypes, 
   scope2EmissionTypes, 
   scope3EmissionTypes 
 } from '@/data/emissionData';
-import { ChevronLeft, ChevronRight, Plus, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Check, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function CalculatorForm() {
@@ -21,6 +22,7 @@ export default function CalculatorForm() {
     saveInventory,
     isLoading
   } = useCalculator();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -84,9 +86,16 @@ export default function CalculatorForm() {
   };
 
   const handleFinishCalculation = async () => {
+    // Verificar se o usuário está autenticado
+    if (!isAuthenticated || !user) {
+      alert('Você precisa estar logado para salvar o inventário. Redirecionando para login...');
+      router.push('/login');
+      return;
+    }
+
     try {
-      // Salvar inventário no banco de dados
-      const companyId = 'comp' + Math.floor(Math.random() * 1000); // ID simples para teste
+      // Usar o ID do usuário autenticado
+      const companyId = user.id;
       const year = new Date().getFullYear();
       
       const result = await saveInventory(companyId, year);
@@ -105,6 +114,25 @@ export default function CalculatorForm() {
 
   return (
     <div className="w-full max-w-6xl mx-auto overflow-hidden">
+      {/* Alert de autenticação */}
+      {!isAuthenticated && (
+        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-semibold text-yellow-800 mb-1">Atenção: Não autenticado</h3>
+            <p className="text-sm text-yellow-700">
+              Você precisa estar logado para salvar o inventário. 
+              <button 
+                onClick={() => router.push('/login')}
+                className="ml-1 underline font-medium hover:text-yellow-900"
+              >
+                Fazer login agora
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Progress Bar */}
       <div className="mb-6 sm:mb-8 overflow-x-auto">
         <div className="flex items-center justify-between mb-4 min-w-min">
@@ -239,14 +267,14 @@ export default function CalculatorForm() {
           </div>
         )}
       </div>
-
-      {/* Summary */}
+{/*       
+      Summary foi retirado porque possuia erros na hora de exibir as emissões
+      
       <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6 overflow-hidden">
         <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
           Resumo dos Dados
         </h3>
         
-        {/* Total Geral */}
         <div className="bg-[#008F70] text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
           <div className="text-center">
             <div className="text-2xl sm:text-3xl font-bold">{calculateTotalEmissions().toFixed(2)} tCO2e</div>
@@ -277,7 +305,7 @@ export default function CalculatorForm() {
             <div className="text-xs text-gray-500 mt-1">{data.scope3.emissions.length} emissões</div>
           </div>
         </div>
-      </div>
+      </div>   */}
 
       {/* Botão Finalizar Cálculo */}
       {calculateTotalEmissions() > 0 && (
@@ -287,7 +315,6 @@ export default function CalculatorForm() {
               Pronto para Finalizar seu Inventário?
             </h3>
             <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
-              Você calculou um total de <strong>{calculateTotalEmissions().toFixed(2)} tCO2e</strong> em emissões. 
               Clique no botão abaixo para salvar seu inventário e ver os resultados completos.
             </p>
             <button
