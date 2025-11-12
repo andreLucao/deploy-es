@@ -15,6 +15,7 @@ import commentsRoutes from "./routes/commentsRoutes";
 import productsRoutes from "./routes/products.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import creditsRoutes from "./routes/credits.routes";
+import reportRoutes from "./routes/report.routes";
 
 const app: Application = express();
 export const PORT = process.env.PORT || 3001;
@@ -51,6 +52,6 @@ app.use("/api/comments", commentsRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/credits", creditsRoutes);
-
+app.use("/reports", reportRoutes);
 
 export default app;

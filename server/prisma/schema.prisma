@@ -192,6 +192,18 @@ model Payment {
   @@map("payments")
 }
 
+/*
+model Report {
+  id           String   @id @default(uuid())
+  companyId    String   @map("company_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  title        String?
+  content      String
+  url          String?  @unique
+}
+*/
+
 enum OrderStatus {
   DRAFT
   PENDING
