@@ -267,14 +267,14 @@ export default function CalculatorForm() {
           </div>
         )}
       </div>
-
-      {/* Summary */}
+{/*       
+      Summary foi retirado porque possuia erros na hora de exibir as emissões
+      
       <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6 overflow-hidden">
         <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
           Resumo dos Dados
         </h3>
         
-        {/* Total Geral */}
         <div className="bg-[#008F70] text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
           <div className="text-center">
             <div className="text-2xl sm:text-3xl font-bold">{calculateTotalEmissions().toFixed(2)} tCO2e</div>
@@ -305,7 +305,7 @@ export default function CalculatorForm() {
             <div className="text-xs text-gray-500 mt-1">{data.scope3.emissions.length} emissões</div>
           </div>
         </div>
-      </div>
+      </div>   */}
 
       {/* Botão Finalizar Cálculo */}
       {calculateTotalEmissions() > 0 && (
@@ -315,7 +315,6 @@ export default function CalculatorForm() {
               Pronto para Finalizar seu Inventário?
             </h3>
             <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
-              Você calculou um total de <strong>{calculateTotalEmissions().toFixed(2)} tCO2e</strong> em emissões. 
               Clique no botão abaixo para salvar seu inventário e ver os resultados completos.
             </p>
             <button

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { calculatorAPI, InventoryInput, InventoryResult, EmissionsSummary, InventoryResponse } from '@/lib/calculatorApi';
+import { useEmissionProducts } from '@/hooks/useEmissionProducts';
 
 export interface EmissionData {
   id: string;
@@ -62,6 +63,9 @@ interface CalculatorProviderProps {
 }
 
 export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
+  // Hook para buscar fatores de emissão do banco
+  const { getFactorValue, isLoading: isLoadingFactors } = useEmissionProducts();
+  
   // Estado local
   const [data, setData] = useState<CalculatorData>({
     scope1: { emissions: [] },
@@ -77,6 +81,82 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+
+  // Função para mapear tipo de emissão do frontend para nome do produto no banco
+  const getProductNameForEmissionType = (emissionType: string, formData: Record<string, any>): string => {
+    // Mapeamento de combustíveis para nomes de produtos
+    const fuelMapping: Record<string, string> = {
+      'gasolina_automotiva': 'Gasolina',
+      'gasolina': 'Gasolina',
+      'oleo_diesel': 'Diesel',
+      'diesel': 'Diesel',
+      'etanol_hidratado': 'Etanol',
+      'etanol_anidro': 'Etanol',
+      'etanol': 'Etanol',
+      'glp': 'GLP',
+      'gas_natural_seco': 'Gás Natural',
+      'gas_natural': 'Gás Natural',
+      'biodiesel': 'Biodiesel',
+      'oleo_combustivel': 'Óleo Combustível',
+      'carvao_mineral': 'Carvão Mineral',
+      'carvao_metalurgico_nacional': 'Carvão Mineral',
+      'carvao_vapor_6000': 'Carvão Mineral',
+      'lenha_comercial': 'Lenha',
+      'lenha': 'Lenha',
+      'alcatrao': 'Gasolina', // Usar Gasolina como padrão para alcatrão
+      // Adicionar mais mapeamentos conforme necessário
+    };
+
+    // Para combustão (estacionária ou móvel), buscar o combustível específico
+    if (emissionType === 'combustao_estacionaria' || emissionType === 'combustao_movel') {
+      const fuelKey = formData.fuel || formData.vehicle || '';
+      const mappedFuel = fuelMapping[fuelKey];
+      if (mappedFuel) {
+        return mappedFuel;
+      }
+      // Se não encontrou no mapeamento, retornar o valor direto (pode ser o nome já correto)
+      return fuelKey || 'Gasolina'; // Fallback para Gasolina
+    }
+
+    // Mapeamento direto para outros tipos
+    const directMapping: Record<string, string> = {
+      // Escopo 1
+      'emissoes_fugitivas': formData.gas === 'ch4' ? 'CH4 Fugitivo' : 
+                           formData.gas === 'n2o' ? 'N2O Fugitivo' :
+                           formData.gas === 'hfc134a' ? 'HFC-134a' :
+                           formData.gas === 'sf6' ? 'SF6' : 'CH4 Fugitivo',
+      'processos_industriais': formData.gas === 'ch4' ? 'CH4 Industrial' :
+                              formData.gas === 'n2o' ? 'N2O Industrial' :
+                              'CO2 Industrial',
+      'atividades_agricultura': formData.gas === 'ch4' ? 'CH4 Agricultura' :
+                               formData.gas === 'n2o' ? 'N2O Agricultura' :
+                               'CO2 Agricultura',
+      'mudancas_uso_solo': 'Mudança Uso Solo',
+      'residuos_solidos': formData.treatment === 'aterro' ? 'Resíduos Aterro' :
+                         formData.treatment === 'compostagem' ? 'Resíduos Compostagem' :
+                         'Resíduos Incineração',
+      'efluentes': 'Efluentes',
+      
+      // Escopo 2
+      'compra_energia_eletrica': 'Energia Elétrica Brasil',
+      'perdas_energia': 'Perdas Energia',
+      'compra_energia_termica': 'Energia Térmica Vapor',
+      
+      // Escopo 3
+      'transporte_distribuicao': formData.transportType === 'aereo' ? 'Viagens Aéreo' :
+                                formData.transportType === 'ferroviario' ? 'Viagens Ferroviário' :
+                                'Transporte Distribuição',
+      'residuos_solidos_gerados': formData.treatment === 'aterro' ? 'Resíduos Gerados Aterro' :
+                                 formData.treatment === 'reciclagem' ? 'Resíduos Gerados Reciclagem' :
+                                 'Resíduos Gerados Compostagem',
+      'efluentes_gerados': 'Efluentes Gerados',
+      'viagens_negocios': formData.transportType === 'aereo' ? 'Viagens Aéreo' :
+                         formData.transportType === 'ferroviario' ? 'Viagens Ferroviário' :
+                         'Viagens Rodoviário',
+    };
+
+    return directMapping[emissionType] || emissionType;
+  };
 
   // Função para extrair a quantidade correta baseada no tipo de emissão e seus campos
   const extractQuantity = (emissionType: string, formData: Record<string, string | number | boolean>): number => {
@@ -151,8 +231,14 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
           if (emission.id === emissionId) {
             // Extrair quantidade baseada no tipo de emissão
             const quantity = extractQuantity(emission.type, emissionData);
-            const emissionFactor = 2.5; // Fator padrão (pode ser melhorado com dados reais)
+            
+            // Buscar fator de emissão real do banco
+            const productName = getProductNameForEmissionType(emission.type, emissionData);
+            const emissionFactor = getFactorValue(productName) || 2.5;
+            
             const calculatedCo2e = quantity > 0 ? quantity * emissionFactor : 0;
+
+            console.log(`🔢 Calculando: ${productName} | Quantidade: ${quantity} | Fator: ${emissionFactor} | CO2e: ${calculatedCo2e}`);
 
             return {
               ...emission,

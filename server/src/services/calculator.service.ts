@@ -31,6 +31,113 @@ interface InventoryInput {
 
 export class CalculatorService {
    /**
+    * Mapeia combustíveis do formData para nomes de produtos no banco
+    */
+   private getProductNameFromFormData(emissionType: string, formData: any): string {
+      // Mapeamento de valores de select para nomes de produtos
+      const fuelMapping: Record<string, string> = {
+         // Combustíveis comuns
+         'gasolina_automotiva': 'Gasolina',
+         'gasolina': 'Gasolina',
+         'oleo_diesel': 'Diesel',
+         'diesel': 'Diesel',
+         'etanol_hidratado': 'Etanol',
+         'etanol_anidro': 'Etanol',
+         'etanol': 'Etanol',
+         'glp': 'GLP',
+         'gas_natural_seco': 'Gás Natural',
+         'gas_natural': 'Gás Natural',
+         'biodiesel': 'Biodiesel',
+         'oleo_combustivel': 'Óleo Combustível',
+         'carvao_mineral': 'Carvão Mineral',
+         'carvao_metalurgico_nacional': 'Carvão Mineral',
+         'carvao_vapor_6000': 'Carvão Mineral',
+         'lenha_comercial': 'Lenha',
+         'lenha': 'Lenha',
+      };
+
+      // Para combustão, buscar o campo 'fuel' ou 'vehicle'
+      const fuelKey = formData.fuel || formData.vehicle || '';
+      return fuelMapping[fuelKey] || fuelKey;
+   }
+
+   /**
+    * Mapeia tipos de emissão para nomes de produtos no banco
+    */
+   private mapEmissionTypeToProduct(emissionType: string, formData: any): string {
+      const mapping: Record<string, string | ((data: any) => string)> = {
+         // Escopo 1
+         'emissoes_fugitivas': (data: any) => {
+            const gasMap: Record<string, string> = {
+               'ch4': 'CH4 Fugitivo',
+               'n2o': 'N2O Fugitivo',
+               'hfc134a': 'HFC-134a',
+               'sf6': 'SF6'
+            };
+            return gasMap[data.gas] || 'CH4 Fugitivo';
+         },
+         'processos_industriais': (data: any) => {
+            const gasMap: Record<string, string> = {
+               'ch4': 'CH4 Industrial',
+               'n2o': 'N2O Industrial',
+               'co2': 'CO2 Industrial'
+            };
+            return gasMap[data.gas] || 'CO2 Industrial';
+         },
+         'atividades_agricultura': (data: any) => {
+            const gasMap: Record<string, string> = {
+               'ch4': 'CH4 Agricultura',
+               'n2o': 'N2O Agricultura',
+               'co2': 'CO2 Agricultura'
+            };
+            return gasMap[data.gas] || 'CH4 Agricultura';
+         },
+         'mudancas_uso_solo': 'Mudança Uso Solo',
+         'residuos_solidos': (data: any) => {
+            const treatmentMap: Record<string, string> = {
+               'aterro': 'Resíduos Aterro',
+               'compostagem': 'Resíduos Compostagem',
+               'incineracao': 'Resíduos Incineração'
+            };
+            return treatmentMap[data.treatment] || 'Resíduos Aterro';
+         },
+         'efluentes': 'Efluentes',
+         
+         // Escopo 2
+         'compra_energia_eletrica': 'Energia Elétrica Brasil',
+         'perdas_energia': 'Perdas Energia',
+         'compra_energia_termica': 'Energia Térmica Vapor',
+         
+         // Escopo 3
+         'transporte_distribuicao': (data: any) => {
+            if (data.transportType === 'aereo') return 'Viagens Aéreo';
+            if (data.transportType === 'ferroviario') return 'Viagens Ferroviário';
+            return 'Transporte Distribuição';
+         },
+         'residuos_solidos_gerados': (data: any) => {
+            const treatmentMap: Record<string, string> = {
+               'aterro': 'Resíduos Gerados Aterro',
+               'reciclagem': 'Resíduos Gerados Reciclagem',
+               'compostagem': 'Resíduos Gerados Compostagem'
+            };
+            return treatmentMap[data.treatment] || 'Resíduos Gerados Aterro';
+         },
+         'efluentes_gerados': 'Efluentes Gerados',
+         'viagens_negocios': (data: any) => {
+            if (data.transportType === 'aereo') return 'Viagens Aéreo';
+            if (data.transportType === 'ferroviario') return 'Viagens Ferroviário';
+            return 'Viagens Rodoviário';
+         },
+      };
+
+      const mapper = mapping[emissionType];
+      if (typeof mapper === 'function') {
+         return mapper(formData);
+      }
+      return mapper || emissionType;
+   }
+
+   /**
     * Calcula e salva um novo inventário de emissões.
     * Cria UMA ÚNICA LINHA por cálculo com TODOS os escopos e emissões compilados.
     */
@@ -95,12 +202,25 @@ export class CalculatorService {
             const emission = emissions[i];
             const emissionType = emission.emissionType || emission.type;
             const quantity = emission.quantity || 0;
+            const formData = emission.formData || {};
 
             console.log(`  ${i + 1}. Tipo: ${emissionType} | Quantidade: ${quantity}`);
 
+            // Determinar o nome do produto para buscar no banco
+            let productName = emissionType;
+            
+            // Para combustão, usar o combustível específico
+            if (emissionType === 'combustao_estacionaria' || emissionType === 'combustao_movel') {
+               productName = this.getProductNameFromFormData(emissionType, formData);
+            } else {
+               productName = this.mapEmissionTypeToProduct(emissionType, formData);
+            }
+
+            console.log(`     🔍 Buscando produto: "${productName}"`);
+
             // Buscar fator de emissão real do banco de dados
             const emissionProduct = await tx.emissionProduct.findFirst({
-               where: { name: emissionType },
+               where: { name: productName },
                include: {
                   emissionFactors: {
                      orderBy: { year: 'desc' },
@@ -113,9 +233,9 @@ export class CalculatorService {
             
             if (emissionProduct && emissionProduct.emissionFactors.length > 0) {
                factorValue = emissionProduct.emissionFactors[0].factorValue;
-               console.log(`     ✓ Fator encontrado para '${emissionType}': ${factorValue} kg CO2e`);
+               console.log(`     ✓ Fator encontrado para '${productName}': ${factorValue} kg CO2e`);
             } else {
-               console.log(`     ⚠ Fator não encontrado para '${emissionType}', usando padrão: ${factorValue}`);
+               console.log(`     ⚠ Fator não encontrado para '${productName}', usando padrão: ${factorValue}`);
             }
 
             const calculatedCo2e = quantity * factorValue;
