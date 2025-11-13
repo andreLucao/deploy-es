@@ -1,100 +1,71 @@
-import prisma from "../config/database";
-import { Order, EmissionInventory, OrderItem } from "../generated/prisma";
+import prisma from '../config/database'; 
+import { Company, Order, Emission} from "../../generated/prisma";
 
 export class ReportsService {
-   /**
-    * Agrega todos os dados de Emissão (dívida) e Transação (compra) para o Dashboard.
-    * @param companyId
-    */
-   async getDashboardSummary(companyId: string): Promise<any> {
-      const company = await prisma.company.findUnique({
-         where: { id: companyId },
-      });
-      if (!company) {
-         throw new Error("Empresa não encontrada.");
-      }
 
-      // Usamos o ano atual como atributo principal
-      const currentYear = new Date().getFullYear();
+  /**
+   * Buscar todos os dados agregados para o Dashboard
+   * Filtra Emissões (dívida) e Compras (gasto) por CompanyId.
+   */
+  async getDashboardSummary(companyId: string): Promise<any> {
+    
+    const company = await prisma.company.findUnique({ where: { id: companyId } });
+    if (!company) {
+      throw new Error("Empresa não encontrada.");
+    }
+    
+    const emissionRecords = await prisma.emission.findMany({
+      where: { 
+        company_id: companyId, 
+        deletedAt: null 
+      },
+      select: { 
+        totalCo2e: true, 
+        scope1_total: true, // Usa o campo scope1_total do schema
+        scope2_total: true, 
+        scope3_total: true, 
+        description: true,
+        year: true
+      },
+      orderBy: { year: 'desc' }
+    });
 
-      //Dados de Emissão (Dívida de Carbono)
+    const orderHistory = await prisma.order.findMany({
+      where: { companyId: companyId, status: 'COMPLETED' },
+      include: {
+        items: { select: { quantity: true, unitPrice: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
-      const inventoryData = await prisma.emissionInventory.findUnique({
-         where: { companyId_year: { companyId: companyId, year: currentYear } },
-         include: {
-            emissions: {
-               where: { deletedAt: null }, // Apenas emissões ativas
-               select: {
-                  calculatedCo2e: true,
-                  scope: true,
-                  emissionType: true,
-               },
-            },
-         },
-      });
 
-      //Dados de Transações (Compras/Vendas)
+   
+    const totalEmittedCo2e = emissionRecords.reduce((sum, e) => sum + e.totalCo2e, 0);
+    const summaryByScope = emissionRecords.reduce((acc, record) => ({
+      scope1: acc.scope1 + record.scope1_total,
+      scope2: acc.scope2 + record.scope2_total,
+      scope3: acc.scope3 + record.scope3_total,
+    }), { scope1: 0, scope2: 0, scope3: 0 });
 
-      const orderHistory = await prisma.order.findMany({
-         where: { companyId: companyId, status: "COMPLETED" },
-         include: {
-            items: { select: { quantity: true, totalPrice: true } },
-         },
-         orderBy: { createdAt: "desc" },
-      });
+    const totalSpentCents = orderHistory.reduce((sum, order) => sum + order.totalAmount, 0);
+    const totalCreditsPurchased = orderHistory.reduce((sum, order) => 
+        sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0);
 
-      const emissions = inventoryData?.emissions || [];
-      const totalEmitted = emissions.reduce(
-         (sum, e) => sum + e.calculatedCo2e,
-         0
-      );
 
-      const summaryByScope = {
-         scope1: emissions
-            .filter((e) => e.scope === 1)
-            .reduce((sum, e) => sum + e.calculatedCo2e, 0),
-         scope2: emissions
-            .filter((e) => e.scope === 2)
-            .reduce((sum, e) => sum + e.calculatedCo2e, 0),
-         scope3: emissions
-            .filter((e) => e.scope === 3)
-            .reduce((sum, e) => sum + e.calculatedCo2e, 0),
-      };
-
-      const totalSpent = orderHistory.reduce(
-         (sum, order) => sum + order.totalAmount,
-         0
-      );
-      const totalCreditsPurchased = orderHistory.reduce(
-         (sum, order) =>
-            sum +
-            order.items.reduce((itemSum, item) => itemSum + item.quantity, 0),
-         0
-      );
-
-      return {
-         companyId: company.id,
-         currentYear: currentYear,
-
-         // Gráficos de Emissão
-         emissionsData: {
-            totalEmittedCo2e: totalEmitted,
+    return {
+        companyId: company.id,
+        
+        emissionsData: {
+            totalEmittedCo2e: totalEmittedCo2e,
             breakdownByScope: summaryByScope,
-            topSources: emissions.map((e) => e.emissionType),
-         },
-
-         // Histórico Financeiro (Gráficos de Transação)
-         transactionData: {
+            emissionRecords: emissionRecords, 
+        },
+        
+        transactionData: {
             totalCreditsPurchased: totalCreditsPurchased,
-            totalSpentBrutto: totalSpent / 100,
-            lastOrders: orderHistory.slice(0, 5),
-         },
-
-         // Dados brutos (o frontend pode usar isso para gráficos de tendência)
-         rawData: {
-            allEmissions: emissions,
-            allOrders: orderHistory,
-         },
-      };
-   }
+            totalSpentBrutto: totalSpentCents / 100, // Converte centavos para reais
+            lastOrders: orderHistory.slice(0, 5), 
+        },
+    };
+  }
 }
