@@ -1,0 +1,122 @@
+{
+  "title": "Relatório Executivo de Emissões de Carbono – Avaliação Inicial e Recomendações",
+  "executive_summary": "A avaliação atual do inventário de emissões está restrita ao Escopo 1, reportando 1.52 tCO2e, sem dados temporais, nem detalhamento de produção ou consumo de energia. Essa limitação aumenta o risco de subavaliação da pegada total e dificulta a comparação entre períodos. Há oportunidades de alto impacto para reduzir emissões no curto prazo, especialmente por meio de melhoria da eficiência de combustão, recuperação de calor e até a substituição do combustível, além de avanços em governança de energia. A implementação de um inventário abrangente (Escopos 1/2/3), estabelecimento de uma linha de base anual e a adoção de práticas de gestão de energia (ISO 50001) são passos fundamentais para reduzir o Escopo 1, expandir para Escopos 2/3 e sustentar melhorias ao longo do tempo. Este relatório apresenta um plano em fases com ações acionáveis e prazos, visando oferecer visibilidade clara para tomadas de decisão e priorização de investimentos.",
+  "detailed_analysis": "Seção: Contexto e Escopo\n- A análise atual reporta apenas Escopo 1 com 1.52 tCO2e. Não há dados temporais, nem detalhamento de produção/energia consumida.\n- Risco identificado: possível subavaliação da pegada total e baixa comparabilidade entre períodos. Alinhamento com o GHG Protocol e aberturas para Escopos 2/3 são necessários para visão completa da pegada de carbono.\n\nSeção: Emissões Atuais\n- Emissões reportadas: Escopo 1 = 1.52 tCO2e.\n- Ausência de dados de Escopos 2 e 3; ausência de linha de base temporal e de parâmetros operacionais.\n\nSeção: Riscos e Limitações\n- Risco: subavaliação da pegada total devido à ausência de Escopos 2/3 e de dados temporais.\n- Limitação de dados: único registro, sem variação temporal, sem contexto de produção ou eficiência.\n\nSeção: Oportunidades de Melhoria\n- Oportunidade de intervenções rápidas em Escopo 1 focadas na combustão estacionária de etanol anidro com ganhos potenciais de eficiência, recuperação de calor e possível eletrificação/uso de fontes com menor emissividade.\n- Potencial de redução por meio de substituição de combustível ou eletrificação com energia renovável, levando a reduções em Escopo 1 e, se necessário, compensação via Escopo 2.\n- Preparação para governança de energia sob ISO 50001, com melhoria contínua, dashboards e metas, abrindo caminho para reduzir Escopo 1 e ampliar para Escopos 2/3.\n\nSeção: Achados Principais\n- Achado 1: Emissões concentradas no Escopo 1 (combustão estacionária com etanol anidro) – total de 1.52 tCO2e.\n- Achado 2: Ausência de dados de Escopo 2 e 3 no conjunto apresentado, risco de subavaliação da pegada total.\n- Achado 3: Dados extremamente limitados (um único registro) sem contexto de produção, horários ou eficiência, dificultando metas e payback.\n- Achado 4: Origem do combustível implica que reduções dependem de mudanças no combustível, eficiência ou eletrificação; efeitos variam com a origem do etanol.\n\nSeção: Recomendações Detalhadas\n- Ampliar o inventário para incluir Escopos 1/2/3 com dados de consumo, produção e horários; validar cálculos conforme GHG Protocol.\n- Criar linha de base anual com registro mensal de consumo de combustível, produção e horas de operação; documentar métodos de cálculo.\n- Realizar diagnóstico de eficiência de caldeiras/fornos, com manutenção de queimadores, recuperação de calor e considerações de substituição por fontes de calor com menor emissividade ou eletrificação quando viável.\n- Avaliar substituição de combustível ou eletrificação com energia renovável; realizar estudo de viabilidade (CAPEX/OPEX, payback) com cenários de eletrificação total/parcial e renováveis.\n- Iniciar gestão de energia (ISO 50001) e, se viável, explorar PPA para Escopo 2; mapear cadeia de valor e engajar fornecedores para dados de Escopo 3.\n\nSeção: Governança, Metodologia e Dados\n- Alinhar metodologia com GHG Protocol; estabelecer governança de dados, verificações de qualidade e documentação de cálculos.\n- Preparar o terreno para metas de redução, com dashboards, KPIs e revisões periódicas.\n\nSeção: Próximos Passos e Cronograma de Alto Nível\n- Preparação: Semana 1-2 – confirmar números e método; documentar unidades; alinhar com GHG Protocol.\n- Aquisição de dados: Semana 2-6 – coletar dados adicionais de Escopo 1; estimar Escopo 2/3; construir linha de base anual.\n- Diagnóstico técnico: Semana 4-8 – diagnóstico de eficiência de caldeiras/fornos; identificar quick wins de melhoria.\n- Viabilidade tecnológica: Semana 6-12 – estudo de viabilidade para substituição de combustível/eletrificação; iniciar projeto piloto de gestão de energia.\n- Engajamento de Cadeia de Valor: Semana 8-12 – iniciar diálogo com fornecedores-chave para dados de Escopo 3; planejar metas de redução.",
+  "charts_data": [
+    {
+      "type": "pie",
+      "title": "Distribuição de Insights por Categoria",
+      "labels": [
+        "risk",
+        "opportunity",
+        "trend"
+      ],
+      "datasets": [
+        {
+          "label": "Número de Insights",
+          "data": [
+            1,
+            3,
+            1
+          ],
+          "backgroundColor": [
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56",
+            "#4BC0C0",
+            "#9966FF"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bar",
+      "title": "Distribuição de Impacto",
+      "labels": [
+        "high",
+        "medium"
+      ],
+      "datasets": [
+        {
+          "label": "Quantidade de Insights",
+          "data": [
+            4,
+            1
+          ],
+          "backgroundColor": [
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "bar",
+      "title": "Insights por Escopo de Emissões",
+      "labels": [
+        "overall",
+        "scope1"
+      ],
+      "datasets": [
+        {
+          "label": "Número de Insights",
+          "data": [
+            3,
+            2
+          ],
+          "backgroundColor": [
+            "#4BC0C0",
+            "#FF9F40",
+            "#9966FF"
+          ]
+        }
+      ]
+    }
+  ],
+  "action_items": [
+    {
+      "priority": "high",
+      "action": "Ampliar o inventário para incluir Escopos 1/2/3 com dados de consumo, produção e horários; validar cálculo conforme GHG Protocol.",
+      "timeline": "Semana 1-2",
+      "responsible": "Gestão de Sustentabilidade / Contabilidade",
+      "estimated_impact": "0 tCO2e (melhoria de acurácia e base para metas futuras)"
+    },
+    {
+      "priority": "high",
+      "action": "Criar linha de base anual com registro mensal de consumo de combustível, produção e horas de operação; documentar métodos de cálculo.",
+      "timeline": "Semana 2-6",
+      "responsible": "Gestão de Dados / Sustentabilidade",
+      "estimated_impact": "0-0.2 tCO2e (base para futuras metas e payback de melhorias)"
+    },
+    {
+      "priority": "high",
+      "action": "Realizar diagnóstico de eficiência de caldeiras/fornos (com manutenção de queimadores) e iniciar recuperação de calor; considerar substituição por fontes de calor com menor emissividade quando viável.",
+      "timeline": "Semana 4-8",
+      "responsible": "Operações / Engenharia de Processo",
+      "estimated_impact": "0.3-0.9 tCO2e/ano"
+    },
+    {
+      "priority": "high",
+      "action": "Avaliar substituição de combustível ou eletrificação com energia renovável; conduzir estudo de viabilidade (CAPEX/OPEX, payback) com cenários de eletrificação total/parcial.",
+      "timeline": "Semana 6-12",
+      "responsible": "Planejamento / Engenharia / Finanças",
+      "estimated_impact": "0.5-2.0 tCO2e/ano (varia conforme cenário)"
+    },
+    {
+      "priority": "high",
+      "action": "Iniciar gestão de energia conforme ISO 50001 ou programa interno equivalente; desenvolver dashboards, KPIs e revisar periodicamente; mapear oportunidades para Escopo 2/3.",
+      "timeline": "Semana 6-12",
+      "responsible": "Gestão de Energia / Sustentabilidade",
+      "estimated_impact": "0-0.2 tCO2e/ano (potenciais reduções conforme metas e implementação)"
+    },
+    {
+      "priority": "medium",
+      "action": "Engajar fornecedores para obtenção de dados de Escopo 3 e mapear a cadeia de valor; estabelecer cronograma de dados e integração com o inventário.",
+      "timeline": "Semana 8-12",
+      "responsible": "Supply Chain / Sustentabilidade",
+      "estimated_impact": "0-0.0 tCO2e (fundamental para metas de Escopo 3; impacto indireto dependente de ações de terceiros)"
+    }
+  ],
+  "generated_at": "2025-11-12T18:06:47.625Z"
+}
