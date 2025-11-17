@@ -38,9 +38,9 @@ export default function Header() {
 
    return (
       <>
-         <div className="w-full h-16 sm:h-20 flex items-center px-3 sm:px-6 lg:px-24 py-3 bg-gradient-to-r from-[#002E34] to-[#004443] shadow-lg backdrop-blur-sm sticky top-0 z-50">
+         <div className="w-full h-16 sm:h-20 flex items-center px-3 sm:px-6 lg:px-24 py-3 bg-gradient-to-r from-[#002E34] to-[#002E34] shadow-lg backdrop-blur-sm sticky top-0 z-50">
             {/* Logo */}
-            <div className="flex-shrink-0 cursor-pointer group" onClick={() => router.push("/")}>
+            <div className="flex-shrink-0 cursor-pointer group" onClick={() => router.push("/marketplace")}>
                <img
                   src="/imgs/Logo.png"
                   alt="Logo"
@@ -64,7 +64,9 @@ export default function Header() {
                   Certificações
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00e07f] transition-all duration-300 group-hover:w-full"></span>
                </a>
-               <a className="text-white/90 hover:text-white cursor-pointer font-medium transition-all duration-300 relative group px-3 py-2">
+               <a className="text-white/90 hover:text-white cursor-pointer font-medium transition-all duration-300 relative group px-3 py-2"
+                  onClick={() => router.push("/reports")}
+               >
                   Relatórios
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00e07f] transition-all duration-300 group-hover:w-full"></span>
                </a>
@@ -207,7 +209,10 @@ export default function Header() {
                      </a>
                      <a 
                         className="block text-white hover:text-[#00e07f] cursor-pointer text-base sm:text-lg py-3 px-4 hover:bg-white/10 rounded-lg transition-all duration-200 font-medium"
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={() => {
+                           router.push("/reports")
+                           setIsMenuOpen(false);
+                        }}
                      >
                         Relatórios
                      </a>

@@ -38,9 +38,27 @@ export interface InventoryResult {
   };
 }
 
+export interface InventoryEmission {
+  id: string;
+  year: number;
+  description: string;
+  totalCo2e: number;
+  scope1_total: number;
+  scope2_total: number;
+  scope3_total: number;
+  calculator_data: any;
+  createdAt: string;
+}
+
+export interface InventoryByYear {
+  year: number;
+  totalCo2e: number;
+  emissions: InventoryEmission[];
+}
+
 export interface InventoryResponse {
-  inventory: InventoryResult;
-  scopes: ScopeResult[];
+  company: Company;
+  inventories: InventoryByYear[];
 }
 
 export interface EmissionData {
@@ -118,6 +136,10 @@ class CalculatorAPI {
   async getInventory(companyId: string, year?: number): Promise<InventoryResponse> {
     const yearParam = year ? `&year=${year}` : '';
     return this.fetchAPI(`/inventory?companyId=${companyId}${yearParam}`);
+  }
+
+  async getInventoryData(inventoryId: string) : Promise<EmissionData> {
+    return this.fetchAPI(`/inventory-by-uuid?uuid=${inventoryId}`);
   }
 
   async calculateScopeTotal(companyId: string, year: number, scope: number): Promise<ScopeResult> {

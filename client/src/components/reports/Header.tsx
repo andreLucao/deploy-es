@@ -83,18 +83,20 @@ export default function Header() {
                   Calculadora
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00e07f] transition-all duration-300 group-hover:w-full"></span>
                </a>
-               <a className="text-white hover:text-white cursor-pointer font-semibold transition-all duration-300 relative px-3 py-2 border-b-2 border-[#00e07f]">
+               <a 
+                  className="text-white/90 hover:text-white cursor-pointer font-medium transition-all duration-300 relative group px-3 py-2"
+                  onClick={() => router.push("/marketplace")}
+               >
                   Marketplace
+               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00e07f] transition-all duration-300 group-hover:w-full"></span>
                </a>
                <a className="text-white/90 hover:text-white cursor-pointer font-medium transition-all duration-300 relative group px-3 py-2">
                   Certificações
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00e07f] transition-all duration-300 group-hover:w-full"></span>
                </a>
-               <a className="text-white/90 hover:text-white cursor-pointer font-medium transition-all duration-300 relative group px-3 py-2"
-                  onClick={() => router.push("/reports")}
+               <a className="text-white hover:text-white cursor-pointer font-semibold transition-all duration-300 relative px-3 py-2 border-b-2 border-[#00e07f]"
                >
                   Relatórios
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#00e07f] transition-all duration-300 group-hover:w-full"></span>
                </a>
             </nav>
 
@@ -238,8 +240,11 @@ export default function Header() {
                         Calculadora
                      </a>
                      <a 
-                        className="block text-white hover:text-[#00e07f] cursor-pointer text-base sm:text-lg py-3 px-4 bg-white/10 rounded-lg transition-all duration-200 font-semibold border-l-4 border-[#00e07f]"
-                        onClick={() => setIsMenuOpen(false)}
+                        className="block text-white hover:text-[#00e07f] cursor-pointer text-base sm:text-lg py-3 px-4 hover:bg-white/10 rounded-lg transition-all duration-200 font-medium"
+                        onClick={() => {
+                            router.push("/marketplace");
+                            setIsMenuOpen(false);
+                        }}
                      >
                         Marketplace
                      </a>
@@ -250,11 +255,8 @@ export default function Header() {
                         Certificações
                      </a>
                      <a 
-                        className="block text-white hover:text-[#00e07f] cursor-pointer text-base sm:text-lg py-3 px-4 hover:bg-white/10 rounded-lg transition-all duration-200 font-medium"
-                        onClick={() => {
-                           router.push("/reports")
-                           setIsMenuOpen(false);
-                        }}
+                        className="block text-white hover:text-[#00e07f] cursor-pointer text-base sm:text-lg py-3 px-4 hover:bg-white/10 rounded-lg transition-all duration-200 font-semibold border-l-4 border-[#00e07f]"
+                        onClick={() => setIsMenuOpen(false)}
                      >
                         Relatórios
                      </a>
