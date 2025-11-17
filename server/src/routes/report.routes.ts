@@ -36,8 +36,8 @@ router.get("/report/:id", async (req: Request, res: Response) => {
 //Criar um relatório novo
 router.post("/", async (req: Request, res: Response) => {
     try {
-        const { companyId, title, content, url } = req.body;
-        const report = await reportService.create({ companyId, title, content, url });
+        const { companyId, title, content, url, type } = req.body;
+        const report = await reportService.create({ companyId, title, content, url, type });
         res.status(201).json(report);
     }
     catch (error) {
@@ -49,8 +49,8 @@ router.post("/", async (req: Request, res: Response) => {
 router.put("/:id", async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const { title, content, url } = req.body;
-        const report = await reportService.update(id, { title, content, url });
+        const { title, content, url, type } = req.body;
+        const report = await reportService.update(id, { title, content, url, type });
         res.json(report);
     }
     catch (error) {

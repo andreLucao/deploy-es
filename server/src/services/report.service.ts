@@ -12,11 +12,11 @@ export class ReportService {
         return await prisma.report.findUnique({ where: { id } });
     }
 
-    async create (data: { companyId: string; title?: string; content: string; url?: string }) {
+    async create (data: { companyId: string; title?: string; content: string; url?: string; type?: string }) {
         return await prisma.report.create({ data });
     }
 
-    async update(id: string, data: { title?: string; content?: string; url?: string}) {
+    async update(id: string, data: { title?: string; content?: string; url?: string; type?: string }) {
         return await prisma.report.update({ where: { id }, data });
     }
 
