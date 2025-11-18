@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
 interface EmissionRecord {
   totalCo2e: number;
@@ -52,7 +52,7 @@ interface DashboardContextType {
   refreshData: (companyId: string) => Promise<void>;
 }
 
-const DashboardContext = createContext<DashboardContextType | undefined>(
+export const DashboardContext = createContext<DashboardContextType | undefined>(
   undefined
 );
 
@@ -67,7 +67,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshData = async (companyId: string) => {
+  const refreshData = useCallback(async (companyId: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -89,7 +89,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return (
     <DashboardContext.Provider value={{ data, loading, error, refreshData }}>
