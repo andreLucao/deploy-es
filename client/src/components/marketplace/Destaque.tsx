@@ -2,7 +2,9 @@ import Link from "next/link";
 
 async function getFeaturedAds() {
   try {
-    const res = await fetch('http://localhost:3001/api/adProducts/featured?limit=4', {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL
+    const url = `${apiUrl}/api/adProducts/featured?limit=4`;
+    const res = await fetch(url, {
       cache: 'no-store'
     });
     if (!res.ok) {
@@ -36,11 +38,15 @@ export default async function Destaque() {
             href={`/marketplace/${ad.id}`}
             key={ad.id}
           >
-            <div className="flex bg-white h-48 sm:h-56 lg:h-100 w-full rounded-lg hover:scale-[1.02] transition-all cursor-pointer shadow-md hover:shadow-xl">
-              <div className="w-full p-4 lg:p-6 flex flex-col items-center justify-center text-base lg:text-lg font-semibold text-gray-700">
-                
+            <div 
+              className="h-48 sm:h-56 lg:h-100 w-full rounded-lg hover:scale-[1.02] transition-all cursor-pointer shadow-md hover:shadow-xl relative bg-cover bg-center bg-no-repeat overflow-hidden"
+              style={{ backgroundImage: `url(${ad.image_ad})` }}
+            >
+              
+              <div className="relative h-full w-full p-4 lg:p-6 flex flex-col items-start justify-end text-base lg:text-lg font-semibold text-white bg-gradient-to-t from-black/100 to-transparent to-50%">
+
                 <span>{ad.title}</span>
-                <span className="text-sm font-normal text-gray-500 mt-2">
+                <span className="text-sm font-medium text-neutral-200 mt-2">
                   Por: {ad.company.name}
                 </span>
                 <span className="text-lg font-bold text-green-600 mt-4">
