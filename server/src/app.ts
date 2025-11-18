@@ -16,6 +16,7 @@ import productsRoutes from "./routes/products.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import creditsRoutes from "./routes/credits.routes";
 import reportsRoutes from "./routes/reports.routes";
+import reportRoutes from "./routes/report.routes";
 
 const app: Application = express();
 export const PORT = process.env.PORT || 3001;
@@ -53,5 +54,6 @@ app.use("/api/products", productsRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/credits", creditsRoutes);
 app.use("/api/reports", reportsRoutes);
+app.use("/reports", reportRoutes);
 
 export default app;
