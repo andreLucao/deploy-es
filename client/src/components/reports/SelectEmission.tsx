@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Search, FileText, Calendar, Building2, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react";
+import { Search, FileText, Calendar, Building2, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { calculatorAPI } from '@/lib/calculatorApi';
 
@@ -21,8 +21,7 @@ export default function SelectEmission() {
   const [prompt, setPrompt] = useState("");
   const { user } = useAuth();
   const [emissions, setEmissions] = useState<Emission[]>([]);
-  const [loading, setLoading] = useState(true);
-  // selectedEmissions salva os IDs das emissões. Usar ele para pegar os emission.calculator_data para o agente 
+  // selectedEmissions salva os IDs das emissões. Usar ele para pegar os emission.calculator_data para o agente
   const [selectedEmissions, setSelectedEmissions] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showReport, setShowReport] = useState(false);
@@ -38,8 +37,6 @@ export default function SelectEmission() {
 
   const loadInventories = async () => {
     try {
-      setLoading(true);
-
       if (!user?.id) {
         console.error("Company ID não Encontrado");
         return;
@@ -48,7 +45,7 @@ export default function SelectEmission() {
       const data = await calculatorAPI.getInventory(user.id);
 
       const allEmissions: Emission[] = [];
-      
+
       data.inventories.forEach((inventory) => {
         inventory.emissions.forEach((emission) => {
           allEmissions.push({
@@ -69,8 +66,6 @@ export default function SelectEmission() {
 
     } catch (error) {
       console.error("Erro ao carregar inventários: ", error);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -107,28 +102,113 @@ export default function SelectEmission() {
   const handleGenerateReport = async () => {
     setIsGenerating(true);
     setShowReport(true);
+    setGeneratedReport("");
 
-    setTimeout(() => {
-      setGeneratedReport(`
-        # Relatório de Emissões de CO2
+    try {
+      // Get selected emissions data
+      const selectedEmissionData = emissions.filter(e => selectedEmissions.includes(e.id));
 
-        ## Análise Solicitada
-        ${prompt}
+      if (selectedEmissionData.length === 0) {
+        setGeneratedReport("Erro: Nenhuma emissão selecionada");
+        setIsGenerating(false);
+        return;
+      }
 
-        ## Emissões Analisadas
-        ${selectedEmissions.length} inventários selecionados
+      // Aggregate emissions data for the agent
+      const aggregatedEmissionData = {
+        totalCo2e: selectedTotals.total,
+        scope1_total: selectedTotals.scope1,
+        scope2_total: selectedTotals.scope2,
+        scope3_total: selectedTotals.scope3,
+        emissions: selectedEmissionData.map(e => ({
+          id: e.id,
+          year: e.year,
+          description: e.description,
+          totalCo2e: e.totalCo2e,
+          scope1_total: e.scope1_total,
+          scope2_total: e.scope2_total,
+          scope3_total: e.scope3_total,
+          data: e.data,
+        })),
+      };
 
-        ## Totais Gerais
-        - **Total de CO2e:** ${selectedTotals.total.toFixed(2)} toneladas
-        - **Escopo 1:** ${selectedTotals.scope1.toFixed(2)} tCO2e
-        - **Escopo 2:** ${selectedTotals.scope2.toFixed(2)} tCO2e
-        - **Escopo 3:** ${selectedTotals.scope3.toFixed(2)} tCO2e
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/agents/generate-report`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          emissionData: aggregatedEmissionData,
+          userPrompt: prompt,
+        }),
+      });
 
-        ## Conclusão
-        Este relatório foi gerado por IA com base nos dados fornecidos...
-      `);
+      if (!response.ok) {
+        throw new Error(`Erro ao gerar relatório: ${response.statusText}`);
+      }
+
+      // Handle Server-Sent Events streaming
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Resposta do servidor não suporta streaming");
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+
+        // Keep the last incomplete line in the buffer
+        buffer = lines[lines.length - 1];
+
+        for (let i = 0; i < lines.length - 1; i++) {
+          const line = lines[i];
+
+          // Parse SSE format
+          if (line.startsWith("data: ")) {
+            const dataStr = line.slice(6);
+            try {
+              const event = JSON.parse(dataStr);
+
+              if (event.type === "report_chunk") {
+                setGeneratedReport(prev => prev + event.chunk);
+              } else if (event.type === "report_complete") {
+                setGeneratedReport(event.content);
+              } else if (event.type === "error") {
+                setGeneratedReport(`Erro ao gerar relatório: ${event.error}`);
+              }
+            } catch (e) {
+              console.error("Erro ao parsear evento SSE:", e);
+            }
+          }
+        }
+      }
+
+      // Process any remaining buffer
+      if (buffer.startsWith("data: ")) {
+        const dataStr = buffer.slice(6);
+        try {
+          const event = JSON.parse(dataStr);
+          if (event.type === "report_complete") {
+            setGeneratedReport(event.content);
+          }
+        } catch (e) {
+          console.error("Erro ao parsear último evento SSE:", e);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao gerar relatório:", error);
+      setGeneratedReport(
+        `Erro ao gerar relatório: ${error instanceof Error ? error.message : "Erro desconhecido"}`
+      );
+    } finally {
       setIsGenerating(false);
-    }, 3000);
+    }
   };
 
   const handleBackForm = () => {
@@ -312,7 +392,6 @@ export default function SelectEmission() {
         }`}>
 
         {/* Conteúdo do Relatório */}
-        {/* TODO: Mudar para o streaming quando descobrir como fazer*/}
         <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200 min-h-[600px]">
           {isGenerating ? (
             <div className="flex flex-col items-center justify-center h-full py-20">
