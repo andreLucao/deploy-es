@@ -1,6 +1,6 @@
 "use client";
 
-import { User, LogOut, Settings, ChevronDown, Menu, X } from "lucide-react";
+import { User, LogOut, Settings, ChevronDown, Menu, X, LayoutDashboard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
@@ -161,6 +161,17 @@ export default function Header() {
                               <User size={18} className="text-gray-600" />
                               <span className="text-gray-700 font-medium">Meu Perfil</span>
                            </button>
+                           
+                           <button
+                              onClick={() => {
+                                 setIsProfileOpen(false);
+                                 router.push("/dashboard"); // Navega pro dashboard
+                              }}
+                              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-200 text-left"
+                           >
+                              <LayoutDashboard size={18} className="text-gray-600" />
+                              <span className="text-gray-700 font-medium">Meu Painel</span>
+                           </button>
 
                            <button
                               onClick={() => {
@@ -285,6 +296,17 @@ export default function Header() {
                      >
                         <User size={18} className="text-white/70" />
                         <span className="text-white font-medium">Meu Perfil</span>
+                     </button>
+
+                     <button
+                        onClick={() => {
+                           setIsMenuOpen(false);
+                           router.push("/dashboard"); // Navega pro dashboard
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 rounded-lg transition-colors text-left"
+                     >
+                        <LayoutDashboard size={18} className="text-white/70" />
+                        <span className="text-white font-medium">Meu Painel</span>
                      </button>
 
                      <button

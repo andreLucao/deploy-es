@@ -16,6 +16,8 @@ import productsRoutes from "./routes/products.routes";
 import transactionRoutes from "./routes/transaction.routes";
 import creditsRoutes from "./routes/credits.routes";
 import agentRoutes from "./routes/agent.routes";
+import reportsRoutes from "./routes/reports.routes";
+import reportRoutes from "./routes/report.routes";
 
 const app: Application = express();
 export const PORT = process.env.PORT || 3001;
@@ -35,8 +37,8 @@ app.use(
 );
 
 // Aumentar limite do body parser para aceitar imagens em base64 (50mb)
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cookieParser());
 
 // Routes
@@ -54,5 +56,7 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/credits", creditsRoutes);
 app.use("/api/agents", agentRoutes);
 
+app.use("/api/reports", reportsRoutes);
+app.use("/reports", reportRoutes);
 
 export default app;

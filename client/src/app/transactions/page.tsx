@@ -30,8 +30,8 @@ export default function Transactions() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const companyId = "380720e6-152e-4711-94c3-ef7aaec0db72"; //Placeholder temporário
-                const res = await fetch(`http://localhost:3001/api/transactions/history/${companyId}`);
+                const companyId = "9c8b0215-b296-4b24-a84e-bcb2548d6ab5"; //Placeholder temporário
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/transactions/history/${companyId}`);
                 const data = await res.json();
 
                 if (!res.ok) throw new Error(data.error || "Erro ao buscar histórico.");
@@ -88,10 +88,11 @@ export default function Transactions() {
             <table className="mx-auto w-[97%] border-collapse shadow-md rounded-lg overflow-hidden mt-8">
                 <thead className="bg-gray-100 text-gray-600 uppercase text-sm">
                     <tr>
-                        <th className="p-3 w-[15%]">Data</th>
-                        <th className="p-3 w-[50%]">Descrição</th>
-                        <th className="p-3 w-[17.5%] text-left">Débito</th>
-                        <th className="p-3 w-[17.5%] text-left">Crédito</th>
+                        <th className="p-3">Data</th>
+                        <th className="p-3">Nome do produto</th>
+                        <th className="p-3">Valor</th>
+                        <th className="p-3">Tipo</th>
+                        <th className="p-3">Quantidade</th>
                     </tr>
                 </thead>
 
@@ -99,7 +100,7 @@ export default function Transactions() {
                     {orders.length === 0 ? (
                         <tr>
                             <td
-                                colSpan={4}
+                                colSpan={5}
                                 className="text-center text-gray-500 p-6 bg-gray-50"
                             >
                                 Nenhuma transação encontrada para esta empresa.
