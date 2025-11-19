@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CalculatorProvider } from "@/contexts/CalculatorContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 import { Inter } from "next/font/google";
 
@@ -18,10 +19,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <CalculatorProvider>
-          {children}
-        </CalculatorProvider>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
+      <body className={`${inter.className} min-h-screen antialiased overflow-x-hidden`}>
+        <div className="flex flex-col min-h-screen">
+          <AuthProvider>
+            <CalculatorProvider>
+              <main className="flex-1 w-full">
+                {children}
+              </main>
+            </CalculatorProvider>
+          </AuthProvider>
+        </div>
       </body>
     </html>
   );

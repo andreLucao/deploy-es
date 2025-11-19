@@ -119,7 +119,7 @@ export default function AdFormModal({
          // Converter preço de reais para centavos antes de enviar
          const dataToSend = {
             ...formData,
-            price: Math.round(formData.price * 100), // Converter para centavos
+            price: Math.round(formData.price), // Converter para centavos
          };
 
          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/adProducts`, {

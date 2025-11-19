@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCard from "./product-card";
-import Link from "next/link"; //Necessário para os redirecionamentos
 
 type Produto = {
    id: number;
@@ -34,40 +33,25 @@ export default function Produtos({
    };
 
    return (
-      <div className="flex flex-col justify-items-center items-center w-full">
-         {/* Container com CSS Grid sempre, mas colunas dinâmicas */}
+      <div className="flex flex-col justify-items-center items-center w-[3400px] px-4 sm:px-6 lg:px-8">
+         {/* Container com Grid/List Responsivo */}
          <div
-            className="w-[1550px] p-3 transition-all duration-700 ease-out"
-            style={{
-               display: "grid",
-               gridTemplateColumns:
-                  modoVisualizacao === "grid" ? "repeat(4, 1fr)" : "1fr",
-               gap: modoVisualizacao === "grid" ? "40px" : "16px",
-               justifyItems: modoVisualizacao === "grid" ? "center" : "stretch",
-               maxWidth: modoVisualizacao === "list" ? "1520px" : "none",
-               margin: "0 auto",
-            }}
+            className={`
+               w-full max-w-[1800px] p-3 transition-all duration-700 ease-out
+               mb-8 sm:mb-12
+               ${modoVisualizacao === 'grid' 
+                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8' 
+                  : 'flex flex-col gap-4 sm:gap-6'}
+            `}
          >
             {produtosPagina.map((produto) => (
-               <Link
+               <div
                   key={produto.id}
-                  href={`/marketplace/${produto.id}`}
-                  className="rounded-lg cursor-pointer overflow-hidden"
-                  style={{
-                     display: "flex",
-                     flexDirection:
-                        modoVisualizacao === "grid" ? "column" : "row",
-                     height: modoVisualizacao === "grid" ? "340px" : "120px",
-                     width: modoVisualizacao === "grid" ? "340px" : "100%",
-                     alignItems:
-                        modoVisualizacao === "grid" ? "center" : "center",
-                     justifyContent:
-                        modoVisualizacao === "grid"
-                           ? "center"
-                           : "space-between",
-                     padding: modoVisualizacao === "grid" ? "16px" : "16px",
-                     transition: "all 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
-                  }}
+                  className={`rounded-lg overflow-hidden transition-all duration-[450ms] 
+                     hover:shadow-xl hover:scale-[1.02] bg-white
+                     ${modoVisualizacao === 'grid' 
+                        ? 'flex flex-col aspect-square' 
+                        : 'flex flex-col sm:flex-row h-auto w-full'}`}
                >
                   <ProductCard
                      id={produto.id}
@@ -76,52 +60,54 @@ export default function Produtos({
                      preco={produto.preco}
                      modoVisualizacao={modoVisualizacao}
                   />
-               </Link>
+               </div>
             ))}
          </div>
 
-         {/* Controles de paginação */}
-         <div className="flex items-center gap-4 mt-8 mb-4">
-            <button
-               onClick={() => irParaPagina(paginaAtual - 1)}
-               disabled={paginaAtual === 1}
-               className="flex items-center gap-2 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-400"
-            >
-               <ChevronLeft size={20} />
-               Anterior
-            </button>
+         {/* Paginação Responsiva - com mais espaçamento */}
+         <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center justify-center py-6 sm:py-8 w-full max-w-4xl bg-white/50 backdrop-blur-sm rounded-lg shadow-sm">
+            {/* Botões Anterior/Próxima */}
+            <div className="flex gap-4 items-center">
+               <button
+                  onClick={() => irParaPagina(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-400 text-sm sm:text-base"
+               >
+                  <ChevronLeft size={16} className="sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Anterior</span>
+                  <span className="sm:hidden">Ant</span>
+               </button>
 
-            <span className="text-sm">
-               Página {paginaAtual} de {totalPaginas}
-            </span>
+               {/* Números das páginas - Oculto em mobile, visível em tablet+ */}
+               <div className="hidden md:flex gap-2 flex-wrap justify-center">
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(
+                     (pagina) => (
+                        <button
+                           key={pagina}
+                           onClick={() => irParaPagina(pagina)}
+                           className={`px-3 py-1 rounded transition-all duration-200 text-sm ${
+                              pagina === paginaAtual
+                                 ? "bg-[#002E34] text-white"
+                                 : "bg-gray-200 hover:bg-gray-300"
+                           }`}
+                        >
+                           {pagina}
+                        </button>
+                     )
+                  )}
+               </div>
 
-            <button
-               onClick={() => irParaPagina(paginaAtual + 1)}
-               disabled={paginaAtual === totalPaginas}
-               className="flex items-center gap-2 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-400"
-            >
-               Próxima
-               <ChevronRight size={20} />
-            </button>
-         </div>
+               <button
+                  onClick={() => irParaPagina(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-400 text-sm sm:text-base"
+               >
+                  <span className="hidden sm:inline">Próxima</span>
+                  <span className="sm:hidden">Prox</span>
+                  <ChevronRight size={16} className="sm:w-5 sm:h-5" />
+               </button>
+            </div>
 
-         {/* Números das páginas */}
-         <div className="flex gap-2">
-            {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(
-               (pagina) => (
-                  <button
-                     key={pagina}
-                     onClick={() => irParaPagina(pagina)}
-                     className={`px-3 py-1 rounded transition-all duration-200 ${
-                        pagina === paginaAtual
-                           ? "bg-[#002E34] text-white"
-                           : "bg-gray-200 hover:bg-gray-300"
-                     }`}
-                  >
-                     {pagina}
-                  </button>
-               )
-            )}
          </div>
       </div>
    );

@@ -20,15 +20,45 @@ export interface InventoryInput {
 }
 
 export interface InventoryResult {
-  inventoryId: string;
+  emissionId?: string;
+  inventoryId?: string; // Mantido para compatibilidade
+  companyId?: string;
+  year?: number;
+  description?: string;
   totalEmissions: number;
-  emissionsCount: number;
-  scopeBreakdown?: { scope: number; total: number; count: number }[];
+  totalEmissionsCount?: number;
+  emissionsCount?: number; // Mantido para compatibilidade
+  scope1Total?: number;
+  scope2Total?: number;
+  scope3Total?: number;
+  scopeBreakdown?: { 
+    scope1?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
+    scope2?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
+    scope3?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
+  };
+}
+
+export interface InventoryEmission {
+  id: string;
+  year: number;
+  description: string;
+  totalCo2e: number;
+  scope1_total: number;
+  scope2_total: number;
+  scope3_total: number;
+  calculator_data: any;
+  createdAt: string;
+}
+
+export interface InventoryByYear {
+  year: number;
+  totalCo2e: number;
+  emissions: InventoryEmission[];
 }
 
 export interface InventoryResponse {
-  inventory: InventoryResult;
-  scopes: ScopeResult[];
+  company: Company;
+  inventories: InventoryByYear[];
 }
 
 export interface EmissionData {
@@ -108,6 +138,10 @@ class CalculatorAPI {
     return this.fetchAPI(`/inventory?companyId=${companyId}${yearParam}`);
   }
 
+  async getInventoryData(inventoryId: string) : Promise<EmissionData> {
+    return this.fetchAPI(`/inventory-by-uuid?uuid=${inventoryId}`);
+  }
+
   async calculateScopeTotal(companyId: string, year: number, scope: number): Promise<ScopeResult> {
     return this.fetchAPI(`/calculate-scope-total?companyId=${companyId}&year=${year}&scope=${scope}`);
   }
@@ -119,6 +153,15 @@ class CalculatorAPI {
 
   async getEmissionsSummary(companyId: string): Promise<EmissionsSummary> {
     return this.fetchAPI(`/emissions-summary?companyId=${companyId}`);
+  }
+
+  async getEmissionFactors(): Promise<unknown> {
+    const url = `${API_BASE_URL}/api/emission-products`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Erro ao buscar fatores de emissão');
+    }
+    return response.json();
   }
 
   async deleteEmission(emissionId: string) {

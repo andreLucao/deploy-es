@@ -1,0 +1,26 @@
+{
+  "timestamp": "2025-11-17T17:11:44.196Z",
+  "datasetName": "complete",
+  "userPromptProvided": true,
+  "userPrompt": "Foque em oportunidades de redução de escopo 2 e 3 com viabilidade técnica.",
+  "emissionDataSummary": {
+    "totalEmissions": 6.2034,
+    "scope1Total": 3.52,
+    "scope2Total": 0.1634,
+    "scope3Total": 2.52
+  },
+  "analysisResult": {
+    "insightsCount": 6,
+    "keyFindingsCount": 4,
+    "recommendationsCount": 6,
+    "nextStepsCount": 3
+  },
+  "reportResult": {
+    "chunksReceived": 3522,
+    "contentSize": 12815,
+    "generatedAt": "2025-11-17T17:11:44.196Z"
+  },
+  "workflowMetrics": {
+    "success": true
+  }
+}

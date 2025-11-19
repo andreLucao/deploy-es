@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { CalculatorService } from "../services/calculator.service";
+import prisma from "../config/database";
 
 const router = Router();
 const calculatorService = new CalculatorService();
@@ -192,5 +193,34 @@ router.get("/emissions-summary", async (req: Request, res: Response) => {
          .json({ error: "Erro ao buscar resumo de emissões." });
    }
 });
+
+router.get("/inventory-by-uuid", async (req: Request, res: Response) => {
+   // pegar o uuid vinda do parametro e buscar no prisma (tabela emissions)
+   try {
+      const { uuid } = req.query;
+
+      if (!uuid) {
+         return res.status(400).json({
+            error: "O parâmetro uuid é obrigatório.",
+         });
+      }
+
+      const inventoryItem = await prisma.emission.findUnique({
+         where: { id: uuid as string },
+      });
+
+      if (!inventoryItem) {
+         return res.status(404).json({
+            error: "Emissão não encontrada.",
+         });
+      }
+
+      return res.status(200).json(inventoryItem);
+   } catch (error) {
+      console.error("Erro ao buscar item do inventário:", error);
+      return res.status(500).json({ error: "Erro ao buscar item do inventário." });
+   }
+});
+
 
 export default router;

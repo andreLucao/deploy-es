@@ -2,13 +2,14 @@
 
 import { useState } from 'react';
 import { useCalculator } from '@/contexts/CalculatorContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { EmissionForm } from './FormComponents';
 import { 
   scope1EmissionTypes, 
   scope2EmissionTypes, 
   scope3EmissionTypes 
 } from '@/data/emissionData';
-import { ChevronLeft, ChevronRight, Plus, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Check, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function CalculatorForm() {
@@ -21,6 +22,7 @@ export default function CalculatorForm() {
     saveInventory,
     isLoading
   } = useCalculator();
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -84,9 +86,16 @@ export default function CalculatorForm() {
   };
 
   const handleFinishCalculation = async () => {
+    // Verificar se o usuário está autenticado
+    if (!isAuthenticated || !user) {
+      alert('Você precisa estar logado para salvar o inventário. Redirecionando para login...');
+      router.push('/login');
+      return;
+    }
+
     try {
-      // Salvar inventário no banco de dados
-      const companyId = 'comp' + Math.floor(Math.random() * 1000); // ID simples para teste
+      // Usar o ID do usuário autenticado
+      const companyId = user.id;
       const year = new Date().getFullYear();
       
       const result = await saveInventory(companyId, year);
@@ -104,13 +113,32 @@ export default function CalculatorForm() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto overflow-hidden">
+      {/* Alert de autenticação */}
+      {!isAuthenticated && (
+        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-semibold text-yellow-800 mb-1">Atenção: Não autenticado</h3>
+            <p className="text-sm text-yellow-700">
+              Você precisa estar logado para salvar o inventário. 
+              <button 
+                onClick={() => router.push('/login')}
+                className="ml-1 underline font-medium hover:text-yellow-900"
+              >
+                Fazer login agora
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Progress Bar */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
+      <div className="mb-6 sm:mb-8 overflow-x-auto">
+        <div className="flex items-center justify-between mb-4 min-w-min">
           {steps.map((step, index) => (
-            <div key={`step-${step.id}-${index}`} className="flex items-center">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+            <div key={`step-${step.id}-${index}`} className="flex items-center flex-shrink-0">
+              <div className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 text-xs sm:text-base ${
                 currentStep === step.id 
                   ? 'bg-[#008F70] border-[#008F70] text-white' 
                   : currentStep > step.id
@@ -119,20 +147,20 @@ export default function CalculatorForm() {
               }`}>
                 {currentStep > step.id ? '✓' : step.id}
               </div>
-              <div className="ml-3">
-                <div className={`text-sm font-medium ${
+              <div className="ml-2 sm:ml-3">
+                <div className={`text-xs sm:text-sm font-medium ${
                   currentStep >= step.id ? 'text-gray-900' : 'text-gray-400'
                 }`}>
                   {step.title}
                 </div>
-                <div className={`text-xs ${
+                <div className={`text-xs hidden sm:block ${
                   currentStep >= step.id ? 'text-gray-600' : 'text-gray-400'
                 }`}>
                   {step.description}
                 </div>
               </div>
               {index < steps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-4 ${
+                <div className={`flex-1 h-0.5 mx-2 sm:mx-4 min-w-[20px] ${
                   currentStep > step.id ? 'bg-[#008F70]' : 'bg-gray-300'
                 }`} />
               )}
@@ -142,7 +170,7 @@ export default function CalculatorForm() {
       </div>
 
       {/* Current Step Content */}
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6 overflow-hidden">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
@@ -168,22 +196,18 @@ export default function CalculatorForm() {
               <ChevronLeft size={20} />
               <span>Anterior</span>
             </button>
-            {currentStep === 3 ? (
-              <button
-                onClick={() => window.location.href = '/calculator/results'}
-                className="px-6 py-2 rounded-lg flex items-center space-x-2 bg-[#008F70] text-white hover:bg-[#004443] font-semibold"
-              >
-                <span>🧮 Calcular</span>
-              </button>
-            ) : (
-              <button
-                onClick={nextStep}
-                className="px-4 py-2 rounded-lg flex items-center space-x-2 bg-[#008F70] text-white hover:bg-[#004443]"
-              >
-                <span>Próximo</span>
-                <ChevronRight size={20} />
-              </button>
-            )}
+            <button
+              onClick={nextStep}
+              disabled={currentStep === 3}
+              className={`px-4 py-2 rounded-lg flex items-center space-x-2 ${
+                currentStep === 3
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-[#008F70] text-white hover:bg-[#004443]'
+              }`}
+            >
+              <span>Próximo</span>
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 
@@ -243,61 +267,60 @@ export default function CalculatorForm() {
           </div>
         )}
       </div>
-
-      {/* Summary */}
-      <div className="bg-gray-50 rounded-lg p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+{/*       
+      Summary foi retirado porque possuia erros na hora de exibir as emissões
+      
+      <div className="bg-gray-50 rounded-lg p-4 sm:p-6 mb-6 overflow-hidden">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-4">
           Resumo dos Dados
         </h3>
         
-        {/* Total Geral */}
-        <div className="bg-[#008F70] text-white p-6 rounded-lg mb-6">
+        <div className="bg-[#008F70] text-white p-4 sm:p-6 rounded-lg mb-4 sm:mb-6">
           <div className="text-center">
-            <div className="text-3xl font-bold">{calculateTotalEmissions().toFixed(2)} tCO2e</div>
-            <div className="text-lg">Total de Emissões Calculadas</div>
+            <div className="text-2xl sm:text-3xl font-bold">{calculateTotalEmissions().toFixed(2)} tCO2e</div>
+            <div className="text-sm sm:text-lg">Total de Emissões Calculadas</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-lg border-l-4 border-red-500">
-            <div className="text-2xl font-bold text-gray-800">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="bg-white p-3 sm:p-4 rounded-lg border-l-4 border-red-500">
+            <div className="text-xl sm:text-2xl font-bold text-gray-800">
               {data.scope1.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
             </div>
-            <div className="text-sm text-gray-600">Escopo 1 - Emissões Diretas (tCO2e)</div>
+            <div className="text-xs sm:text-sm text-gray-600">Escopo 1 - Emissões Diretas (tCO2e)</div>
             <div className="text-xs text-gray-500 mt-1">{data.scope1.emissions.length} emissões</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border-l-4 border-yellow-500">
-            <div className="text-2xl font-bold text-gray-800">
+          <div className="bg-white p-3 sm:p-4 rounded-lg border-l-4 border-yellow-500">
+            <div className="text-xl sm:text-2xl font-bold text-gray-800">
               {data.scope2.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
             </div>
-            <div className="text-sm text-gray-600">Escopo 2 - Energia Indireta (tCO2e)</div>
+            <div className="text-xs sm:text-sm text-gray-600">Escopo 2 - Energia Indireta (tCO2e)</div>
             <div className="text-xs text-gray-500 mt-1">{data.scope2.emissions.length} emissões</div>
           </div>
-          <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500">
-            <div className="text-2xl font-bold text-gray-800">
+          <div className="bg-white p-3 sm:p-4 rounded-lg border-l-4 border-blue-500">
+            <div className="text-xl sm:text-2xl font-bold text-gray-800">
               {data.scope3.emissions.reduce((total, emission) => total + (emission.calculatedCo2e || 0), 0).toFixed(2)}
             </div>
-            <div className="text-sm text-gray-600">Escopo 3 - Outras Emissões Indiretas (tCO2e)</div>
+            <div className="text-xs sm:text-sm text-gray-600">Escopo 3 - Outras Emissões Indiretas (tCO2e)</div>
             <div className="text-xs text-gray-500 mt-1">{data.scope3.emissions.length} emissões</div>
           </div>
         </div>
-      </div>
+      </div>   */}
 
       {/* Botão Finalizar Cálculo */}
       {calculateTotalEmissions() > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
               Pronto para Finalizar seu Inventário?
             </h3>
-            <p className="text-gray-600 mb-6">
-              Você calculou um total de <strong>{calculateTotalEmissions().toFixed(2)} tCO2e</strong> em emissões. 
+            <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
               Clique no botão abaixo para salvar seu inventário e ver os resultados completos.
             </p>
             <button
               onClick={handleFinishCalculation}
               disabled={isLoading}
-              className="bg-[#008F70] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-[#007563] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto transition-colors"
+              className="bg-[#008F70] text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg hover:bg-[#007563] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto transition-colors w-full sm:w-auto"
             >
               {isLoading ? (
                 <>

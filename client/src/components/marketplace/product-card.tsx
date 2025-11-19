@@ -2,7 +2,8 @@
 
 import React from "react";
 import { useCartStore } from "@/store/cart.store";
-import { ShoppingCart } from "lucide-react"; // Ícone para o botão
+import { ShoppingCart } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
    id: number;
@@ -20,33 +21,37 @@ export default function ProductCard({
    modoVisualizacao,
 }: ProductCardProps) {
    const addItem = useCartStore((state) => state.addItem);
+   const router = useRouter();
 
    const handleAddToCart = (e: React.MouseEvent) => {
-      e.stopPropagation(); // Impede que o clique no botão ative o hover do container principal
+      e.stopPropagation();
 
       const itemToAdd = {
-         // IDs mockados (necessário usar o id do produto real aqui)
          creditId: `CREDIT-${id}`,
          sellerId: `SELLER-MOCK-ID`,
          quantity: 1,
          pricePerUnit: preco,
+         productName: titulo,
       };
 
       addItem(itemToAdd);
-      // Opcional: Adicionar um Toast ou alerta para feedback
+   };
+
+   const handleCardClick = () => {
+      router.push(`/marketplace/${id}`);
    };
 
    return (
       <div
+         onClick={handleCardClick}
          className="bg-white rounded-lg cursor-pointer transition-all duration-400 hover:shadow-md"
          style={{
             display: "flex",
             flexDirection: modoVisualizacao === "grid" ? "column" : "row",
-            height: modoVisualizacao === "grid" ? "340px" : "120px",
-            width: modoVisualizacao === "grid" ? "340px" : "100%",
-            alignItems: modoVisualizacao === "grid" ? "center" : "center",
-            justifyContent:
-               modoVisualizacao === "grid" ? "space-between" : "space-between",
+            height: modoVisualizacao === "grid" ? "100%" : "120px",
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "center",
             padding: "16px",
             transform: "scale(1)",
          }}
@@ -59,7 +64,7 @@ export default function ProductCard({
       >
          <div
             className={
-               modoVisualizacao === "grid" ? "text-center" : "flex-1 mr-4"
+               modoVisualizacao === "grid" ? "text-center flex-1 flex flex-col justify-center" : "flex-1 mr-4"
             }
             style={{ transition: "all 0.7s ease-out" }}
          >

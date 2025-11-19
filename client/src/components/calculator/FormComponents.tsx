@@ -17,11 +17,11 @@ export const SelectBox = ({ options, value, onChange, placeholder, className = "
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008F70] focus:border-transparent ${className}`}
+      className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008F70] focus:border-transparent transition-all duration-200 bg-white hover:border-[#008F70] cursor-pointer ${className} ${value ? 'text-gray-900' : 'text-gray-500'}`}
     >
-      <option value="">{placeholder || "Selecione uma opção"}</option>
+      <option value="" disabled>{placeholder || "Selecione uma opção"}</option>
       {options.map((option) => (
-        <option key={option.value} value={option.value}>
+        <option key={option.value} value={option.value} className="text-gray-900">
           {option.label}
         </option>
       ))}
@@ -55,17 +55,32 @@ export const InputField = ({
       <label className="block text-sm font-medium text-gray-700">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <div className="relative">
+      <div className="relative group">
         <input
           type={type}
           value={value}
-          onChange={(e) => onChange(type === 'number' ? parseFloat(e.target.value) || 0 : e.target.value)}
+          onChange={(e) => {
+            if (type === 'number') {
+              let val = e.target.value;
+              // Substitui vírgula por ponto
+              val = val.replace(',', '.');
+              
+              // Permite string vazia, valores parciais como "0.", "0,", ou números válidos
+              if (val === '' || val === '0' || val === '0.' || !isNaN(Number(val))) {
+                onChange(val === '' ? 0 : val);
+              }
+            } else {
+              onChange(e.target.value);
+            }
+          }}
           placeholder={placeholder}
           required={required}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008F70] focus:border-transparent pr-16"
+          step={type === 'number' ? '0.01' : undefined}
+          min={type === 'number' ? '0' : undefined}
+          className={`w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#008F70] focus:border-transparent transition-all duration-200 hover:border-[#008F70] ${unit ? 'pr-28' : 'pr-3'}`}
         />
         {unit && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm font-medium bg-gray-50 px-2 py-1 rounded border border-gray-200">
             {unit}
           </span>
         )}
@@ -109,7 +124,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o Combustível <span className="text-red-500">*</span>
+                Combustível <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={stationaryCombustionFuels}
@@ -124,13 +139,9 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
               onChange={(value) => updateField('quantity', value)}
               type="number"
               placeholder="0"
+              unit={stationaryCombustionFuels.find(f => f.value === formData.fuel)?.unit || 'Selecione o combustível'}
               required
             />
-            <div className="flex items-center justify-center">
-              <span className="text-gray-500">
-                {stationaryCombustionFuels.find(f => f.value === formData.fuel)?.unit || 'Unidade'}
-              </span>
-            </div>
           </div>
         );
 
@@ -146,7 +157,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o Tipo de Veículo <span className="text-red-500">*</span>
+                Tipo de Veículo <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={mobileCombustionVehicles}
@@ -161,13 +172,9 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
               onChange={(value) => updateField('quantity', value)}
               type="number"
               placeholder="0"
+              unit={mobileCombustionVehicles.find(v => v.value === formData.vehicle)?.unit || 'Selecione o veículo'}
               required
             />
-            <div className="flex items-center justify-center">
-              <span className="text-gray-500">
-                {mobileCombustionVehicles.find(v => v.value === formData.vehicle)?.unit || 'Unidade'}
-              </span>
-            </div>
           </div>
         );
 
@@ -183,7 +190,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o gás ou composto <span className="text-red-500">*</span>
+                Gás ou Composto <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={fugitiveEmissionsGases}
@@ -247,7 +254,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o gás emitido <span className="text-red-500">*</span>
+                Gás Emitido <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={fugitiveEmissionsGases}
@@ -280,7 +287,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o gás emitido <span className="text-red-500">*</span>
+                Gás Emitido <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={agricultureGases}
@@ -313,7 +320,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Uso anterior do solo <span className="text-red-500">*</span>
+                Uso Anterior do Solo <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={landUseOptions}
@@ -324,7 +331,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Uso posterior do solo <span className="text-red-500">*</span>
+                Uso Posterior do Solo <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={landUseOptions}
@@ -358,7 +365,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o Tratamento <span className="text-red-500">*</span>
+                Tipo de Tratamento <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={wasteTreatmentOptions}
@@ -405,7 +412,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o Tipo de Efluente <span className="text-red-500">*</span>
+                Tipo de Efluente <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={effluentTypes}
@@ -482,7 +489,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Selecione o combustível <span className="text-red-500">*</span>
+                Combustível <span className="text-red-500">*</span>
               </label>
               <SelectBox
                 options={stationaryCombustionFuels}
@@ -525,7 +532,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
               />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Selecione o tipo de transporte <span className="text-red-500">*</span>
+                  Tipo de Transporte <span className="text-red-500">*</span>
                 </label>
                 <SelectBox
                   options={transportTypes}
@@ -540,7 +547,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Selecione o tipo de veículo <span className="text-red-500">*</span>
+                    Tipo de Veículo <span className="text-red-500">*</span>
                   </label>
                   <SelectBox
                     options={mobileCombustionVehicles}
@@ -565,7 +572,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Selecione a Concessionária <span className="text-red-500">*</span>
+                    Concessionária <span className="text-red-500">*</span>
                   </label>
                   <SelectBox
                     options={railwayConcessions}
@@ -633,7 +640,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
               />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Selecione o tipo de transporte <span className="text-red-500">*</span>
+                  Tipo de Transporte <span className="text-red-500">*</span>
                 </label>
                 <SelectBox
                   options={transportTypes.filter(t => t.value !== 'ferroviario')}
@@ -648,7 +655,7 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Selecione o tipo de veículo <span className="text-red-500">*</span>
+                    Tipo de Veículo <span className="text-red-500">*</span>
                   </label>
                   <SelectBox
                     options={mobileCombustionVehicles}
@@ -700,14 +707,16 @@ export const EmissionForm = ({ emissionType, onUpdate, onRemove, initialData }: 
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-800">
+    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 space-y-4">
+      <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#008F70]"></span>
           {emissionType ? emissionType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Tipo de Emissão'}
         </h3>
         <button
           onClick={onRemove}
-          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 hover:scale-110"
+          title="Remover emissão"
         >
           <Trash2 size={20} />
         </button>

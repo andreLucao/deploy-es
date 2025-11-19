@@ -7,6 +7,7 @@ interface CartItem {
    sellerId: string;
    quantity: number;
    pricePerUnit: number;
+   productName: string;
 }
 
 // estado e ações
