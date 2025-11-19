@@ -10,7 +10,7 @@ export default function Report(){
         <div className="flex flex-col min-h-screen">
             <Header />
             
-              <div className="flex flex flex-col">
+              <div className="flex flex-col">
                 <SelectEmission />
               </div>
             

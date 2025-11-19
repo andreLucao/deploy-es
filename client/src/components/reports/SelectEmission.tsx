@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, FileText, Calendar, Building2, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { calculatorAPI } from '@/lib/calculatorApi';
+import Markdown from 'react-markdown';
 
 interface Emission {
   id: string;
@@ -17,6 +18,20 @@ interface Emission {
   createdAt: string;
 }
 
+interface ActionItem {
+  priority: "high" | "medium" | "low";
+  action: string;
+  timeline: string;
+  responsible: string;
+  estimated_impact: string;
+}
+
+interface GeneratedReport {
+  title: string;
+  content: string;
+  action_items: ActionItem[];
+}
+
 export default function SelectEmission() {
   const [prompt, setPrompt] = useState("");
   const { user } = useAuth();
@@ -26,7 +41,8 @@ export default function SelectEmission() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showReport, setShowReport] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedReport, setGeneratedReport] = useState("");
+  const [generatedReport, setGeneratedReport] = useState<GeneratedReport | null>(null);
+  const [reportError, setReportError] = useState("");
 
   // roda assim que iniciar o componente
   useEffect(() => {
@@ -102,14 +118,15 @@ export default function SelectEmission() {
   const handleGenerateReport = async () => {
     setIsGenerating(true);
     setShowReport(true);
-    setGeneratedReport("");
+    setGeneratedReport(null);
+    setReportError("");
 
     try {
       // Get selected emissions data
       const selectedEmissionData = emissions.filter(e => selectedEmissions.includes(e.id));
 
       if (selectedEmissionData.length === 0) {
-        setGeneratedReport("Erro: Nenhuma emissão selecionada");
+        setReportError("Erro: Nenhuma emissão selecionada");
         setIsGenerating(false);
         return;
       }
@@ -147,7 +164,7 @@ export default function SelectEmission() {
         throw new Error(`Erro ao gerar relatório: ${response.statusText}`);
       }
 
-      // Handle Server-Sent Events streaming
+      // Handle streaming
       const reader = response.body?.getReader();
       if (!reader) {
         throw new Error("Resposta do servidor não suporta streaming");
@@ -155,6 +172,7 @@ export default function SelectEmission() {
 
       const decoder = new TextDecoder();
       let buffer = "";
+      let reportContent = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -167,43 +185,49 @@ export default function SelectEmission() {
         buffer = lines[lines.length - 1];
 
         for (let i = 0; i < lines.length - 1; i++) {
-          const line = lines[i];
+          const line = lines[i].trim();
 
-          // Parse SSE format
-          if (line.startsWith("data: ")) {
-            const dataStr = line.slice(6);
-            try {
-              const event = JSON.parse(dataStr);
+          // Skip empty lines
+          if (!line) continue;
 
-              if (event.type === "report_chunk") {
-                setGeneratedReport(prev => prev + event.chunk);
-              } else if (event.type === "report_complete") {
-                setGeneratedReport(event.content);
-              } else if (event.type === "error") {
-                setGeneratedReport(`Erro ao gerar relatório: ${event.error}`);
-              }
-            } catch (e) {
-              console.error("Erro ao parsear evento SSE:", e);
+          // Parse NDJSON format
+          try {
+            const event = JSON.parse(line);
+
+            if (event.type === "report_chunk") {
+              reportContent += event.chunk;
+            } else if (event.type === "error") {
+              setReportError(`Erro ao gerar relatório: ${event.error}`);
             }
+          } catch (e) {
+            console.error("Erro ao parsear NDJSON:", e, "Linha:", line);
           }
         }
       }
 
       // Process any remaining buffer
-      if (buffer.startsWith("data: ")) {
-        const dataStr = buffer.slice(6);
+      if (buffer.trim()) {
         try {
-          const event = JSON.parse(dataStr);
-          if (event.type === "report_complete") {
-            setGeneratedReport(event.content);
+          const event = JSON.parse(buffer);
+          if (event.type === "report_chunk") {
+            reportContent += event.chunk;
           }
         } catch (e) {
-          console.error("Erro ao parsear último evento SSE:", e);
+          console.error("Erro ao parsear último evento NDJSON:", e);
         }
+      }
+
+      // Parse the accumulated report content as JSON
+      try {
+        const parsedReport = JSON.parse(reportContent) as GeneratedReport;
+        setGeneratedReport(parsedReport);
+      } catch (parseError) {
+        console.error("Erro ao parsear relatório como JSON:", parseError);
+        setReportError("Erro ao processar relatório gerado");
       }
     } catch (error) {
       console.error("Erro ao gerar relatório:", error);
-      setGeneratedReport(
+      setReportError(
         `Erro ao gerar relatório: ${error instanceof Error ? error.message : "Erro desconhecido"}`
       );
     } finally {
@@ -213,7 +237,8 @@ export default function SelectEmission() {
 
   const handleBackForm = () => {
     setShowReport(false);
-    setGeneratedReport("");
+    setGeneratedReport(null);
+    setReportError("");
   };
 
   return (
@@ -392,29 +417,105 @@ export default function SelectEmission() {
         }`}>
 
         {/* Conteúdo do Relatório */}
-        <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200 min-h-[600px]">
+        <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200 min-h-[600px] max-h-[90vh] overflow-y-auto">
           {isGenerating ? (
             <div className="flex flex-col items-center justify-center h-full py-20">
               <Loader2 className="w-16 h-16 text-[#008F70] animate-spin mb-4" />
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Gerando seu relatório...</h3>
               <p className="text-gray-600">Nossa IA está analisando {selectedEmissions.length} inventários</p>
             </div>
-          ) : (
-            <div className="prose max-w-none">
-              <div className="whitespace-pre-wrap text-gray-800">{generatedReport}</div>
-              <div className="flex gap-4 mt-8 pt-8 border-t">
+          ) : reportError ? (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-red-800 mb-2">Erro ao gerar relatório</h3>
+              <p className="text-red-700 mb-4">{reportError}</p>
+              <button onClick={handleBackForm} className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors">
+                Voltar
+              </button>
+            </div>
+          ) : generatedReport ? (
+            <div className="space-y-8">
+              {/* Título do Relatório */}
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">{generatedReport.title}</h1>
+              </div>
+
+              {/* Conteúdo em Markdown */}
+              <div className="prose prose-lg max-w-none text-gray-800">
+                <Markdown
+                  components={{
+                    h2: ({...props}) => <h2 className="text-2xl font-bold mt-6 mb-3 text-gray-900" {...props} />,
+                    h3: ({...props}) => <h3 className="text-xl font-bold mt-4 mb-2 text-gray-800" {...props} />,
+                    p: ({...props}) => <p className="mb-3 text-gray-700" {...props} />,
+                    ul: ({...props}) => <ul className="list-disc list-inside mb-3 space-y-2 text-gray-700" {...props} />,
+                    li: ({...props}) => <li className="ml-2" {...props} />,
+                    strong: ({...props}) => <strong className="font-semibold text-gray-900" {...props} />,
+                  }}
+                >
+                  {generatedReport.content}
+                </Markdown>
+              </div>
+
+              {/* Action Items */}
+              {generatedReport.action_items && generatedReport.action_items.length > 0 && (
+                <div className="mt-10 pt-8 border-t border-gray-300">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Plano de Ação</h2>
+                  <div className="space-y-4">
+                    {generatedReport.action_items.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className={`border-l-4 p-4 rounded ${
+                          item.priority === "high"
+                            ? "border-red-500 bg-red-50"
+                            : item.priority === "medium"
+                            ? "border-yellow-500 bg-yellow-50"
+                            : "border-green-500 bg-green-50"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-bold text-gray-900 flex-1">{item.action}</h3>
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ml-2 ${
+                              item.priority === "high"
+                                ? "bg-red-200 text-red-800"
+                                : item.priority === "medium"
+                                ? "bg-yellow-200 text-yellow-800"
+                                : "bg-green-200 text-green-800"
+                            }`}
+                          >
+                            {item.priority === "high" ? "Alta" : item.priority === "medium" ? "Média" : "Baixa"}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-sm mt-3">
+                          <div>
+                            <span className="text-gray-600 font-medium">Prazo:</span>
+                            <p className="text-gray-800">{item.timeline}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 font-medium">Responsável:</span>
+                            <p className="text-gray-800">{item.responsible}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600 font-medium">Impacto Estimado:</span>
+                            <p className="text-gray-800">{item.estimated_impact}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Botões de Ação */}
+              <div className="flex gap-4 mt-8 pt-8 border-t border-gray-300">
                 <button className="px-6 py-3 bg-[#008F70] text-white rounded-lg font-semibold hover:bg-[#007a5e] transition-colors">
                   Exportar PDF
                 </button>
-                {/* Header do Relatório */}
-                <div className="flex items-center justify-between">
-                  <button onClick={handleBackForm} className="px-4 py-2 bg-white text-[#008F70] rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                    Nova Análise
-                  </button>
-                </div>
+                <button onClick={handleBackForm} className="px-4 py-2 bg-white text-[#008F70] border border-[#008F70] rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                  Nova Análise
+                </button>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
