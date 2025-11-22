@@ -17,7 +17,9 @@ export default function Transactions() {
         if (isLoading) return;
 
         if (!isAuthenticated) {
-            router.push("/login");
+            setTimeout(() => {
+                router.push("/login");
+            }, 5000);
             return;
         }
 
@@ -47,6 +49,20 @@ export default function Transactions() {
 
         fetchOrders();
     }, [isLoading, isAuthenticated, user]);
+
+    if (!isLoading && !isAuthenticated) {
+        return (
+            <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+                <p className="text-red-500">
+                    É necessário realizar login para acessar esta página.
+                </p>
+
+                <p>
+                    Você será redirecionado para a página de login.
+                </p>
+            </main>
+        );
+    }
 
     if (isLoading) {
         return (
