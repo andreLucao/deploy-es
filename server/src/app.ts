@@ -13,7 +13,7 @@ import paymentRoutes from "./routes/paymentRoutes";
 import stripeWebhook from "./routes/stripeWebhook";
 import commentsRoutes from "./routes/commentsRoutes";
 import productsRoutes from "./routes/products.routes";
-import transactionRoutes from "./routes/transaction.routes";
+import transactionsRoutes from "./routes/transactions.routes";
 import creditsRoutes from "./routes/credits.routes";
 import agentRoutes from "./routes/agent.routes";
 import reportsRoutes from "./routes/reports.routes";
@@ -52,7 +52,7 @@ app.use("/api/adProducts", adProductRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/comments", commentsRoutes);
 app.use("/api/products", productsRoutes);
-app.use("/api/transactions", transactionRoutes);
+app.use("/api/transactions", transactionsRoutes);
 app.use("/api/credits", creditsRoutes);
 app.use("/api/agents", agentRoutes);
 
