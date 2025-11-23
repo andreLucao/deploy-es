@@ -11,4 +11,8 @@ module.exports = {
    testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
    // Ignora a pasta node_modules
    testPathIgnorePatterns: ["/node_modules/"],
+
+   moduleNameMapper: {
+      "^@/(.*)$": "<rootDir>/src/$1",
+   },
 };
