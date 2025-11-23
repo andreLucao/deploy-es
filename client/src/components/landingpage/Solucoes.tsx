@@ -26,7 +26,7 @@ export default function Solucoes() {
                     Soluções
                 </h1>
 
-                <div className="w-full max-w-7xl">
+                <div className="mb-10 w-full max-w-7xl">
                     <FocusCards cards={cards} />
                 </div>
             </div>
