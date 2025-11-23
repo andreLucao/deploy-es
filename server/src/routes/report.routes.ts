@@ -4,18 +4,6 @@ import { ReportService } from "../services/report.service";
 const router = Router();
 const reportService = new ReportService();
 
-//Listar relatórios da empresa
-router.get("/:companyId", async (req: Request, res: Response) => {
-    try {
-        const { companyId } = req.params;
-        const reports = await reportService.getAll(companyId);
-        res.json(reports)
-    }
-    catch (error) {
-        res.status(500).json({ error: "Erro ao listar relatórios." });
-    }
-});
-
 //Buscar um relatório específico
 router.get("/report/:id", async (req: Request, res: Response) => {
     try {
@@ -30,6 +18,18 @@ router.get("/report/:id", async (req: Request, res: Response) => {
     }
     catch (error) {
         return res.status(500).json({ error: "Erro ao buscar relatório." });
+    }
+});
+
+//Listar relatórios da empresa
+router.get("/:companyId", async (req: Request, res: Response) => {
+    try {
+        const { companyId } = req.params;
+        const reports = await reportService.getAll(companyId);
+        res.json(reports)
+    }
+    catch (error) {
+        res.status(500).json({ error: "Erro ao listar relatórios." });
     }
 });
 
