@@ -6,6 +6,7 @@ import Header from "@/components/marketplace/Header";
 import Footer from "@/components/Footer";
 import CreateCommentBox from '@/components/marketplace/CreateCommentBox';
 import CommentsSection from '@/components/marketplace/CommentsSection';
+import { CommentsProvider } from '@/context/CommentsContext';
 import { useCartStore } from '@/store/cart.store';
 
 type ProductPageProps = {
@@ -110,35 +111,8 @@ export default function ProductPage({ params }: ProductPageProps) {
     const [productData, setProductData] = useState<ProductData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [, setComments] = useState<Comment[]>([]);
-    const [, setLoadingComments] = useState(true);
     const [quantity, setQuantity] = useState(1);
-    const [showCartNotification, setShowCartNotification] = useState(false);
     const addItem = useCartStore((state) => state.addItem);
-
-    // Função para buscar comentários
-    const fetchComments = async () => {
-        try {
-            setLoadingComments(true);
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/comments/get-ad-comments?adProductId=${id}`);
-            
-            if (!response.ok) {
-                throw new Error('Erro ao carregar comentários');
-            }
-            
-            const data = await response.json();
-            setComments(data.comments || []);
-        } catch (err) {
-            console.error('Erro ao carregar comentários:', err);
-        } finally {
-            setLoadingComments(false);
-        }
-    };
-
-    // Carregar comentários quando o componente monta
-    useEffect(() => {
-        fetchComments();
-    }, [id]);
 
     useEffect(() => {
         const fetchProductData = async () => {
@@ -188,12 +162,6 @@ export default function ProductPage({ params }: ProductPageProps) {
         };
 
         addItem(itemToAdd);
-
-        // Mostrar notificação
-        setShowCartNotification(true);
-        setTimeout(() => setShowCartNotification(false), 3000);
-
-        // Resetar quantidade
         setQuantity(1);
     };
 
@@ -473,24 +441,21 @@ export default function ProductPage({ params }: ProductPageProps) {
             </div>
 
             {/* Seção de Comentários */}
-            <div className="w-full flex flex-col items-center px-4 mb-16">
-                <div className="max-w-4xl w-full">
-                    <h2 className="text-3xl font-bold text-[#002E34] mb-8 text-center">
-                        Deixe seu comentário
-                    </h2>
+            <CommentsProvider adProductId={id}>
+                <div className="w-full flex flex-col items-center px-4 mb-16">
+                    <div className="max-w-4xl w-full">
+                        <h2 className="text-3xl font-bold text-[#002E34] mb-8 text-center">
+                            Deixe seu comentário
+                        </h2>
 
-                    <div className="mb-8">
-                        <CreateCommentBox
-                            adProductId={id}
-                            onCommentAdded={fetchComments}
-                        />
+                        <div className="mb-8">
+                            <CreateCommentBox />
+                        </div>
+
+                        <CommentsSection />
                     </div>
-
-                    <CommentsSection
-                        adProductId={id}
-                    />
                 </div>
-            </div>
+            </CommentsProvider>
 
             <Footer />
         </div>
