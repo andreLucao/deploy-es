@@ -5,6 +5,7 @@ const MOCK_ITEM_A = {
    sellerId: "SELLER-XYZ",
    quantity: 100,
    pricePerUnit: 10.0,
+   productName: "Eletricidade Teste",
 };
 
 const MOCK_ITEM_B = {
@@ -12,6 +13,7 @@ const MOCK_ITEM_B = {
    sellerId: "SELLER-XYZ",
    quantity: 50,
    pricePerUnit: 20.0,
+   productName: "Carvão Teste",
 };
 
 describe("Cart Store Functionality", () => {

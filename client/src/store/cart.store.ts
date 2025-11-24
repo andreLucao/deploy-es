@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { upsertItemInCart, updateItemQuantity } from "@/lib/cart-helpers";
 
-// o que o carrinho guarda MUDAR CONFORME MODELAGEM DO ANUNCIO
-interface CartItem {
+// o que o carrinho guarda -> MUDAR CONFORME MODELAGEM DO ANUNCIO
+export interface CartItem {
    creditId: string;
    sellerId: string;
    quantity: number;
@@ -10,8 +11,7 @@ interface CartItem {
    productName: string;
 }
 
-// estado e ações
-interface CartState {
+export interface CartState {
    items: CartItem[];
 
    addItem: (item: CartItem) => void;
@@ -22,57 +22,28 @@ interface CartState {
    getTotalPrice: () => number;
 }
 
-//  Lógica
 export const useCartStore = create(
    persist<CartState>(
       (set, get) => ({
          items: [],
 
          addItem: (newItem) => {
-            set((state) => {
-               const exists = state.items.find(
-                  (item) => item.creditId === newItem.creditId
-               );
-
-               if (exists) {
-                  // Se o item existe, apenas atualiza a quantidade
-                  return {
-                     items: state.items.map((item) =>
-                        item.creditId === newItem.creditId
-                           ? {
-                                ...item,
-                                quantity: item.quantity + newItem.quantity,
-                             }
-                           : item
-                     ),
-                  };
-               } else {
-                  // Se for novo, adiciona ao carrinho
-                  return { items: [...state.items, newItem] };
-               }
-            });
-         },
-
-         increaseQuantity: (creditId: string) => {
             set((state) => ({
-               items: state.items.map((item) =>
-                  item.creditId === creditId
-                     ? { ...item, quantity: item.quantity + 1 }
-                     : item
-               ),
+               items: upsertItemInCart(state.items, newItem),
             }));
          },
 
-         //Diminui a quantidade de um item existente (e remove se chegar a zero)
+         // REFACTORADO: Usa a função auxiliar para simplificar
+         increaseQuantity: (creditId: string) => {
+            set((state) => ({
+               items: updateItemQuantity(state.items, creditId, 1),
+            }));
+         },
+
+         // REFACTORADO: Usa a função auxiliar para simplificar
          decreaseQuantity: (creditId: string) => {
             set((state) => ({
-               items: state.items
-                  .map((item) =>
-                     item.creditId === creditId
-                        ? { ...item, quantity: item.quantity - 1 }
-                        : item
-                  )
-                  .filter((item) => item.quantity > 0),
+               items: updateItemQuantity(state.items, creditId, -1),
             }));
          },
 
