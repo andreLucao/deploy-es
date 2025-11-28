@@ -4,13 +4,19 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
 
-    //Rotas públicas
-    const publicRoutes = ["/", "/login", "/register", "/marketplace", "/calculator"];
-
     const { pathname } = req.nextUrl;
 
+    //Rotas públicas
+    const exactPublicRoutes = ["/", "/login", "/register"];
+    const prefixPublicRoutes = ["/marketplace", "/calculator"];
+
+    const isPublic = 
+      exactPublicRoutes.includes(pathname) ||
+      prefixPublicRoutes.some(route => 
+        pathname.startsWith(route + "/") || pathname === route);
+
     //Se rota é pública, dexia passar
-    if (publicRoutes.includes(pathname)) {
+    if (isPublic) {
         return NextResponse.next();
     }
 
