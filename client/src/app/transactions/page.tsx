@@ -5,21 +5,7 @@ import HistoryTable from "@/components/transactions/HistoryTable";
 import { useTransactionHistory } from "@/hooks/useTransactionHistory"
 
 export default function Transactions() {
-    const { orders, error, isLoading, isAuthenticated } = useTransactionHistory();
-
-    if (!isLoading && !isAuthenticated) {
-        return (
-            <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-                <p className="text-red-500">
-                    É necessário realizar login para acessar esta página.
-                </p>
-
-                <p>
-                    Você será redirecionado para a página de login.
-                </p>
-            </main>
-        );
-    }
+    const { orders, error, isLoading } = useTransactionHistory();
 
     if (isLoading) {
         return (
