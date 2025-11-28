@@ -31,6 +31,14 @@ export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onSc
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToKnowUs}>Marketplace</a>
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToCertificacoes}>Certificações</a>
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToSolucoes}>Soluções</a>
+                                        {/* NOVO LINK PARA A NOVA PÁGINA */}
+                    <a
+                        className="text-black hover:text-zinc-800 cursor-pointer"
+                        onClick={() => (window.location.href = "/legislacao")}
+                    >
+                        Legislação
+                    </a>
+
                 </div>
 
                 {/* Desktop Login Button */}
