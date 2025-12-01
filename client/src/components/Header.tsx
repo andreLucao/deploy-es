@@ -6,9 +6,10 @@ type HeaderProps = {
     onScrollToKnowUs: () => void;
     onScrollToCertificacoes: () => void;
     onScrollToSolucoes: () => void;
+    onScrollToLegislacao: () => void;
 };
 
-export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onScrollToSolucoes }: HeaderProps) {
+export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onScrollToSolucoes, onScrollToLegislacao }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -31,11 +32,9 @@ export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onSc
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToKnowUs}>Marketplace</a>
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToCertificacoes}>Certificações</a>
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToSolucoes}>Soluções</a>
-                                        {/* NOVO LINK PARA A NOVA PÁGINA */}
-                    <a
-                        className="text-black hover:text-zinc-800 cursor-pointer"
-                        onClick={() => (window.location.href = "/legislacao")}
-                    >
+                            
+                    <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
+                        onClick={onScrollToLegislacao} >
                         Legislação
                     </a>
 
