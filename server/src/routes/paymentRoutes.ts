@@ -73,6 +73,23 @@ router.get('/payment-status/:sessionId', async (req: Request, res: Response): Pr
         creditsBought: true,
         createdAt: true,
         paymentMethod: true,
+        adProduct: {
+          select: {
+            title: true,
+            credit_type: true,
+            certification_type: true,
+            co2_reduction: true,
+            local: true,
+            biome: true,
+            standard: true,
+            project_type: true,
+          }
+        },
+        company: {
+          select: {
+            email: true,
+          }
+        }
       }
     });
 
@@ -88,6 +105,17 @@ router.get('/payment-status/:sessionId', async (req: Request, res: Response): Pr
       creditsBought: payment.creditsBought,
       createdAt: payment.createdAt,
       paymentMethod: payment.paymentMethod,
+      productTitle: payment.adProduct.title,
+      creditType: payment.adProduct.credit_type,
+      certificationType: payment.adProduct.certification_type,
+      productDetails: {
+        co2Reduction: payment.adProduct.co2_reduction,
+        location: payment.adProduct.local,
+        biome: payment.adProduct.biome,
+        standard: payment.adProduct.standard,
+        projectType: payment.adProduct.project_type,
+      },
+      companyEmail: payment.company.email,
     });
   } catch (error) {
     console.error('Erro ao buscar pagamento:', error);
