@@ -1,8 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
 const jwt = require('jsonwebtoken');
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 import prisma from '../config/database';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const router = Router();
 
@@ -26,18 +28,6 @@ interface CompanyDocument {
   id: string;
   email: string;
 }
-
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  // For port 465 use secure true, for 587/STARTTLS use false
-  secure: (process.env.SMTP_PORT === "465"),
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
 
 const generateToken = (email: string) => {
   const token = crypto.randomBytes(32).toString("hex");
@@ -87,7 +77,7 @@ router.post("/magic-link", async (req: Request<{}, {}, MagicLinkRequestBody>, re
     }/auth/verify?token=${token}&email=${encodeURIComponent(email)}`;
 
     // Send email
-    await transporter.sendMail({
+    const { error } = await resend.emails.send({
       from: `"EcoChange" <${process.env.EMAIL_FROM}>`,
       to: email,
       subject: "Seu link de acesso - EcoChange",
@@ -109,6 +99,11 @@ router.post("/magic-link", async (req: Request<{}, {}, MagicLinkRequestBody>, re
         </div>
       `,
     });
+
+    if (error) {
+      console.error("Resend error:", error);
+      return res.status(500).json({ error: "Failed to send magic link" });
+    }
 
     return res.json({ message: "Magic link sent successfully" });
   } catch (error) {
