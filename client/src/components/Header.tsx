@@ -41,36 +41,16 @@ export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onSc
                         onClick={onScrollToLegislacao} >
                         Legislação
                     </a>
-
-                </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg xl:text-xl space-x-6 xl:space-x-8">
-               <a
-                  className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
-                  onClick={onScrollToKnowUs}
-               >
-                  Marketplace
-               </a>
-               <a
-                  className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
-                  onClick={onScrollToCertificacoes}
-               >
-                  Certificações
-               </a>
-               <a
-                  className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
-                  onClick={onScrollToSolucoes}
-               >
-                  Soluções
-               </a>
-               <a
+                    <a
                   className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
                   onClick={onScrollToFAQ}
                >
                   FAQ
                </a>
-            </div>
+
+                </div>
+
+
 
             {/* Desktop Login Button */}
             <div className="ml-auto hidden sm:flex items-center">
