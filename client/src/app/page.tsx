@@ -7,11 +7,13 @@ import Hero from "@/components/landingpage/Hero";
 import KnowUs from "@/components/landingpage/KnowUs";
 import Solucoes from "@/components/landingpage/Solucoes";
 import Footer from "@/components/Footer";
+import FAQSection from "@/components/landingpage/FAQSection";
 
 export default function LandingPage() {
    const knowUsRef = useRef<HTMLElement>(null);
    const certificacoesRef = useRef<HTMLElement>(null);
    const solucoesRef = useRef<HTMLElement>(null);
+   const faqRef = useRef<HTMLElement>(null);
 
    const scrollToSection = (
       ref: React.RefObject<HTMLElement | null>,
@@ -32,6 +34,7 @@ export default function LandingPage() {
                scrollToSection(certificacoesRef, 60)
             }
             onScrollToSolucoes={() => scrollToSection(solucoesRef, 60)}
+            onScrollToFAQ={() => scrollToSection(faqRef, 60)}
          />
 
          <div className="flex-1 w-full">
@@ -47,8 +50,11 @@ export default function LandingPage() {
             <section ref={solucoesRef} className="w-full">
                <Solucoes />
             </section>
+            <section ref={faqRef} className="w-full">
+               <FAQSection />
+            </section>
          </div>
-         
+
          <Footer />
       </main>
    );
