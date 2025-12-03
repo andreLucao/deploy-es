@@ -20,7 +20,7 @@ export function middleware(req: NextRequest) {
 
     //Rotas públicas
     const exactPublicRoutes = ["/", "/login", "/register"];
-    const prefixPublicRoutes = ["/marketplace", "/calculator", "/auth/verify"];
+    const prefixPublicRoutes = ["/marketplace", "/calculator", "/auth/verify", "/legislacao"];
 
     const isPublic = 
       exactPublicRoutes.includes(pathname) ||
