@@ -35,6 +35,8 @@ function VerifyContent() {
     // Call your backend to verify the magic link
     const verifyMagicLink = async () => {
       try {
+        console.log('🔐 [Verify] Calling backend /api/auth/verify...');
+        
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`,
           {
@@ -49,13 +51,15 @@ function VerifyContent() {
         const data: VerifyResponse = await response.json();
 
         if (response.ok && data.token && data.user) {
+          console.log('✅ [Verify] Magic link verified, cookie should be set');
+          console.log('✅ [Verify] User data:', data.user);
           
           // Buscar dados completos do usuário autenticado (com UUID correto do JWT)
           try {
             await login(data.user.email);
-            console.log('✅ Dados do usuário carregados com sucesso');
+            console.log('✅ [Verify] Dados do usuário carregados com sucesso');
           } catch (loginError) {
-            console.error('❌ Erro ao carregar dados do usuário:', loginError);
+            console.error('❌ [Verify] Erro ao carregar dados do usuário:', loginError);
           }
           
           setStatus('success');
@@ -63,13 +67,14 @@ function VerifyContent() {
           
           // Redirect to main application after a short delay
           setTimeout(() => {
+            console.log('🔄 [Verify] Redirecting to /marketplace...');
             router.push('/marketplace');
           }, 2000);
         } else {
           throw new Error(data.error || 'Verification failed');
         }
       } catch (error) {
-        console.error('Verification error:', error);
+        console.error('❌ [Verify] Verification error:', error);
         setStatus('error');
         setMessage(
           error instanceof Error 
