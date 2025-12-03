@@ -7,7 +7,7 @@ export default function Legislacao() {
                 </h1>
                 
                 <p className="text-center text-black font-light text-sm sm:text-lg lg:text-xl max-w-sm sm:max-w-3xl lg:max-w-5xl mx-auto leading-relaxed mb-8 sm:mb-12 lg:mb-16">
-                    Confira todas as informções sobre o Programa de Descarbonização e seu funcionamento.
+                    Confira todas as informações sobre o Programa de Descarbonização e seu funcionamento.
                 </p>
 
                 <button className="bg-[#002e34] text-lg sm:text-xl lg:text-[25px] text-white font-medium px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 rounded-[10px] hover:bg-emerald-950 transition duration-200 hover:scale-105 cursor-pointer"
