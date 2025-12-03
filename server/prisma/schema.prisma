@@ -21,7 +21,6 @@ model Company {
   emissions    Emission[]
   orders       Order[]
   payments     Payment[]
-  reports      Report[]
 
   @@map("companies")
 }
@@ -191,19 +190,6 @@ model Payment {
   company               Company   @relation(fields: [companyId], references: [id])
 
   @@map("payments")
-}
-
-model Report {
-  id           String   @id @default(uuid())
-  companyId    String   @map("company_id")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  type         String   @default("markdown")
-  title        String?
-  content      String
-  company      Company  @relation(fields: [companyId], references: [id])
-
-  @@map("reports")
 }
 
 enum OrderStatus {
