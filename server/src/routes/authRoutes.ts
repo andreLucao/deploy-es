@@ -78,7 +78,7 @@ router.post("/magic-link", async (req: Request<{}, {}, MagicLinkRequestBody>, re
 
     // Send email
     const { error } = await resend.emails.send({
-      from: `"EcoChange" <${process.env.EMAIL_FROM}>`,
+      from: 'onboarding@resend.dev',
       to: email,
       subject: "Seu link de acesso - EcoChange",
       html: `
