@@ -13,11 +13,12 @@ import paymentRoutes from "./routes/paymentRoutes";
 import stripeWebhook from "./routes/stripeWebhook";
 import commentsRoutes from "./routes/commentsRoutes";
 import productsRoutes from "./routes/products.routes";
-import transactionRoutes from "./routes/transaction.routes";
+import transactionsRoutes from "./routes/transactions.routes";
 import creditsRoutes from "./routes/credits.routes";
 import agentRoutes from "./routes/agent.routes";
 import reportsRoutes from "./routes/reports.routes";
 import reportRoutes from "./routes/report.routes";
+import onboardingRoutes from "./routes/onboardingRoutes";
 
 const app: Application = express();
 export const PORT = process.env.PORT || 3001;
@@ -52,11 +53,12 @@ app.use("/api/adProducts", adProductRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/comments", commentsRoutes);
 app.use("/api/products", productsRoutes);
-app.use("/api/transactions", transactionRoutes);
+app.use("/api/transactions", transactionsRoutes);
 app.use("/api/credits", creditsRoutes);
 app.use("/api/agents", agentRoutes);
 
 app.use("/api/reports", reportsRoutes);
 app.use("/reports", reportRoutes);
+app.use("/api/onboarding", onboardingRoutes);
 
 export default app;

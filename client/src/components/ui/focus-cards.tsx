@@ -50,7 +50,7 @@ export const Card = React.memo(
             }}
           >
             <Image
-              src="/placeholder.jpg"//{card.src}
+              src={card.src}
               alt={card.title}
               fill
               className="object-cover absolute inset-0"

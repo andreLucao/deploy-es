@@ -171,18 +171,28 @@ router.get("/verify", async (req: Request<{}, {}, {}, VerifyQuery>, res: Respons
 
 router.get("/me", verifyToken, async (req: AuthRequest, res: Response) => {
   try {
-    const company: CompanyDocument | null = await prisma.company.findUnique({ 
-      where: { email: req.user?.email } 
+    const company: any = await prisma.company.findUnique({
+      where: { email: req.user?.email },
+      select: {
+        id: true,
+        email: true,
+        onboarded: true,
+        company_name: true,
+        industry: true,
+      },
     });
-    
+
     if (!company) {
       return res.status(404).json({ error: "Company not found" });
     }
-    
+
     return res.json({
       user: {
         id: company.id,
         email: company.email,
+        onboarded: company.onboarded,
+        company_name: company.company_name,
+        industry: company.industry,
       },
     });
   } catch (error) {
