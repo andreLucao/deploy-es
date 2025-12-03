@@ -5,14 +5,19 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 interface User {
   id: string;
   email: string;
+  onboarded?: boolean;
+  company_name?: string;
+  industry?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isOnboarded: boolean;
   login: (email: string) => Promise<void>;
   logout: () => void;
+  completeOnboarding: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -95,28 +100,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (response.ok) {
         const data = await response.json();
-        // API retorna { user: { id, email } }
-        const userData = {
+        // API retorna { user: { id, email, onboarded, company_name, industry } }
+        const userData: User = {
           id: data.user?.id || data.id,
           email: data.user?.email || data.email,
+          onboarded: data.user?.onboarded ?? false,
+          company_name: data.user?.company_name,
+          industry: data.user?.industry,
         };
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
-        console.log('✅ [AuthContext] Login bem-sucedido com ID correto:', userData.id);
+        console.log('✅ Login bem-sucedido:', userData.id, 'Onboarded:', userData.onboarded);
       } else {
         const errorData = await response.json();
-        console.error('❌ [AuthContext] Erro ao buscar usuário autenticado:', errorData);
-        // Remove fallback - se não conseguir autenticar, usuário deve fazer login novamente
+        console.error('❌ Erro ao buscar usuário autenticado:', errorData);
         setUser(null);
         localStorage.removeItem('user');
         throw new Error('Falha na autenticação - faça login novamente');
       }
     } catch (error) {
-      console.error('❌ [AuthContext] Erro ao fazer login:', error);
-      // Remove fallback que usava email como ID - força re-autenticação correta
+      console.error('❌ Erro ao fazer login:', error);
       setUser(null);
       localStorage.removeItem('user');
-      throw error; // Propaga erro para o componente tratar
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -130,10 +136,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   };
 
+  const completeOnboarding = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/onboarding/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const updatedUser = { ...user, onboarded: true } as User;
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        console.log('✅ Onboarding concluído');
+      } else {
+        throw new Error('Falha ao completar onboarding');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao completar onboarding:', error);
+      throw error;
+    }
+  };
+
   const isAuthenticated = !!user;
+  const isOnboarded = user?.onboarded ?? false;
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, isOnboarded, login, logout, completeOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

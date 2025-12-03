@@ -51,25 +51,47 @@ function VerifyContent() {
         const data: VerifyResponse = await response.json();
 
         if (response.ok && data.token && data.user) {
-          console.log('✅ [Verify] Magic link verified, cookie should be set');
-          console.log('✅ [Verify] User data:', data.user);
-          
+
           // Buscar dados completos do usuário autenticado (com UUID correto do JWT)
           try {
             await login(data.user.email);
-            console.log('✅ [Verify] Dados do usuário carregados com sucesso');
+            console.log('✅ Dados do usuário carregados com sucesso');
+
+            // Fetch the updated user data to check onboarding status
+            const meResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+              {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+
+            if (meResponse.ok) {
+              const meData = await meResponse.json();
+              const isOnboarded = meData.user?.onboarded ?? false;
+              console.log('Onboarded status:', isOnboarded);
+
+              setStatus('success');
+              setMessage('Login successful! Redirecting...');
+
+              // Redirect based on onboarding status
+              setTimeout(() => {
+                if (!isOnboarded) {
+                  router.push('/onboarding');
+                } else {
+                  router.push('/marketplace');
+                }
+              }, 2000);
+            } else {
+              throw new Error('Failed to fetch user data');
+            }
           } catch (loginError) {
-            console.error('❌ [Verify] Erro ao carregar dados do usuário:', loginError);
+            console.error('❌ Erro ao carregar dados do usuário:', loginError);
+            throw loginError;
           }
-          
-          setStatus('success');
-          setMessage('Login successful! Redirecting to your dashboard...');
-          
-          // Redirect to main application after a short delay
-          setTimeout(() => {
-            console.log('🔄 [Verify] Redirecting to /marketplace...');
-            router.push('/marketplace');
-          }, 2000);
         } else {
           throw new Error(data.error || 'Verification failed');
         }

@@ -18,6 +18,7 @@ import creditsRoutes from "./routes/credits.routes";
 import agentRoutes from "./routes/agent.routes";
 import reportsRoutes from "./routes/reports.routes";
 import reportRoutes from "./routes/report.routes";
+import onboardingRoutes from "./routes/onboardingRoutes";
 
 const app: Application = express();
 export const PORT = process.env.PORT || 3001;
@@ -58,5 +59,6 @@ app.use("/api/agents", agentRoutes);
 
 app.use("/api/reports", reportsRoutes);
 app.use("/reports", reportRoutes);
+app.use("/api/onboarding", onboardingRoutes);
 
 export default app;

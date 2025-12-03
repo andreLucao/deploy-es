@@ -10,17 +10,28 @@ datasource db {
 }
 
 model Company {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  created_at   DateTime      @default(now())
-  balance      Int           @default(0)
-  adProducts   AdProduct[]
-  cart         Cart?
-  commentLikes CommentLike[]
-  comments     Comment[]
-  emissions    Emission[]
-  orders       Order[]
-  payments     Payment[]
+  id                    String        @id @default(uuid())
+  email                 String        @unique
+  created_at            DateTime      @default(now())
+  updated_at            DateTime      @updatedAt @map("updated_at")
+  balance               Int           @default(0)
+
+  // Onboarding fields
+  onboarded             Boolean?      @default(false)
+  company_name          String?
+  industry              String?
+  company_type          String?
+  country               String?
+  annual_revenue_range  String?       @map("annual_revenue_range")
+  sustainability_goals  String?       @map("sustainability_goals")
+
+  adProducts            AdProduct[]
+  cart                  Cart?
+  commentLikes          CommentLike[]
+  comments              Comment[]
+  emissions             Emission[]
+  orders                Order[]
+  payments              Payment[]
 
   @@map("companies")
 }
