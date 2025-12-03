@@ -25,8 +25,9 @@ export function useTransactionHistory(companyId?: string) {
 
                 setOrders(data.data);
             }
-            catch (err: any) {
-                setError(err.message);
+            catch (err: unknown) {
+                const errorMessage = err instanceof Error ? err.message : "Erro desconhecido";
+                setError(errorMessage);
             }
             finally {
                 setIsLoading(false);
@@ -34,7 +35,7 @@ export function useTransactionHistory(companyId?: string) {
         };
 
         fetchOrders();
-    }, []);
+    }, [companyId]);
 
     return {
         orders,
