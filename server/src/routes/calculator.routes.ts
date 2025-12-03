@@ -78,7 +78,7 @@ router.get("/calculate-scope-total", async (req: Request, res: Response) => {
       );
 
       const total = emissions.reduce(
-         (sum, emission) => sum + emission.calculatedCo2e,
+         (sum: number, emission: any) => sum + emission.totalCo2e,
          0
       );
 
@@ -138,7 +138,7 @@ router.get("/emissions-by-type", async (req: Request, res: Response) => {
          emissionType,
          emissions,
          totalCo2e: emissions.reduce(
-            (sum, emission) => sum + emission.calculatedCo2e,
+            (sum: number, emission: any) => sum + emission.totalCo2e,
             0
          ),
       });
@@ -181,7 +181,7 @@ router.get("/emissions-summary", async (req: Request, res: Response) => {
          });
       }
 
-      const summary = await calculatorService.getEmissionsSummaryByYear(
+      const summary = await calculatorService.getEmissionsSummary(
          companyId as string
       );
 
