@@ -3,19 +3,18 @@
 import { useState } from "react";
 
 type HeaderProps = {
-   onScrollToKnowUs: () => void;
-   onScrollToCertificacoes: () => void;
-   onScrollToSolucoes: () => void;
-   onScrollToFAQ: () => void;
+    onScrollToKnowUs: () => void;
+    onScrollToCertificacoes: () => void;
+    onScrollToSolucoes: () => void;
+    onScrollToLegislacao: () => void;
+  onScrollToFAQ: () => void;
 };
 
-export default function Header({
-   onScrollToKnowUs,
-   onScrollToCertificacoes,
-   onScrollToSolucoes,
-   onScrollToFAQ,
-}: HeaderProps) {
-   const [isMenuOpen, setIsMenuOpen] = useState(false);
+export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onScrollToSolucoes, onScrollToLegislacao, onScrollToFAQ }: HeaderProps) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+   
+
+
 
    const toggleMenu = () => {
       setIsMenuOpen(!isMenuOpen);
@@ -26,15 +25,24 @@ export default function Header({
       setIsMenuOpen(false);
    };
 
-   return (
-      <>
-         <div className="w-full h-16 sm:h-20 flex items-center px-4 sm:px-8 lg:px-24 py-3 sm:py-5 bg-[#efefef] bg-opacity-50 relative shadow-lg z-50 sticky top-0 rounded-b-3xl">
-            {/* Logo */}
-            <img
-               src="/imgs/Logo.png"
-               alt="Logo"
-               className="h-10 sm:h-12 lg:h-15"
-            />
+    return (
+        <>
+            <div className="w-full h-16 sm:h-20 flex items-center px-4 sm:px-8 lg:px-24 py-3 sm:py-5 bg-[#efefef] bg-opacity-50 relative shadow-lg z-50 sticky top-0 rounded-b-3xl">
+                {/* Logo */}
+                <img src="/imgs/Logo.png" alt="Logo" className="h-10 sm:h-12 lg:h-15" />
+                
+                {/* Desktop Navigation */}
+                <div className="hidden lg:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg xl:text-xl space-x-6 xl:space-x-8">
+                    <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToKnowUs}>Marketplace</a>
+                    <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToCertificacoes}>Certificações</a>
+                    <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToSolucoes}>Soluções</a>
+                            
+                    <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
+                        onClick={onScrollToLegislacao} >
+                        Legislação
+                    </a>
+
+                </div>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-lg xl:text-xl space-x-6 xl:space-x-8">
