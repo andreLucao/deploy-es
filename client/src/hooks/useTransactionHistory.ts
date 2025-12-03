@@ -1,55 +1,44 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
 
 export function useTransactionHistory(companyId?: string) {
-    const { user, isAuthenticated, isLoading } = useAuth();
-    const router = useRouter();
-    
     const [orders, setOrders] = useState([]);
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (isLoading) return;
-
-        if (!isAuthenticated) {
-            setTimeout(() => {
-                router.push("/login");
-            }, 5000);
-            return;
-        }
-
-        const companyId = user?.id;
-
-        if (!companyId) {
-            setError("É necessário estar logado para acessar esta página.");
-            return;
-        }
-
         const fetchOrders = async () => {
+            if (!companyId) {
+                setError("Não foi informada a empresa.");
+                setIsLoading(false);
+                
+                return;
+            }
+
             try {
                 const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/transactions/history/${companyId}`,
                 { credentials: "include" }
-            );
+                );
 
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Erro ao buscar histórico.");
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Erro ao buscar histórico.");
 
-            setOrders(data.data);
+                setOrders(data.data);
             }
             catch (err: any) {
                 setError(err.message);
             }
+            finally {
+                setIsLoading(false);
+            }
         };
 
         fetchOrders();
-    }, [isLoading, isAuthenticated, user]);
+    }, []);
 
     return {
         orders,
         error,
         isLoading,
-        isAuthenticated
     };
 }

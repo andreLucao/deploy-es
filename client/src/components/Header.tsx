@@ -1,24 +1,29 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 type HeaderProps = {
     onScrollToKnowUs: () => void;
     onScrollToCertificacoes: () => void;
     onScrollToSolucoes: () => void;
+    onScrollToLegislacao: () => void;
+  onScrollToFAQ: () => void;
 };
 
-export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onScrollToSolucoes }: HeaderProps) {
+export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onScrollToSolucoes, onScrollToLegislacao, onScrollToFAQ }: HeaderProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+   
 
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
 
-    const handleNavClick = (scrollFunction: () => void) => {
-        scrollFunction();
-        setIsMenuOpen(false);
-    };
+
+   const toggleMenu = () => {
+      setIsMenuOpen(!isMenuOpen);
+   };
+
+   const handleNavClick = (scrollFunction: () => void) => {
+      scrollFunction();
+      setIsMenuOpen(false);
+   };
 
     return (
         <>
@@ -31,61 +36,133 @@ export default function Header({ onScrollToKnowUs, onScrollToCertificacoes, onSc
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToKnowUs}>Marketplace</a>
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToCertificacoes}>Certificações</a>
                     <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors" onClick={onScrollToSolucoes}>Soluções</a>
+                            
+                    <a className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
+                        onClick={onScrollToLegislacao} >
+                        Legislação
+                    </a>
+                    <a
+                  className="text-black hover:text-zinc-800 cursor-pointer transition-colors"
+                  onClick={onScrollToFAQ}
+               >
+                  FAQ
+               </a>
+
                 </div>
 
-                {/* Desktop Login Button */}
-                <div className="ml-auto hidden sm:flex items-center">
-                    <button className="bg-[#00e07f] font-medium text-black px-3 sm:px-4 py-2 rounded-[10px] hover:bg-green-500 transition cursor-pointer text-sm sm:text-base" 
-                            onClick={() => window.location.href = '/login'}>
-                        Entrar
-                    </button>
-                </div>
 
-                {/* Mobile Menu Button */}
-                <div className="ml-auto lg:hidden flex items-center space-x-3">
-                    <button className="bg-[#00e07f] font-medium text-black px-3 py-2 rounded-[10px] hover:bg-green-500 transition cursor-pointer text-sm sm:hidden" 
-                            onClick={() => window.location.href = '/login'}>
-                        Entrar
-                    </button>
-                    <button 
-                        onClick={toggleMenu}
-                        className="text-black focus:outline-none"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            {isMenuOpen ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            )}
-                        </svg>
-                    </button>
-                </div>
+
+            {/* Desktop Login Button */}
+            <div className="ml-auto hidden sm:flex items-center">
+               <button
+                  className="bg-[#00e07f] font-medium text-black px-3 sm:px-4 py-2 rounded-[10px] hover:bg-green-500 transition cursor-pointer text-sm sm:text-base"
+                  onClick={() => (window.location.href = "/login")}
+               >
+                  Entrar
+               </button>
             </div>
 
-            {/* Mobile Menu Overlay */}
-            {isMenuOpen && (
-                <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setIsMenuOpen(false)}>
-                    <div className="bg-[#efefef] w-64 h-full shadow-lg p-6 space-y-6">
-                        <div className="flex justify-between items-center mb-8">
-                            <img src="/imgs/Logo.png" alt="Logo" className="h-10" />
-                            <button onClick={() => setIsMenuOpen(false)} className="text-black">
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <nav className="space-y-4">
-                            <a className="block text-black hover:text-zinc-800 cursor-pointer text-lg py-2" onClick={() => handleNavClick(onScrollToKnowUs)}>Marketplace</a>
-                            <a className="block text-black hover:text-zinc-800 cursor-pointer text-lg py-2" onClick={() => handleNavClick(onScrollToCertificacoes)}>Certificações</a>
-                            <a className="block text-black hover:text-zinc-800 cursor-pointer text-lg py-2" onClick={() => handleNavClick(onScrollToSolucoes)}>Soluções</a>
-                        </nav>
-                        <button className="w-full bg-[#00e07f] font-medium text-black px-4 py-3 rounded-[10px] hover:bg-green-500 transition cursor-pointer mt-8 sm:hidden" 
-                                onClick={() => window.location.href = '/login'}>
-                            Entrar
-                        </button>
-                    </div>
-                </div>
-            )}
-        </>
-    );
+            {/* Mobile Menu Button */}
+            <div className="ml-auto lg:hidden flex items-center space-x-3">
+               <button
+                  className="bg-[#00e07f] font-medium text-black px-3 py-2 rounded-[10px] hover:bg-green-500 transition cursor-pointer text-sm sm:hidden"
+                  onClick={() => (window.location.href = "/login")}
+               >
+                  Entrar
+               </button>
+               <button
+                  onClick={toggleMenu}
+                  className="text-black focus:outline-none"
+               >
+                  <svg
+                     className="w-6 h-6"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24"
+                  >
+                     {isMenuOpen ? (
+                        <path
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                           strokeWidth={2}
+                           d="M6 18L18 6M6 6l12 12"
+                        />
+                     ) : (
+                        <path
+                           strokeLinecap="round"
+                           strokeLinejoin="round"
+                           strokeWidth={2}
+                           d="M4 6h16M4 12h16M4 18h16"
+                        />
+                     )}
+                  </svg>
+               </button>
+            </div>
+         </div>
+
+         {/* Mobile Menu Overlay */}
+         {isMenuOpen && (
+            <div
+               className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+               onClick={() => setIsMenuOpen(false)}
+            >
+               <div className="bg-[#efefef] w-64 h-full shadow-lg p-6 space-y-6">
+                  <div className="flex justify-between items-center mb-8">
+                     <img src="/imgs/Logo.png" alt="Logo" className="h-10" />
+                     <button
+                        onClick={() => setIsMenuOpen(false)}
+                        className="text-black"
+                     >
+                        <svg
+                           className="w-6 h-6"
+                           fill="none"
+                           stroke="currentColor"
+                           viewBox="0 0 24 24"
+                        >
+                           <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                           />
+                        </svg>
+                     </button>
+                  </div>
+                  <nav className="space-y-4">
+                     <a
+                        className="block text-black hover:text-zinc-800 cursor-pointer text-lg py-2"
+                        onClick={() => handleNavClick(onScrollToKnowUs)}
+                     >
+                        Marketplace
+                     </a>
+                     <a
+                        className="block text-black hover:text-zinc-800 cursor-pointer text-lg py-2"
+                        onClick={() => handleNavClick(onScrollToCertificacoes)}
+                     >
+                        Certificações
+                     </a>
+                     <a
+                        className="block text-black hover:text-zinc-800 cursor-pointer text-lg py-2"
+                        onClick={() => handleNavClick(onScrollToSolucoes)}
+                     >
+                        Soluções
+                     </a>
+                     <a
+                        className="block text-black hover:text-zinc-800 cursor-pointer text-lg py-2"
+                        onClick={() => handleNavClick(onScrollToFAQ)}
+                     >
+                        FAQ
+                     </a>
+                  </nav>
+                  <button
+                     className="w-full bg-[#00e07f] font-medium text-black px-4 py-3 rounded-[10px] hover:bg-green-500 transition cursor-pointer mt-8 sm:hidden"
+                     onClick={() => (window.location.href = "/login")}
+                  >
+                     Entrar
+                  </button>
+               </div>
+            </div>
+         )}
+      </>
+   );
 }
