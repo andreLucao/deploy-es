@@ -127,7 +127,7 @@ router.post("/generate-report", async (req: Request, res: Response) => {
       }) + "\n"
     );
 
-    res.end();
+    return res.end();
   } catch (error) {
     console.error("Erro ao gerar relatório:", error);
     const errorMessage =
@@ -143,7 +143,7 @@ router.post("/generate-report", async (req: Request, res: Response) => {
       }) + "\n"
     );
 
-    res.end();
+    return res.end();
   }
 });
 
