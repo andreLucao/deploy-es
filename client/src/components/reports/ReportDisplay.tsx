@@ -1,8 +1,9 @@
 import { Loader2, Download } from "lucide-react";
 import Markdown from 'react-markdown';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// @ts-ignore - jspdf-autotable doesn't have types
+import autoTable from 'jspdf-autotable';
 
 interface ActionItem {
   priority: "high" | "medium" | "low";
@@ -33,51 +34,163 @@ export default function ReportDisplay({
   selectedCount,
   onBackForm
 }: ReportDisplayProps) {
-  const reportRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportPDF = async () => {
-    if (!reportRef.current || !generatedReport) return;
+    if (!generatedReport) {
+      console.error('❌ [ReportDisplay] Nenhum relatório para exportar');
+      return;
+    }
 
     setIsExporting(true);
     console.log('📄 [ReportDisplay] Iniciando exportação para PDF...');
 
     try {
-      // Capture the report content as canvas
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      
-      // Calculate PDF dimensions
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pdfWidth - 20; // 10mm margin on each side
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      const contentWidth = pageWidth - 2 * margin;
+      let yPosition = margin;
 
-      let heightLeft = imgHeight;
-      let position = 10; // Top margin
+      // Helper function to add new page if needed
+      const checkPageBreak = (requiredSpace: number) => {
+        if (yPosition + requiredSpace > pageHeight - margin) {
+          pdf.addPage();
+          yPosition = margin;
+          return true;
+        }
+        return false;
+      };
 
-      // Add first page
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight - 20; // Subtract page height minus margins
+      // Title
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      const titleLines = pdf.splitTextToSize(generatedReport.title, contentWidth);
+      checkPageBreak(titleLines.length * 10);
+      pdf.text(titleLines, margin, yPosition);
+      yPosition += titleLines.length * 10 + 10;
 
-      // Add additional pages if content exceeds one page
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight + 10;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight - 20;
+      // Content
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      
+      // Split content into paragraphs and sections
+      const contentLines = generatedReport.content.split('\n');
+      
+      for (const line of contentLines) {
+        if (!line.trim()) {
+          yPosition += 5;
+          continue;
+        }
+
+        // Check if it's a header (starts with ##)
+        if (line.startsWith('## ')) {
+          checkPageBreak(15);
+          pdf.setFontSize(14);
+          pdf.setFont('helvetica', 'bold');
+          const headerText = line.replace(/^##\s*/, '');
+          const headerLines = pdf.splitTextToSize(headerText, contentWidth);
+          pdf.text(headerLines, margin, yPosition);
+          yPosition += headerLines.length * 7 + 8;
+          pdf.setFontSize(11);
+          pdf.setFont('helvetica', 'normal');
+        } 
+        // Check if it's a subheader (starts with ###)
+        else if (line.startsWith('### ')) {
+          checkPageBreak(12);
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          const subHeaderText = line.replace(/^###\s*/, '');
+          const subHeaderLines = pdf.splitTextToSize(subHeaderText, contentWidth);
+          pdf.text(subHeaderLines, margin, yPosition);
+          yPosition += subHeaderLines.length * 6 + 6;
+          pdf.setFontSize(11);
+          pdf.setFont('helvetica', 'normal');
+        }
+        // Check if it's a bullet point
+        else if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+          checkPageBreak(10);
+          const bulletText = line.replace(/^[\s-*]+/, '');
+          const wrappedLines = pdf.splitTextToSize(bulletText, contentWidth - 10);
+          pdf.text('•', margin + 2, yPosition);
+          pdf.text(wrappedLines, margin + 7, yPosition);
+          yPosition += wrappedLines.length * 6 + 3;
+        }
+        // Check for bold text (**text**)
+        else if (line.includes('**')) {
+          checkPageBreak(10);
+          // Simple handling - just make the whole line bold if it contains **
+          pdf.setFont('helvetica', 'bold');
+          const cleanText = line.replace(/\*\*/g, '');
+          const wrappedLines = pdf.splitTextToSize(cleanText, contentWidth);
+          pdf.text(wrappedLines, margin, yPosition);
+          yPosition += wrappedLines.length * 6 + 3;
+          pdf.setFont('helvetica', 'normal');
+        }
+        // Regular paragraph
+        else {
+          checkPageBreak(10);
+          const wrappedLines = pdf.splitTextToSize(line, contentWidth);
+          pdf.text(wrappedLines, margin, yPosition);
+          yPosition += wrappedLines.length * 6 + 4;
+        }
+      }
+
+      // Action Items Table
+      if (generatedReport.action_items && generatedReport.action_items.length > 0) {
+        checkPageBreak(20);
+        yPosition += 10;
+        
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Plano de Ação', margin, yPosition);
+        yPosition += 10;
+
+        const tableData = generatedReport.action_items.map((item) => [
+          item.action,
+          item.priority === 'high' ? 'Alta' : item.priority === 'medium' ? 'Média' : 'Baixa',
+          item.timeline,
+          item.responsible,
+          item.estimated_impact,
+        ]);
+
+        autoTable(pdf, {
+          startY: yPosition,
+          head: [['Ação', 'Prioridade', 'Prazo', 'Responsável', 'Impacto']],
+          body: tableData,
+          margin: { left: margin, right: margin },
+          headStyles: { fillColor: [0, 143, 112], textColor: 255, fontSize: 10 },
+          bodyStyles: { fontSize: 9 },
+          alternateRowStyles: { fillColor: [245, 245, 245] },
+          columnStyles: {
+            0: { cellWidth: 50 },
+            1: { cellWidth: 25 },
+            2: { cellWidth: 30 },
+            3: { cellWidth: 35 },
+            4: { cellWidth: 40 },
+          },
+          didParseCell: function (data) {
+            if (data.row.section === 'body' && data.column.index === 1) {
+              const priority = generatedReport.action_items[data.row.index].priority;
+              if (priority === 'high') {
+                data.cell.styles.fillColor = [254, 226, 226]; // red-100
+                data.cell.styles.textColor = [153, 27, 27]; // red-800
+              } else if (priority === 'medium') {
+                data.cell.styles.fillColor = [254, 249, 195]; // yellow-100
+                data.cell.styles.textColor = [133, 77, 14]; // yellow-800
+              } else {
+                data.cell.styles.fillColor = [220, 252, 231]; // green-100
+                data.cell.styles.textColor = [22, 101, 52]; // green-800
+              }
+            }
+          },
+        });
       }
 
       // Generate filename with timestamp
@@ -90,7 +203,8 @@ export default function ReportDisplay({
       console.log('✅ [ReportDisplay] PDF exportado com sucesso:', filename);
     } catch (error) {
       console.error('❌ [ReportDisplay] Erro ao exportar PDF:', error);
-      alert('Erro ao exportar PDF. Por favor, tente novamente.');
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+      alert(`Erro ao exportar PDF: ${error instanceof Error ? error.message : 'Erro desconhecido'}. Verifique o console para mais detalhes.`);
     } finally {
       setIsExporting(false);
     }
@@ -116,7 +230,7 @@ export default function ReportDisplay({
           </button>
         </div>
       ) : generatedReport ? (
-        <div ref={reportRef} className="space-y-8">
+        <div className="space-y-8">
           {/* Título do Relatório */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{generatedReport.title}</h1>
