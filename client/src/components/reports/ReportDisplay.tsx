@@ -1,5 +1,8 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
 import Markdown from 'react-markdown';
+import { useRef, useState } from 'react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface ActionItem {
   priority: "high" | "medium" | "low";
@@ -30,6 +33,69 @@ export default function ReportDisplay({
   selectedCount,
   onBackForm
 }: ReportDisplayProps) {
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    if (!reportRef.current || !generatedReport) return;
+
+    setIsExporting(true);
+    console.log('📄 [ReportDisplay] Iniciando exportação para PDF...');
+
+    try {
+      // Capture the report content as canvas
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Calculate PDF dimensions
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20; // 10mm margin on each side
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 10; // Top margin
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight - 20; // Subtract page height minus margins
+
+      // Add additional pages if content exceeds one page
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight - 20;
+      }
+
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `relatorio-emissoes-${timestamp}.pdf`;
+
+      // Save the PDF
+      pdf.save(filename);
+      
+      console.log('✅ [ReportDisplay] PDF exportado com sucesso:', filename);
+    } catch (error) {
+      console.error('❌ [ReportDisplay] Erro ao exportar PDF:', error);
+      alert('Erro ao exportar PDF. Por favor, tente novamente.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-md p-8 border border-gray-200 min-h-[600px] max-h-[90vh] overflow-y-auto">
       {isGenerating ? (
@@ -50,7 +116,7 @@ export default function ReportDisplay({
           </button>
         </div>
       ) : generatedReport ? (
-        <div className="space-y-8">
+        <div ref={reportRef} className="space-y-8">
           {/* Título do Relatório */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{generatedReport.title}</h1>
@@ -124,8 +190,24 @@ export default function ReportDisplay({
 
           {/* Botões de Ação */}
           <div className="flex gap-4 mt-8 pt-8 border-t border-gray-300">
-            <button className="px-6 py-3 bg-[#008F70] text-white rounded-lg font-semibold hover:bg-[#007a5e] transition-colors">
-              Exportar PDF
+            <button 
+              onClick={handleExportPDF}
+              disabled={isExporting}
+              className={`px-6 py-3 bg-[#008F70] text-white rounded-lg font-semibold transition-colors flex items-center gap-2 ${
+                isExporting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#007a5e]'
+              }`}
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Exportando...
+                </>
+              ) : (
+                <>
+                  <Download className="w-5 h-5" />
+                  Exportar PDF
+                </>
+              )}
             </button>
             <button 
               onClick={onBackForm} 
