@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         const updatedUser = { ...user, onboarded: true } as User;
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));

@@ -15,21 +15,22 @@ function DashboardContent() {
 
   const authCtx = useAuth();
 
+  useEffect(() => {
+    if (!dashboardCtx || !authCtx?.user?.id) {
+      return;
+    }
+
+    const companyId = authCtx.user.id;
+    dashboardCtx.refreshData(companyId);
+
+  }, [dashboardCtx, authCtx]);
+
   if (!dashboardCtx || !authCtx) {
     return <div>Erro: Contextos não carregados.</div>;
   }
 
-  const { data, loading, error, refreshData } = dashboardCtx;
+  const { data, loading, error } = dashboardCtx;
   const { user } = authCtx;
-
-  useEffect(() => {
-    const companyId = user?.id;
-
-    if (companyId) {
-      refreshData(companyId);
-    }
-
-  }, [user, refreshData]);
 
   // Lida com carregamento
   if (loading) {

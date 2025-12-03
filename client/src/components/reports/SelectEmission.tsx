@@ -16,7 +16,7 @@ interface Emission {
   scope1_total: number;
   scope2_total: number;
   scope3_total: number;
-  data: JSON;
+  data: Record<string, unknown>;
   createdAt: string;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import { calculatorAPI, InventoryInput, InventoryResult, EmissionsSummary, InventoryResponse } from '@/lib/calculatorApi';
+import { calculatorAPI, InventoryInput, InventoryResult, EmissionsSummary, InventoryResponse, ScopeBreakdownItem } from '@/lib/calculatorApi';
 import { useEmissionProducts } from '@/hooks/useEmissionProducts';
 
 export interface EmissionData {
@@ -64,7 +64,7 @@ interface CalculatorProviderProps {
 
 export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
   // Hook para buscar fatores de emissão do banco
-  const { getFactorValue, isLoading: isLoadingFactors } = useEmissionProducts();
+  const { getFactorValue } = useEmissionProducts();
   
   // Estado local
   const [data, setData] = useState<CalculatorData>({
@@ -83,7 +83,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
   }, []);
 
   // Função para mapear tipo de emissão do frontend para nome do produto no banco
-  const getProductNameForEmissionType = (emissionType: string, formData: Record<string, any>): string => {
+  const getProductNameForEmissionType = (emissionType: string, formData: Record<string, string | number | boolean>): string => {
     // Mapeamento de combustíveis para nomes de produtos
     const fuelMapping: Record<string, string> = {
       'gasolina_automotiva': 'Gasolina',
@@ -109,7 +109,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
 
     // Para combustão (estacionária ou móvel), buscar o combustível específico
     if (emissionType === 'combustao_estacionaria' || emissionType === 'combustao_movel') {
-      const fuelKey = formData.fuel || formData.vehicle || '';
+      const fuelKey = String(formData.fuel || formData.vehicle || '');
       const mappedFuel = fuelMapping[fuelKey];
       if (mappedFuel) {
         return mappedFuel;
@@ -365,7 +365,7 @@ export const CalculatorProvider = ({ children }: CalculatorProviderProps) => {
       
       // Atualizar os valores calculados no contexto com os resultados do backend
       if (result?.scopeBreakdown) {
-        const breakdown = result.scopeBreakdown as Record<string, any>;
+        const breakdown = result.scopeBreakdown as Record<string, ScopeBreakdownItem | undefined>;
         
         setData(prev => {
           const updatedData = { ...prev };
