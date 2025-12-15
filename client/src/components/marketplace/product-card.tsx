@@ -80,7 +80,7 @@ export default function ProductCard({
             }}
          >
             <span className="font-semibold text-green-700 text-lg">
-               R$ {(preco/100).toFixed(2)}
+               R$ {preco.toFixed(2)}
             </span>
 
             <button

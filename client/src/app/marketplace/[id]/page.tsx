@@ -267,7 +267,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                             <h1 className="text-4xl lg:text-7xl font-bold">{productData.title}</h1>
                             <p className="text-sm mt-4">{productData.credit_type}</p>
                             <p className="text-lg mt-2 font-semibold">
-                                R$ {(productData.price / 100).toFixed(2)}
+                                R$ {(productData.price).toFixed(2)}
                             </p>
                         </div>
 
