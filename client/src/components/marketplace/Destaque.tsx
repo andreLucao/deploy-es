@@ -60,7 +60,7 @@ export default async function Destaque() {
                   Por: {ad.company.name}
                 </span>
                 <span className="text-lg font-bold text-green-600 mt-4">
-                  R$ {(ad.price).toFixed(2).replace('.', ',')}
+                  R$ {(ad.price / 100).toFixed(2).replace('.', ',')}
                 </span>
 
               </div>
