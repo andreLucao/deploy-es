@@ -1,5 +1,16 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+export interface ScopeEmission {
+  calculatedCo2e?: number;
+  [key: string]: unknown;
+}
+
+export interface ScopeBreakdownItem {
+  emissions: ScopeEmission[];
+  totalCo2e: number;
+  emissionsCount: number;
+}
+
 export interface EmissionInput {
   type: string;
   emissionProductId: string;
@@ -31,10 +42,10 @@ export interface InventoryResult {
   scope1Total?: number;
   scope2Total?: number;
   scope3Total?: number;
-  scopeBreakdown?: { 
-    scope1?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
-    scope2?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
-    scope3?: { emissions: any[]; totalCo2e: number; emissionsCount: number };
+  scopeBreakdown?: {
+    scope1?: ScopeBreakdownItem;
+    scope2?: ScopeBreakdownItem;
+    scope3?: ScopeBreakdownItem;
   };
 }
 
@@ -46,7 +57,7 @@ export interface InventoryEmission {
   scope1_total: number;
   scope2_total: number;
   scope3_total: number;
-  calculator_data: any;
+  calculator_data: Record<string, unknown>;
   createdAt: string;
 }
 
@@ -146,7 +157,7 @@ class CalculatorAPI {
     return this.fetchAPI(`/calculate-scope-total?companyId=${companyId}&year=${year}&scope=${scope}`);
   }
 
-  async getEmissionsByType(companyId: string, emissionType: string, year?: number) {
+  async getEmissionsByType(companyId: string, emissionType: string, year?: number): Promise<unknown> {
     const yearParam = year ? `&year=${year}` : '';
     return this.fetchAPI(`/emissions-by-type?companyId=${companyId}&emissionType=${emissionType}${yearParam}`);
   }

@@ -132,8 +132,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     console.log('🚪 [AuthContext] Logging out user');
     setUser(null);
     localStorage.removeItem('user');
-    // Limpar cookie também se necessário
-    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    // Clear the authToken cookie by setting it to expire in the past
+    document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
   };
 
   const completeOnboarding = async () => {
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         const updatedUser = { ...user, onboarded: true } as User;
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));

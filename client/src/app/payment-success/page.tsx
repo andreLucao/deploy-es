@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { CheckCircle, Home, Package, DollarSign, Download } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -27,7 +27,7 @@ interface PaymentData {
     companyEmail: string;
 }
 
-export default function SuccessPage() {
+function SuccessPageContent() {
     const [orderNumber, setOrderNumber] = useState<string>("");
     const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
     const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
@@ -285,5 +285,20 @@ export default function SuccessPage() {
                 </div>
             </footer>
         </main>
+    );
+}
+
+export default function SuccessPage() {
+    return (
+        <Suspense fallback={
+            <main className="min-h-screen bg-[#efefef] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00e07f] mx-auto mb-4"></div>
+                    <p className="text-gray-600">Carregando...</p>
+                </div>
+            </main>
+        }>
+            <SuccessPageContent />
+        </Suspense>
     );
 }

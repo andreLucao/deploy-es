@@ -2,7 +2,6 @@ import { Loader2, Download } from "lucide-react";
 import Markdown from 'react-markdown';
 import { useState } from 'react';
 import jsPDF from 'jspdf';
-// @ts-ignore - jspdf-autotable doesn't have types
 import autoTable from 'jspdf-autotable';
 
 interface ActionItem {

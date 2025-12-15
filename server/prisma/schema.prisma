@@ -32,6 +32,7 @@ model Company {
   emissions             Emission[]
   orders                Order[]
   payments              Payment[]
+  reports               Report[]
 
   @@map("companies")
 }
@@ -210,6 +211,19 @@ enum OrderStatus {
   COMPLETED
   CANCELLED
   FAILED
+}
+
+model Report {
+  id        String   @id @default(uuid())
+  companyId String   @map("company_id")
+  title     String?
+  content   String
+  url       String?
+  type      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  @@map("reports")
 }
 
 enum PaymentStatus {

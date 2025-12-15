@@ -459,6 +459,38 @@ export class CalculatorService {
    }
 
    /**
+    * Busca emissões de um tipo específico
+    */
+   async getEmissionsByType(
+      companyId: string,
+      emissionType: string,
+      year?: number
+   ): Promise<Emission[]> {
+      const emissions = await prisma.emission.findMany({
+         where: {
+            company_id: companyId,
+            year: year,
+            deletedAt: null,
+         },
+      });
+
+      // Filtrar pelo tipo de emissão dentro dos dados do calculator_data
+      return emissions.filter((emission: any) => {
+         const data = emission.calculator_data as any;
+         const scopes = data?.scopes || {};
+
+         // Verificar se alguma emissão tem este tipo
+         for (const scopeKey in scopes) {
+            const emissions = scopes[scopeKey].emissions || [];
+            if (emissions.some((e: any) => e.type === emissionType)) {
+               return true;
+            }
+         }
+         return false;
+      });
+   }
+
+   /**
     * Soft delete de uma emissão
     */
    async deleteEmission(emissionId: string): Promise<void> {

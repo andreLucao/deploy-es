@@ -1,11 +1,21 @@
 import Link from "next/link";
 
-async function getFeaturedAds() {
+interface FeaturedAd {
+  id: string;
+  title: string;
+  image_ad: string;
+  price: number;
+  company: {
+    name: string;
+  };
+}
+
+async function getFeaturedAds(): Promise<FeaturedAd[]> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL
     const url = `${apiUrl}/api/adProducts/featured?limit=4`;
     const res = await fetch(url, {
-      cache: 'no-store'
+      next: { revalidate: 60 }
     });
     if (!res.ok) {
       console.error("Erro ao buscar destaques:", res.statusText);
@@ -33,7 +43,7 @@ export default async function Destaque() {
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
       <div className="max-w-[1400px] mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
 
-        {featuredAds.map((ad: any) => (
+        {featuredAds.map((ad: FeaturedAd) => (
           <Link
             href={`/marketplace/${ad.id}`}
             key={ad.id}
