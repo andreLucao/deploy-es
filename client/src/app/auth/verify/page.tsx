@@ -51,6 +51,13 @@ function VerifyContent() {
         const data: VerifyResponse = await response.json();
 
         if (response.ok && data.token && data.user) {
+          console.log('✅ [Verify] Token received, creating client-side cookie...');
+
+          // Create client-side cookie with the JWT token so Next.js middleware can read it
+          // This is necessary because the backend cookie (from localhost:3001) isn't accessible
+          // by the frontend (localhost:3000) in development
+          document.cookie = `authToken=${data.token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+          console.log('✅ [Verify] Client-side cookie created');
 
           // Buscar dados completos do usuário autenticado (com UUID correto do JWT)
           try {
